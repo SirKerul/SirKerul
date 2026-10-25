@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modul D9 JSJ - Sistem PDAB Mobile</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        .bg-custom {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.85)), url('PDABBG5.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+    </style>
+</head>
+<body class="bg-custom relative min-h-screen flex flex-col items-center justify-start font-sans text-white p-3 sm:p-5 pb-12">
+
+    <div class="w-full max-w-xl mx-auto space-y-3">
+        
+        <!-- HEADER KEPALA -->
+        <div class="bg-black/60 border border-white/20 backdrop-blur-md p-4 rounded-2xl shadow-xl text-center relative">
+            <a href="index.html" class="absolute left-3 top-3 text-[11px] text-indigo-300 hover:text-white font-medium flex items-center gap-1 transition">← Kembali</a>
+            <img src="PDAB.png" alt="Logo PDAB" class="w-12 h-12 mx-auto mb-1 object-contain drop-shadow-md" onerror="this.src='https://via.placeholder.com/80?text=PDAB'">
+            <h1 class="text-base sm:text-lg font-bold tracking-wide text-indigo-400">MODUL D9 JSJ</h1>
+            <p class="text-[11px] text-gray-300 mt-0.5">Panduan Rasmi Kes Pembunuhan & Rampasan Senjata</p>
+            <div class="mt-1 text-[9px] text-amber-300 bg-amber-950/50 border border-amber-500/30 py-0.5 px-2 rounded-lg inline-block">
+                Oleh: DIGP | Johnny Luis [ABRP], OP (27/10/2025)
+            </div>
+        </div>
+
+        <!-- MENU PECAHAN SECTION (TAB NAVIGASI DI ATAS) -->
+        <div class="grid grid-cols-4 gap-1 bg-black/70 p-1.5 rounded-xl border border-white/15 backdrop-blur-md">
+            <button onclick="switchSection(1)" id="tab-btn-1" class="py-2 px-1 text-[11px] font-bold rounded-lg transition bg-indigo-600 text-white shadow">1. Pembunuhan</button>
+            <button onclick="switchSection(2)" id="tab-btn-2" class="py-2 px-1 text-[11px] font-semibold rounded-lg transition text-gray-300 hover:bg-white/10">2. Senjata Api</button>
+            <button onclick="switchSection(3)" id="tab-btn-3" class="py-2 px-1 text-[11px] font-semibold rounded-lg transition text-gray-300 hover:bg-white/10">3. Rampasan</button>
+            <button onclick="switchSection(4)" id="tab-btn-4" class="py-2 px-1 text-[11px] font-semibold rounded-lg transition text-gray-300 hover:bg-white/10">4. Bahan Terlarang</button>
+        </div>
+
+        <!-- KOTAK UTAMA KANDUNGAN SECTION -->
+        <div class="bg-black/60 border border-white/20 backdrop-blur-md p-4 sm:p-5 rounded-2xl shadow-xl flex flex-col justify-between space-y-4 min-h-[350px]">
+            
+            <!-- SECTION 1: KES PEMBUNUHAN RAKYAT AWAM -->
+            <div id="section-1" class="space-y-3">
+                <h2 class="font-bold text-amber-400 text-xs sm:text-sm border-b border-white/10 pb-2 flex items-center gap-2">
+                    <span>⚠️</span> 1. Kes Pembunuhan Rakyat Awam
+                </h2>
+                <div class="space-y-2 text-[11px] text-gray-300">
+                    <div class="bg-black/40 p-2.5 rounded space-y-1.5">
+                        <p>1. Apabila dapat blip pembunuhan, maklumkan unit MPV mana yang akan *respond*.</p>
+                        <p>2. Setibanya dilokasi sila maklumkan kepada CCC.</p>
+                        <p>3. Periksa kawasan sekitar kes dalam radius 1km. Jika ada rakyat mencurigakan, lakukan tahanan & siasatan.</p>
+                        <p>4. Tunjukkan kad kuasa, beritahu sebab ditahan, semak identiti, rekod, check badan & bonet kereta jika naik kenderaan.</p>
+                        <p>5. Jika ingkar, bawa OKT ke Sungai Buluh didakwa di bawah Akta Tidak Memberikan Kerjasama.</p>
+                        <p>6. Minta unit D6/JSPT hadir untuk sita kenderaan OKT melalui longkai.</p>
+                        <p>7. Jika bersalah & beri kerjasama, 50% pengurangan saman layak diberikan.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 2: RAMPASAN SENJATA API BERLESEN -->
+            <div id="section-2" class="space-y-3 hidden">
+                <h2 class="font-bold text-amber-400 text-xs sm:text-sm border-b border-white/10 pb-2 flex items-center gap-2">
+                    <span>🔫</span> 2. Rampasan Senjata Api Berlesen
+                </h2>
+                <div class="space-y-2 text-[11px] text-gray-300">
+                    <div class="bg-black/40 p-2.5 rounded space-y-2">
+                        <p>• Kes pergaduhan organisasi & kes jenayah: Jika ada lesen senjata api, rampasan senjata <strong>tidak perlu</strong> dilakukan (hanya saman & CS).</p>
+                        <p>• Jika <strong>tidak memiliki lesen</strong> senjata: Rampasan senjata api boleh dilakukan.</p>
+                        <p>• Jika berlaku peperangan antara organisasi dan PDAB: Rampasan senjata api <strong>boleh dilakukan</strong> walaupun mempunyai lesen.</p>
+                        <p>• Rampasan boleh dilakukan kepada suspek yang berperang dengan PDAB walaupun guna *hammer/melee* jika didapati ada senjata api di poket.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 3: RAMPASAN WALKIE & HAMMER -->
+            <div id="section-3" class="space-y-3 hidden">
+                <h2 class="font-bold text-amber-400 text-xs sm:text-sm border-b border-white/10 pb-2 flex items-center gap-2">
+                    <span>📻</span> 3. Rampasan Walkie & Hammer
+                </h2>
+                <div class="space-y-2 text-[11px] text-gray-300">
+                    <div class="bg-black/40 p-2.5 rounded space-y-2">
+                        <p class="font-semibold text-white">Hanya dibenarkan untuk kes:</p>
+                        <p>1) Kes Pembunuhan Rakyat Awam (Walkie & Hammer)</p>
+                        <p>2) Kes-kes pergaduhan organisasi (Walkie & Hammer)</p>
+                        <p>3) Kes-kes jenayah (Walkie Sahaja)</p>
+                        <p class="text-amber-200 mt-1">⚠️ Kes saman lampau tidak perlu rampas walkie. Ronda kawasan Weedbud Farm dan diserang guna hammer? Tindakan rampasan walkie & hammer dibenarkan.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 4: BAHAN TERLARANG & PENUTUP -->
+            <div id="section-4" class="space-y-3 hidden">
+                <h2 class="font-bold text-amber-400 text-xs sm:text-sm border-b border-white/10 pb-2 flex items-center gap-2">
+                    <span>🧪</span> 4. Bahan Terlarang & Penutup
+                </h2>
+                <div class="space-y-2 text-[11px] text-gray-300">
+                    <div class="bg-indigo-950/40 border-l-4 border-indigo-500 p-2.5 rounded-r-xl space-y-1">
+                        <p class="font-semibold text-white">Jenis Bahan: Serbuk Belerang (Gun Powder)</p>
+                        <p class="text-indigo-200">
+                            Semasa semakan badan, jika didapati memiliki serbuk belerang, bawa ke Sungai Buluh untuk jalani hukuman <strong>RM 3,000 Saman & 50Cs</strong> di bawah Seksyen 9(6) Akta Senjata 1960.
+                        </p>
+                    </div>
+                    <!-- PENUTUP MODUL -->
+                    <div class="bg-emerald-950/60 border border-emerald-500/40 p-3 rounded-xl text-center space-y-1 mt-2">
+                        <p class="font-bold text-emerald-300 text-xs">MODUL TAMAT JUMPA DILAPANGAN</p>
+                        <p class="text-[9px] text-emerald-200">Arahan Tetap ini akan berubah jika terdapat kemas kini terkini.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BUTANG KAWALAN NEXT / PREV DI BAWAH KOTAK -->
+            <div class="flex justify-between items-center pt-3 border-t border-white/10 mt-2">
+                <button onclick="changeSection(-1)" id="prev-btn" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition opacity-50 cursor-not-allowed" disabled>← Sebelumnya</button>
+                <span id="page-indicator" class="text-[11px] text-gray-400 font-mono">1 / 4</span>
+                <button onclick="changeSection(1)" id="next-btn" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition">Seterusnya →</button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        let currentSection = 1;
+        const totalSections = 4;
+
+        function switchSection(sectionNum) {
+            currentSection = sectionNum;
+            updateView();
+        }
+
+        function changeSection(direction) {
+            currentSection += direction;
+            if (currentSection < 1) currentSection = 1;
+            if (currentSection > totalSections) currentSection = totalSections;
+            updateView();
+        }
+
+        function updateView() {
+            for (let i = 1; i <= totalSections; i++) {
+                document.getElementById(`section-${i}`).classList.add('hidden');
+                let tabBtn = document.getElementById(`tab-btn-${i}`);
+                tabBtn.classList.remove('bg-indigo-600', 'text-white', 'shadow');
+                tabBtn.classList.add('text-gray-300', 'hover:bg-white/10');
+            }
+
+            document.getElementById(`section-${currentSection}`).classList.remove('hidden');
+            let activeTab = document.getElementById(`tab-btn-${currentSection}`);
+            activeTab.classList.remove('text-gray-300', 'hover:bg-white/10');
+            activeTab.classList.add('bg-indigo-600', 'text-white', 'shadow');
+
+            document.getElementById('page-indicator').innerText = `${currentSection} / ${totalSections}`;
+            
+            let prevBtn = document.getElementById('prev-btn');
+            let nextBtn = document.getElementById('next-btn');
+
+            if (currentSection === 1) {
+                prevBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                prevBtn.disabled = true;
+            } else {
+                prevBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                prevBtn.disabled = false;
+            }
+
+            if (currentSection === totalSections) {
+                nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                nextBtn.disabled = true;
+            } else {
+                nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                nextBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

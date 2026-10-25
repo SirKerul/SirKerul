@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lagu Rasmi PDAB - Sistem PDAB Mobile</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        .bg-custom {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.85)), url('PDABBG5.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+        @keyframes spinSlow {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+            animation: spinSlow 6s linear infinite;
+        }
+        
+        /* Animasi Kaki Perompak Lidi yang Lebih Kemas & Realistik */
+        @keyframes walkLeg1 {
+            0%, 100% { transform: rotate(15deg); }
+            50% { transform: rotate(-25deg); }
+        }
+        @keyframes walkLeg2 {
+            0%, 100% { transform: rotate(-25deg); }
+            50% { transform: rotate(15deg); }
+        }
+        .stick-leg-1 { transform-origin: top center; animation: walkLeg1 0.4s infinite ease-in-out; }
+        .stick-leg-2 { transform-origin: top center; animation: walkLeg2 0.4s infinite ease-in-out; }
+    </style>
+</head>
+<body class="bg-custom relative min-h-screen flex flex-col items-center justify-start font-sans text-white p-3 sm:p-5 pb-16">
+
+    <!-- ELEMEN AUDIO PDABSong.mp3 -->
+    <audio id="bg-audio" src="PDABSong.mp3" preload="auto"></audio>
+
+    <div class="w-full max-w-lg mx-auto space-y-3">
+        
+        <!-- HEADER KEPALA -->
+        <div class="bg-black/60 border border-white/20 backdrop-blur-md p-4 rounded-2xl shadow-xl text-center relative">
+            <a href="index.html" class="absolute left-3 top-3 text-[11px] text-indigo-300 hover:text-white font-medium flex items-center gap-1 transition">← Kembali</a>
+            <img src="PDAB.png" alt="Logo PDAB" class="w-12 h-12 mx-auto mb-1 object-contain drop-shadow-md" onerror="this.src='https://via.placeholder.com/80?text=PDAB'">
+            <h1 class="text-base sm:text-lg font-bold tracking-wide text-amber-400">LAGU RASMI PDAB</h1>
+            <p class="text-[11px] text-gray-300 mt-0.5">Taat Setia PDAB</p>
+        </div>
+
+        <!-- KOTAK LIRIK STATIK -->
+        <div class="bg-black/75 border border-white/20 backdrop-blur-md p-4 rounded-2xl shadow-xl h-56 overflow-y-auto space-y-3 text-center text-xs text-gray-300 leading-relaxed pr-2">
+            <div>
+                <p class="text-amber-400 font-bold mb-1">[Verse 1]</p>
+                <p>Gema suara taat setia,</p>
+                <p>Kami sedia berbakti bangsa.</p>
+                <p>Polis Diraja Adik Beradik,</p>
+                <p>Pelindung rakyat, maruah negara.</p>
+            </div>
+            <div>
+                <p class="text-amber-400 font-bold mb-1">[Chorus]</p>
+                <p class="font-semibold text-white">Taat setia!</p>
+                <p>Selamanya… kami junjung amanahnya.</p>
+                <p>Dengan jiwa dan raga,</p>
+                <p>Menjaga, membela, bersama.</p>
+            </div>
+            <div>
+                <p class="text-amber-400 font-bold mb-1">[Verse 2]</p>
+                <p>Dalam susah, dalam gelora,</p>
+                <p>Kami teguh, pantang menyerah.</p>
+                <p>Demi rakyat, demi nusa,</p>
+                <p>Keamanan jadi janji utama.</p>
+            </div>
+            <div>
+                <p class="text-amber-400 font-bold mb-1">[Chorus]</p>
+                <p class="font-semibold text-white">Taat setia!</p>
+                <p>Selamanya… kami junjung amanahnya.</p>
+                <p>Dengan jiwa dan raga,</p>
+                <p>Menjaga, membela, bersama.</p>
+            </div>
+            <div>
+                <p class="text-amber-400 font-bold mb-1">[Bridge]</p>
+                <p>Bersatu hati, berdisiplin,</p>
+                <p>PDAB, benteng negara!</p>
+            </div>
+            <div>
+                <p class="text-amber-400 font-bold mb-1">[Final Chorus]</p>
+                <p class="font-semibold text-white">Taat setia!</p>
+                <p>Selamanya… tidak goyah segalanya.</p>
+                <p>Demi bangsa dan negara,</p>
+                <p>Kami setia… selamanya!</p>
+            </div>
+            <div>
+                <p class="text-amber-400 font-bold mb-1">[Ending]</p>
+                <p>Polis Diraja Adik Beradik,</p>
+                <p>Taat setia… untuk selamanya!</p>
+            </div>
+        </div>
+
+        <!-- PLAYER KAWALAN & ANIMASI PEROMPAK LIDI -->
+        <div class="bg-black/80 border border-white/20 backdrop-blur-md p-4 rounded-2xl shadow-xl space-y-3">
+            
+            <div class="flex items-center justify-between">
+                <!-- Info Piring Hitam Mini -->
+                <div class="flex items-center gap-2.5">
+                    <div class="relative w-9 h-9 rounded-full bg-slate-900 border border-amber-400/50 flex items-center justify-center shadow-md shrink-0">
+                        <div id="vinyl-disc" class="w-full h-full rounded-full border border-dashed border-amber-500/40 flex items-center justify-center">
+                            <div class="w-2.5 h-2.5 bg-amber-400 rounded-full shadow"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="text-xs font-bold text-amber-300 block">PDABSong.mp3</span>
+                        <span id="audio-status" class="text-[9px] text-gray-400">Dijeda</span>
+                    </div>
+                </div>
+
+                <!-- Butang Kawalan -->
+                <div class="flex items-center gap-1.5">
+                    <button onclick="rewindAudio()" class="w-7 h-7 rounded-full bg-gray-800 hover:bg-gray-700 text-white flex items-center justify-center text-xs transition" title="Undur 5 Saat">⏪</button>
+                    <button onclick="togglePlay()" id="play-btn" class="w-8 h-8 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 flex items-center justify-center text-xs font-bold shadow transition">▶</button>
+                    <button onclick="stopAudio()" class="w-7 h-7 rounded-full bg-red-600/80 hover:bg-red-600 text-white flex items-center justify-center text-xs transition" title="Henti (Stop)">⏹</button>
+                    
+                    <!-- Slider Volume -->
+                    <div class="flex items-center gap-1 bg-black/60 px-2 py-1 rounded-lg border border-white/10 ml-1">
+                        <span class="text-[10px]" id="vol-icon">🔊</span>
+                        <input type="range" id="vol-slider" min="0" max="1" step="0.05" value="0.5" oninput="changeVolume(this.value)" class="w-12 accent-emerald-400 cursor-pointer h-1 bg-gray-700 rounded-lg">
+                    </div>
+                </div>
+            </div>
+
+            <!-- PROGRESS BAR DENGAN ANIMASI PEROMPAK LIDI BERJALAN KEMAS -->
+            <div class="relative pt-6 pb-1">
+                <div id="thief-runner" class="absolute -top-1.5 transition-all duration-100 ease-linear" style="left: 0%;">
+                    <div class="flex flex-col items-center -ml-3.5">
+                        <!-- Lukisan Stickman Perompak Membawa Beg -->
+                        <svg class="w-7 h-7 text-amber-400 drop-shadow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <!-- Kepala Topi Perompak -->
+                            <circle cx="12" cy="4.5" r="2.5" fill="black"/>
+                            <!-- Beg Rompak di Bahu/Tangan -->
+                            <path d="M13 7h3.5c.8 0 1.5.7 1.5 1.5v2c0 .8-.7 1.5-1.5 1.5H13z" fill="#78350f" stroke="#d97706" stroke-width="1.5"/>
+                            <!-- Badan -->
+                            <line x1="12" y1="7" x2="12" y2="15"/>
+                            <!-- Tangan -->
+                            <line x1="12" y1="10" x2="15" y2="10.5"/>
+                            <!-- Kaki Berjalan Kemas -->
+                            <line x1="12" y1="15" x2="9" y2="21" class="stick-leg-1"/>
+                            <line x1="12" y1="15" x2="15" y2="21" class="stick-leg-2"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Bar Input Masa -->
+                <input type="range" id="progress-bar" value="0" max="100" step="0.1" oninput="seekAudio(this.value)" class="w-full accent-emerald-400 cursor-pointer h-1.5 bg-gray-700 rounded-lg">
+                
+                <div class="flex justify-between items-center text-[10px] text-gray-400 font-mono mt-1">
+                    <span id="current-time">0:00</span>
+                    <span id="total-duration">0:00</span>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        const audio = document.getElementById('bg-audio');
+        const playBtn = document.getElementById('play-btn');
+        const audioStatus = document.getElementById('audio-status');
+        const vinylDisc = document.getElementById('vinyl-disc');
+        const progressBar = document.getElementById('progress-bar');
+        const thiefRunner = document.getElementById('thief-runner');
+        const currentTimeEl = document.getElementById('current-time');
+        const totalDurationEl = document.getElementById('total-duration');
+        const volSlider = document.getElementById('vol-slider');
+        const volIcon = document.getElementById('vol-icon');
+
+        let savedVol = localStorage.getItem('pdab_song_vol');
+        if (savedVol !== null) {
+            audio.volume = parseFloat(savedVol);
+            volSlider.value = savedVol;
+        } else {
+            audio.volume = 0.5;
+        }
+        updateVolIcon(audio.volume);
+
+        function togglePlay() {
+            if (audio.paused) {
+                audio.play().then(() => {
+                    playBtn.innerText = "⏸";
+                    audioStatus.innerText = "Sedang dimainkan";
+                    vinylDisc.classList.add('animate-spin-slow');
+                }).catch(err => {
+                    audioStatus.innerText = "Gagal main (Tekan Play)";
+                });
+            } else {
+                audio.pause();
+                playBtn.innerText = "▶";
+                audioStatus.innerText = "Dijeda (Paused)";
+                vinylDisc.classList.remove('animate-spin-slow');
+            }
+        }
+
+        function stopAudio() {
+            audio.pause();
+            audio.currentTime = 0;
+            playBtn.innerText = "▶";
+            audioStatus.innerText = "Berhenti (Stop)";
+            vinylDisc.classList.remove('animate-spin-slow');
+            progressBar.value = 0;
+            thiefRunner.style.left = "0%";
+            currentTimeEl.innerText = "0:00";
+        }
+
+        function rewindAudio() {
+            audio.currentTime = Math.max(0, audio.currentTime - 5);
+        }
+
+        function changeVolume(val) {
+            let v = parseFloat(val);
+            audio.volume = v;
+            localStorage.setItem('pdab_song_vol', v);
+            updateVolIcon(v);
+        }
+
+        function updateVolIcon(v) {
+            if (v === 0) volIcon.innerText = "🔇";
+            else if (v < 0.5) volIcon.innerText = "🔉";
+            else volIcon.innerText = "🔊";
+        }
+
+        audio.addEventListener('timeupdate', () => {
+            if (audio.duration) {
+                let currentSec = audio.currentTime;
+                let percent = (currentSec / audio.duration) * 100;
+                progressBar.value = percent;
+                thiefRunner.style.left = percent + "%";
+                currentTimeEl.innerText = formatTime(currentSec);
+                totalDurationEl.innerText = formatTime(audio.duration);
+            }
+        });
+
+        audio.addEventListener('ended', () => {
+            playBtn.innerText = "▶";
+            audioStatus.innerText = "Tamat";
+            vinylDisc.classList.remove('animate-spin-slow');
+            progressBar.value = 0;
+            thiefRunner.style.left = "0%";
+        });
+
+        function seekAudio(val) {
+            if (audio.duration) {
+                audio.currentTime = (val / 100) * audio.duration;
+            }
+        }
+
+        function formatTime(sec) {
+            let m = Math.floor(sec / 60);
+            let s = Math.floor(sec % 60);
+            return `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+
+        window.onload = function() {
+            audio.play().then(() => {
+                playBtn.innerText = "⏸";
+                audioStatus.innerText = "Sedang dimainkan";
+                vinylDisc.classList.add('animate-spin-slow');
+            }).catch(() => {
+                audioStatus.innerText = "Tekan Play untuk mula";
+            });
+        };
+    </script>
+</body>
+</html>

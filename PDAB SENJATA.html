@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pengurusan Inventori & Log - PDAB Mobile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #0A192F;
+            background-image: linear-gradient(135deg, #0A192F 0%, #112240 100%);
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans p-2 sm:p-6">
+    <div class="max-w-6xl mx-auto">
+        <div class="mb-4">
+            <button onclick="window.location.href='index.html'" class="bg-slate-800 hover:bg-slate-700 text-amber-400 px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 border border-slate-700 shadow">
+                <i class="fa-solid fa-arrow-left"></i> Kembali ke Menu Utama
+            </button>
+        </div>
+        
+        <!-- HEADER DENGAN BACKGROUND PDABBG.png -->
+        <header class="relative border border-slate-700/60 rounded-2xl p-6 mb-8 shadow-2xl overflow-hidden bg-slate-950">
+            <div class="absolute inset-0 bg-cover bg-center opacity-40" style="background-image: url('PDABBG.png');"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-900/75 to-slate-950/85"></div>
+
+            <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+                <div class="flex flex-col md:flex-row items-center gap-4">
+                    <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-700 shadow-lg flex items-center justify-center">
+                        <img src="PDAB.png" alt="Logo PDAB" class="w-16 h-16 object-contain drop-shadow-[0_0_12px_rgba(234,179,8,0.4)]" onerror="this.src='https://via.placeholder.com/64?text=PDAB'">
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold tracking-wider text-amber-400 uppercase drop-shadow-md">PDAB Mobile</h1>
+                        <p class="text-xs text-slate-300 tracking-wide font-medium mt-0.5">Sistem Rekod Inventori & Log Perkakasan (V2)</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 bg-slate-900 border border-slate-700/60 rounded-2xl p-6 shadow-2xl">
+                <div class="flex justify-between items-center mb-6 border-b border-slate-800 pb-3">
+                    <h2 id="formTitle" class="text-sm font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-file-pen"></i> Borang Transaksi & Log Perkakasan
+                    </h2>
+                    <span id="editingBadge" class="hidden text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2.5 py-1 rounded-lg font-medium">
+                        Mod Kemaskini Log
+                    </span>
+                </div>
+                
+                <form id="inventoryForm" onsubmit="handleSubmit(event)" class="space-y-4">
+                    <input type="hidden" id="editingLogId" value="">
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Nama Pegawai Pengurus</label>
+                            <input type="text" id="officerName" list="officerOptions" required placeholder="Pilih atau taip nama pegawai..." class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500 transition">
+                            <datalist id="officerOptions">
+                                <option value="IGP Mipan Karim">
+                                <option value="DIGP Johnny Luis">
+                                <option value="DIGP Zane Farihin">
+                            </datalist>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Tarikh</label>
+                            <input type="date" id="logDate" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500 transition">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Status Log</label>
+                        <select id="logStatus" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500 transition">
+                            <option value="" disabled selected>Pilih status transaksi...</option>
+                            <option value="Penambahan">1. Penambahan</option>
+                            <option value="Pengeluaran">2. Pengeluaran</option>
+                        </select>
+                    </div>
+
+                    <div class="border-t border-slate-800 pt-4 mt-2">
+                        <div class="flex justify-between items-center mb-3">
+                            <label class="block text-xs font-bold text-amber-400 uppercase tracking-wider">Pilihan Perkakasan & Kuantiti</label>
+                            <button type="button" onclick="addItemRow()" class="bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1 shadow">
+                                <i class="fa-solid fa-plus"></i> Tambah Item
+                            </button>
+                        </div>
+
+                        <div id="itemRowsContainer" class="space-y-3"></div>
+                    </div>
+
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex justify-between items-center mt-4 shadow-inner">
+                        <div>
+                            <span class="text-[11px] text-slate-400 block font-medium">Jumlah Keseluruhan Kos</span>
+                            <span id="grandTotalDisplay" class="text-xl font-bold text-emerald-400">RM 0</span>
+                        </div>
+                        <input type="hidden" id="grandTotalVal" value="0">
+                    </div>
+
+                    <div class="pt-2 flex gap-3">
+                        <button type="submit" id="submitBtn" class="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2.5 px-4 rounded-lg shadow-lg transition flex items-center justify-center gap-2 text-xs">
+                            <i class="fa-solid fa-plus-circle"></i> Rekod & Hantar ke Google Sheet
+                        </button>
+                        <button type="button" onclick="resetForm()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium py-2.5 px-4 rounded-lg transition text-xs border border-slate-700">
+                            Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- SENARAI HARGA RUJUKAN -->
+            <div class="bg-slate-900 border border-slate-700/60 rounded-2xl p-6 shadow-2xl flex flex-col justify-between">
+                <div>
+                    <h2 class="text-sm font-bold text-emerald-400 uppercase tracking-wider mb-4 flex items-center gap-2 border-b border-slate-800 pb-2">
+                        <i class="fa-solid fa-tags"></i> Harga Rujukan Standard
+                    </h2>
+                    <div class="space-y-2 text-xs max-h-[380px] overflow-y-auto pr-1">
+                        <div class="flex justify-between py-1.5 border-b border-slate-800/80"><span>Tazer</span><span class="font-bold text-emerald-300">RM 5,000 / pcs</span></div>
+                        <div class="flex justify-between py-1.5 border-b border-slate-800/80"><span>Deagle</span><span class="font-bold text-emerald-300">RM 10,000 / pcs</span></div>
+                        <div class="flex justify-between py-1.5 border-b border-slate-800/80"><span>M4A1</span><span class="font-bold text-emerald-300">RM 10,000 / pcs</span></div>
+                        <div class="flex justify-between py-1.5 border-b border-slate-800/80"><span>SMG</span><span class="font-bold text-emerald-300">RM 10,000 / pcs</span></div>
+                        <div class="flex justify-between py-1.5 border-b border-slate-800/80"><span>Declip</span><span class="font-bold text-emerald-300">RM 10,000 / 10 pcs</span></div>
+                        <div class="flex justify-between py-1.5 border-b border-slate-800/80"><span>M4Clip</span><span class="font-bold text-emerald-300">RM 10,000 / 10 pcs</span></div>
+                        <div class="flex justify-between py-1.5 border-b border-slate-800/80"><span>SMGClip</span><span class="font-bold text-emerald-300">RM 10,000 / 10 pcs</span></div>
+                        <div class="flex justify-between py-1.5 border-b border-slate-800/80"><span>Panadol</span><span class="font-bold text-emerald-300">RM 1,000 / 10 pcs</span></div>
+                        <div class="flex justify-between py-1.5 border-b border-slate-800/80"><span>Lockpick</span><span class="font-bold text-emerald-300">RM 5,000 / 5 pcs</span></div>
+                        <div class="flex justify-between py-1.5 border-b border-slate-800/80"><span>Medkit</span><span class="font-bold text-emerald-300">RM 5,000 / 10 pcs</span></div>
+                        <div class="flex justify-between py-1.5 border-b border-slate-800/80"><span>AED</span><span class="font-bold text-emerald-300">RM 5,000 / 10 pcs</span></div>
+                        <div class="flex justify-between py-1.5 border-b border-slate-800/80"><span>Bandage</span><span class="font-bold text-emerald-300">RM 5,000 / 10 pcs</span></div>
+                        <div class="flex justify-between py-1.5 border-b border-slate-800/80"><span>Vest</span><span class="font-bold text-emerald-300">RM 10,000 / 10 pcs</span></div>
+                        <div class="flex justify-between py-1.5"><span>Harness</span><span class="font-bold text-emerald-300">RM 2,000 / 5 pcs</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SENARAI LOG TERKINI -->
+        <div class="mt-6 bg-slate-900 border border-slate-700/60 rounded-2xl p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
+                <h2 class="text-sm font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-list-check"></i> Senarai Log Terkini (Google Sheet)
+                </h2>
+                <button onclick="muatNaikDataLog()" class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow">
+                    <i class="fa-solid fa-cloud-arrow-down"></i> Muat Naik Data
+                </button>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="border-b border-slate-800 text-slate-400 bg-slate-950">
+                            <th class="p-3 font-semibold rounded-l-lg">Tarikh</th>
+                            <th class="p-3 font-semibold">Pegawai Pengurus</th>
+                            <th class="p-3 font-semibold">Butiran Perkakasan</th>
+                            <th class="p-3 font-semibold text-right">Jumlah Kos Keseluruhan</th>
+                            <th class="p-3 font-semibold">Status Log</th>
+                            <th class="p-3 font-semibold text-center rounded-r-lg">Tindakan</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logTableBody" class="divide-y divide-slate-800/60 text-slate-300"></tbody>
+                </table>
+                <div id="emptyState" class="text-center py-10 text-slate-500 text-xs italic">
+                    <i class="fa-solid fa-folder-open text-3xl mb-2 block"></i>
+                    Tiada rekod log dimuat turun daripada Google Sheet.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATION POPUP MODAL -->
+    <div id="notificationModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+        <div class="bg-slate-900 border border-slate-700 p-6 rounded-2xl w-full max-w-sm text-center space-y-3 shadow-2xl">
+            <div id="notifIcon" class="text-3xl text-emerald-400"><i class="fa-solid fa-circle-check"></i></div>
+            <h3 id="notifTitle" class="font-bold text-white text-base">Berjaya</h3>
+            <p id="notifMessage" class="text-xs text-slate-300">Data telah berjaya dimuat naik.</p>
+            <button onclick="closeNotif()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2 rounded-xl text-xs transition">Tutup</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('logDate').valueAsDate = new Date();
+
+        const pricingRules = {
+            'Tazer': { price: 5000, unit: 1 }, 'Deagle': { price: 10000, unit: 1 },
+            'M4A1': { price: 10000, unit: 1 }, 'SMG': { price: 10000, unit: 1 },
+            'Declip': { price: 10000, unit: 10 }, 'M4Clip': { price: 10000, unit: 10 },
+            'SMGClip': { price: 10000, unit: 10 }, 'Panadol': { price: 1000, unit: 10 },
+            'Lockpick': { price: 5000, unit: 5 }, 'Medkit': { price: 5000, unit: 10 },
+            'AED': { price: 5000, unit: 10 }, 'Bandage': { price: 5000, unit: 10 },
+            'Vest': { price: 10000, unit: 10 }, 'Harness': { price: 2000, unit: 5 }
+        };
+
+        let rowCounter = 0;
+        function addItemRow(selectedType = '', selectedQty = 1) {
+            rowCounter++;
+            const container = document.getElementById('itemRowsContainer');
+            const row = document.createElement('div');
+            row.id = `itemRow_${rowCounter}`;
+            row.className = "grid grid-cols-12 gap-2 items-center bg-slate-950 p-2.5 rounded-xl border border-slate-800";
+
+            row.innerHTML = `
+                <div class="col-span-5 md:col-span-5">
+                    <select class="item-type w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-amber-500" onchange="calculateOverallTotal()">
+                        <option value="" disabled ${!selectedType ? 'selected' : ''}>Pilih perkakasan...</option>
+                        <option value="Tazer" ${selectedType === 'Tazer' ? 'selected' : ''}>Tazer</option>
+                        <option value="Deagle" ${selectedType === 'Deagle' ? 'selected' : ''}>Deagle</option>
+                        <option value="M4A1" ${selectedType === 'M4A1' ? 'selected' : ''}>M4A1</option>
+                        <option value="SMG" ${selectedType === 'SMG' ? 'selected' : ''}>SMG</option>
+                        <option value="Declip" ${selectedType === 'Declip' ? 'selected' : ''}>Declip</option>
+                        <option value="M4Clip" ${selectedType === 'M4Clip' ? 'selected' : ''}>M4Clip</option>
+                        <option value="SMGClip" ${selectedType === 'SMGClip' ? 'selected' : ''}>SMGClip</option>
+                        <option value="Panadol" ${selectedType === 'Panadol' ? 'selected' : ''}>Panadol</option>
+                        <option value="Lockpick" ${selectedType === 'Lockpick' ? 'selected' : ''}>Lockpick</option>
+                        <option value="Medkit" ${selectedType === 'Medkit' ? 'selected' : ''}>Medkit</option>
+                        <option value="AED" ${selectedType === 'AED' ? 'selected' : ''}>AED</option>
+                        <option value="Bandage" ${selectedType === 'Bandage' ? 'selected' : ''}>Bandage</option>
+                        <option value="Vest" ${selectedType === 'Vest' ? 'selected' : ''}>Vest</option>
+                        <option value="Harness" ${selectedType === 'Harness' ? 'selected' : ''}>Harness</option>
+                    </select>
+                </div>
+                <div class="col-span-3 md:col-span-3">
+                    <input type="number" min="1" value="${selectedQty}" class="item-qty w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-amber-500" oninput="calculateOverallTotal()">
+                </div>
+                <div class="col-span-3 md:col-span-3 font-semibold text-xs text-emerald-400 text-right item-subtotal">RM 0</div>
+                <div class="col-span-1 text-center">
+                    <button type="button" onclick="removeItemRow('${rowCounter}')" class="text-rose-400 hover:text-rose-300 text-xs"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            `;
+            container.appendChild(row);
+            calculateOverallTotal();
+        }
+
+        function removeItemRow(id) {
+            const row = document.getElementById(`itemRow_${id}`);
+            if (row) { row.remove(); calculateOverallTotal(); }
+        }
+
+        function calculateOverallTotal() {
+            const rows = document.querySelectorAll('#itemRowsContainer > div');
+            let grandTotal = 0;
+            rows.forEach(row => {
+                const itemType = row.querySelector('.item-type').value;
+                const qty = parseInt(row.querySelector('.item-qty').value) || 0;
+                const subtotalElem = row.querySelector('.item-subtotal');
+                if (itemType && qty > 0 && pricingRules[itemType]) {
+                    const rule = pricingRules[itemType];
+                    let subtotal = (rule.unit === 1) ? (qty * rule.price) : ((qty / rule.unit) * rule.price);
+                    subtotalElem.textContent = 'RM ' + subtotal.toLocaleString('en-MY');
+                    grandTotal += subtotal;
+                } else { subtotalElem.textContent = 'RM 0'; }
+            });
+            document.getElementById('grandTotalDisplay').textContent = 'RM ' + grandTotal.toLocaleString('en-MY');
+            document.getElementById('grandTotalVal').value = grandTotal;
+        }
+
+        addItemRow();
+
+        let logs = [];
+        const scriptUrl = 'https://script.google.com/macros/s/AKfycbzu2XdB8CQnMwvv3Bfk0tkLlGW-7c7xNFIOi6GvEyQeQzjc4gtS17eKT9pdNmlTHZRn/exec'; 
+
+        window.onload = function() {
+            muatNaikDataLog();
+        };
+
+        function showNotification(title, message, isSuccess = true) {
+            document.getElementById('notifTitle').textContent = title;
+            document.getElementById('notifMessage').textContent = message;
+            const iconEl = document.getElementById('notifIcon');
+            if (isSuccess) {
+                iconEl.className = "text-3xl text-emerald-400";
+                iconEl.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+            } else {
+                iconEl.className = "text-3xl text-rose-400";
+                iconEl.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>';
+            }
+            document.getElementById('notificationModal').classList.remove('hidden');
+        }
+
+        function closeNotif() {
+            document.getElementById('notificationModal').classList.add('hidden');
+        }
+
+        function handleSubmit(e) {
+            e.preventDefault();
+            const officer = document.getElementById('officerName').value.trim();
+            const date = document.getElementById('logDate').value;
+            const status = document.getElementById('logStatus').value;
+            const grandTotal = document.getElementById('grandTotalVal').value;
+            const editingId = document.getElementById('editingLogId').value;
+
+            const rows = document.querySelectorAll('#itemRowsContainer > div');
+            let itemDetails = [], itemsArray = [];
+            rows.forEach(row => {
+                const itemType = row.querySelector('.item-type').value;
+                const qty = parseInt(row.querySelector('.item-qty').value) || 0;
+                if (itemType && qty > 0) {
+                    itemDetails.push(`${itemType} (${qty}x)`);
+                    itemsArray.push({ type: itemType, qty: qty });
+                }
+            });
+
+            if (itemDetails.length === 0) return alert('Sila pilih sekurang-kurangnya satu perkakasan.');
+            const itemString = itemDetails.join(', ');
+
+            const logData = {
+                id: editingId ? editingId : 'ID_' + Date.now(),
+                date: date,
+                officer: officer,
+                item: itemString,
+                itemsArray: itemsArray,
+                cost: grandTotal,
+                status: status
+            };
+
+            syncRowToGoogleSheet(logData, () => {
+                resetForm();
+                muatNaikDataLog();
+                showNotification("Berjaya", "Log berjaya direkod dan diselaraskan ke Google Sheet!");
+            });
+        }
+
+        function editLog(id) {
+            const log = logs.find(l => l.id == id);
+            if (!log) return;
+            document.getElementById('editingLogId').value = log.id;
+            document.getElementById('officerName').value = log.officer;
+            document.getElementById('logDate').value = log.date;
+            document.getElementById('logStatus').value = log.status;
+            document.getElementById('itemRowsContainer').innerHTML = '';
+            rowCounter = 0;
+            log.itemsArray?.forEach(item => addItemRow(item.type, item.qty)) || addItemRow();
+            calculateOverallTotal();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetForm() {
+            document.getElementById('inventoryForm').reset();
+            document.getElementById('editingLogId').value = '';
+            document.getElementById('logDate').valueAsDate = new Date();
+            document.getElementById('itemRowsContainer').innerHTML = '';
+            rowCounter = 0; addItemRow(); calculateOverallTotal();
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('logTableBody');
+            tbody.innerHTML = '';
+            document.getElementById('emptyState').style.display = logs.length === 0 ? 'block' : 'none';
+            logs.forEach(log => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-800/40 transition border-b border-slate-800/60";
+                const statusBadge = log.status === 'Penambahan' ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-800/50">Penambahan</span>' : '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-950 text-rose-300 border border-rose-800/50">Pengeluaran</span>';
+                
+                const costVal = parseFloat(log.cost) || 0;
+
+                tr.innerHTML = `
+                    <td class="p-3 text-slate-300">${log.date}</td>
+                    <td class="p-3 font-bold text-white">${log.officer}</td>
+                    <td class="p-3 text-slate-300">${log.item}</td>
+                    <td class="p-3 text-right text-emerald-400 font-bold">RM ${costVal.toLocaleString('en-MY')}</td>
+                    <td class="p-3">${statusBadge}</td>
+                    <td class="p-3 text-center space-x-2">
+                        <button type="button" onclick="editLog('${log.id}')" class="text-amber-400 font-semibold text-xs underline">Edit</button>
+                        <button type="button" onclick="deleteSingleLog('${log.id}')" class="text-rose-400 font-semibold text-xs underline">Padam</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function syncRowToGoogleSheet(log, callback) {
+            if (!scriptUrl) return; 
+
+            const formData = new FormData();
+            formData.append('sheetType', 'Senjata'); 
+            formData.append('id', log.id);
+            formData.append('date', log.date);
+            formData.append('officer', log.officer);
+            formData.append('item', log.item);
+            formData.append('quantity', '-');
+            formData.append('cost', log.cost);
+            formData.append('status', log.status);
+
+            fetch(scriptUrl, { 
+                method: 'POST', 
+                mode: 'no-cors', 
+                body: formData 
+            }).then(() => {
+                if (callback) callback();
+            }).catch(() => {
+                showNotification("Ralat", "Gagal menghantar data ke Google Sheet.", false);
+            });
+        }
+
+        function muatNaikDataLog() {
+            fetch(`${scriptUrl}?sheetType=GetSenjata`)
+            .then(res => res.json())
+            .then(data => {
+                if (data && Array.isArray(data)) {
+                    logs = data.map((item, index) => ({
+                        id: item.id || ('ID_' + (Date.now() + index)),
+                        date: item.date,
+                        officer: item.officer,
+                        item: item.item,
+                        itemsArray: item.itemsArray || [],
+                        cost: item.cost,
+                        status: item.status
+                    }));
+                    renderTable();
+                    showNotification("Berjaya", "Data log berjaya dimuat naik daripada Google Sheet!");
+                } else {
+                    renderTable();
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                renderTable();
+                showNotification("Ralat", "Gagal memuat naik data daripada Google Sheet.", false);
+            });
+        }
+
+        function deleteSingleLog(id) {
+            if (confirm('Adakah anda pasti mahu memadam log ini dari sistem dan Google Sheet?')) {
+                const formData = new FormData();
+                formData.append('sheetType', 'DeleteSenjataItem');
+                formData.append('id', id);
+
+                fetch(scriptUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: formData
+                }).then(() => {
+                    showNotification("Berjaya", "Log berjaya dipadam.");
+                    setTimeout(() => { muatNaikDataLog(); }, 1000);
+                }).catch(() => {
+                    showNotification("Ralat", "Gagal berhubung dengan pelayan untuk memadam log.", false);
+                });
+            }
+        }
+    </script>
+</body>
+</html>

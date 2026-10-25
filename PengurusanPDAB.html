@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Pengurusan PDAB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Pustaka untuk Download Gambar Jadual (html2canvas) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body {
+            background-color: #0A192F;
+            background-image: linear-gradient(135deg, #0A192F 0%, #112240 100%);
+        }
+    </style>
+</head>
+<body class="font-sans text-gray-100 min-h-screen flex items-center justify-center p-2 sm:p-6">
+
+    <!-- LOADING / BLOCKING OVERLAY DENGAN PROGRESS BAR (Menyekat akses & memaparkan animasi sinkronisasi) -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex flex-col items-center justify-center space-y-4 p-4">
+        <div class="w-12 h-12 border-4 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
+        <div class="w-full max-w-xs bg-slate-900 border border-slate-700 p-4 rounded-xl space-y-2 shadow-2xl text-center">
+            <div class="flex justify-between text-xs font-semibold">
+                <span id="progress-label" class="text-amber-400">Menyegerak data pelayan...</span>
+                <span id="progress-percent" class="text-white">0%</span>
+            </div>
+            <div class="w-full bg-slate-950 rounded-full h-2.5 overflow-hidden border border-slate-800">
+                <div id="progress-bar-fill" class="bg-amber-400 h-2.5 rounded-full transition-all duration-150" style="width: 0%"></div>
+            </div>
+            <p id="loadingText" class="text-[11px] text-slate-400">Memeriksa sambungan ke Google Sheets...</p>
+        </div>
+    </div>
+
+    <!-- CUSTOM HTML NOTIFICATION MODAL -->
+    <div id="htmlModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+        <div class="bg-slate-900 border border-slate-700 p-6 rounded-2xl w-full max-w-sm space-y-4 shadow-2xl text-center">
+            <div id="modalIcon" class="text-3xl text-amber-400 mb-1">ℹ️</div>
+            <h3 id="modalTitle" class="font-bold text-amber-400 text-base">Makluman Sistem</h3>
+            <p id="modalMessage" class="text-xs text-slate-300 leading-relaxed"></p>
+            <button onclick="closeHtmlModal()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition shadow cursor-pointer">Tutup</button>
+        </div>
+    </div>
+
+    <div class="w-full max-w-7xl bg-slate-900 border border-slate-700/60 rounded-2xl shadow-2xl overflow-hidden flex flex-col justify-between min-h-[700px]">
+
+        <!-- HEADER BANNER -->
+        <header class="relative border-b border-slate-800 p-6 text-center shadow-md overflow-hidden bg-slate-950">
+            <div class="absolute inset-0 bg-cover bg-center opacity-50" style="background-image: url('PDABBG.png');"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-900/75 to-slate-950/85"></div>
+
+            <div class="relative z-10 flex flex-col items-center justify-center space-y-2">
+                <img src="PDAB.png" alt="Logo PDAB" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/2/26/Royal_Malaysian_Police.svg';" class="w-16 h-16 object-contain drop-shadow-[0_0_12px_rgba(234,179,8,0.4)]">
+                <div>
+                    <h1 class="text-lg sm:text-xl font-bold tracking-wider text-amber-400 uppercase drop-shadow-md">Panel Pengurusan PDAB</h1>
+                    <p class="text-xs text-slate-200 tracking-wide font-medium">Sistem Pentadbiran, Semakan Duty, Cuti & Kawalan Denda</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- KANDUNGAN UTAMA -->
+        <main class="p-5 sm:p-8 flex-1">
+
+            <!-- NAVIGASI UTAMA -->
+            <div id="managementDashboard" class="space-y-6">
+                <div class="flex justify-between items-center bg-slate-950 p-3 rounded-xl border border-slate-800">
+                    <span class="text-xs text-slate-400">Navigasi Utama Sistem</span>
+                    <a href="index.html" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-3 py-1.5 rounded transition shadow">🏠 Kembali ke Menu Utama</a>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    <button onclick="showSection('matrixSection')" class="group bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 hover:border-amber-400 p-4 rounded-xl text-left transition shadow-md flex items-center space-x-3 cursor-pointer">
+                        <span class="text-2xl p-2 bg-slate-950 rounded-lg">📊</span>
+                        <div>
+                            <h2 class="font-bold text-white text-sm group-hover:text-amber-400">Jadual Matrik Bulanan</h2>
+                            <p class="text-[11px] text-slate-400">Auto sync rekod dari GS</p>
+                        </div>
+                    </button>
+
+                    <button onclick="showSection('dutyApprovalSection')" class="group bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 hover:border-amber-400 p-4 rounded-xl text-left transition shadow-md flex items-center space-x-3 cursor-pointer">
+                        <span class="text-2xl p-2 bg-slate-950 rounded-lg">🛡️</span>
+                        <div>
+                            <h2 class="font-bold text-white text-sm group-hover:text-amber-400">Semakan Log Duty</h2>
+                            <p class="text-[11px] text-slate-400">Semak & padam (Sync GS)</p>
+                        </div>
+                    </button>
+
+                    <button onclick="showSection('leaveApprovalSection')" class="group bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 hover:border-amber-400 p-4 rounded-xl text-left transition shadow-md flex items-center space-x-3 cursor-pointer">
+                        <span class="text-2xl p-2 bg-slate-950 rounded-lg">📋</span>
+                        <div>
+                            <h2 class="font-bold text-white text-sm group-hover:text-amber-400">Semakan Cuti</h2>
+                            <p class="text-[11px] text-slate-400">Kelulusan & padam (Sync GS)</p>
+                        </div>
+                    </button>
+
+                    <button onclick="showSection('fineSection')" class="group bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 hover:border-amber-400 p-4 rounded-xl text-left transition shadow-md flex items-center space-x-3 cursor-pointer">
+                        <span class="text-2xl p-2 bg-slate-950 rounded-lg">⚠️</span>
+                        <div>
+                            <h2 class="font-bold text-white text-sm group-hover:text-amber-400">Pengurusan Denda</h2>
+                            <p class="text-[11px] text-slate-400">Aktif bermula 1 Okt 2026 (9 Malam)</p>
+                        </div>
+                    </button>
+
+                    <button onclick="showSection('exemptionSection')" class="group bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 hover:border-amber-400 p-4 rounded-xl text-left transition shadow-md flex items-center space-x-3 cursor-pointer">
+                        <span class="text-2xl p-2 bg-slate-950 rounded-lg">🛡️</span>
+                        <div>
+                            <h2 class="font-bold text-white text-sm group-hover:text-amber-400">Pengecualian</h2>
+                            <p class="text-[11px] text-slate-400">Senarai bebas denda (Veteran)</p>
+                        </div>
+                    </button>
+
+                    <button onclick="showSection('staffSection')" class="group bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 hover:border-amber-400 p-4 rounded-xl text-left transition shadow-md flex items-center space-x-3 sm:col-span-2 md:col-span-1 cursor-pointer">
+                        <span class="text-2xl p-2 bg-slate-950 rounded-lg">👥</span>
+                        <div>
+                            <h2 class="font-bold text-white text-sm group-hover:text-amber-400">Urus Staff</h2>
+                            <p class="text-[11px] text-slate-400">Tambah anggota & rujukan password</p>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- SEKSYEN 1: JADUAL MATRIK -->
+            <div id="matrixSection" class="hidden space-y-4">
+                <div class="flex flex-col sm:flex-row items-center justify-between border-b border-slate-700 pb-3 gap-2">
+                    <div class="flex items-center gap-3">
+                        <button onclick="showSection('managementDashboard')" class="text-amber-400 text-xs font-semibold cursor-pointer">← Menu Utama</button>
+                        <a href="index.html" class="text-slate-400 hover:text-amber-400 text-xs font-semibold">🏠 Menu Umum</a>
+                    </div>
+                    <h2 class="text-sm font-bold text-slate-200 uppercase tracking-wider">Jadual Matrik Bulanan Anggota</h2>
+                    
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button onclick="forceSyncAndReloadMatrix()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-3 py-1.5 rounded shadow flex items-center gap-1 transition cursor-pointer">
+                            <span>🔄 Sync GS</span>
+                        </button>
+                        
+                        <!-- 2 PILIHAN DOWNLOAD GAMBAR -->
+                        <button onclick="downloadMatrixImage('full')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-3 py-1.5 rounded shadow flex items-center gap-1 transition cursor-pointer">
+                            <span>📥 Download Bulan Penuh</span>
+                        </button>
+                        <select id="selectDownloadWeek" onchange="downloadMatrixImage('week', this.value)" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-2.5 py-1.5 rounded shadow cursor-pointer outline-none">
+                            <option value="" disabled selected>📥 Download By Minggu</option>
+                            <option value="1">Minggu 1 (Hari 1-7)</option>
+                            <option value="2">Minggu 2 (Hari 8-14)</option>
+                            <option value="3">Minggu 3 (Hari 15-21)</option>
+                            <option value="4">Minggu 4 (Hari 22-28)</option>
+                            <option value="5">Minggu 5 (Hari 29-Akhir)</option>
+                        </select>
+
+                        <select id="selectYear" onchange="loadMatrixData()" class="bg-slate-950 border border-slate-700 text-xs px-2 py-1.5 rounded text-amber-400 font-bold cursor-pointer">
+                            <option value="2025">2025</option>
+                            <option value="2026" selected>2026</option>
+                            <option value="2027">2027</option>
+                        </select>
+                        <select id="selectMonth" onchange="loadMatrixData()" class="bg-slate-950 border border-slate-700 text-xs px-2 py-1.5 rounded text-amber-400 font-bold cursor-pointer">
+                            <option value="01">Januari</option><option value="02">Februari</option><option value="03">Mac</option>
+                            <option value="04">April</option><option value="05">Mei</option><option value="06">Jun</option>
+                            <option value="07">Julai</option><option value="08">Ogos</option><option value="09">September</option>
+                            <option value="10" selected>Oktober</option><option value="11">November</option><option value="12">Disember</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="matrixTableContainer" class="overflow-x-auto max-h-[450px] border border-gray-300 rounded-lg bg-white shadow-xl p-2">
+                    <table class="w-auto text-center text-xs border-collapse whitespace-nowrap text-gray-900">
+                        <thead id="matrixHeader" class="bg-gray-800 text-amber-300 sticky top-0 z-10"></thead>
+                        <tbody id="matrixBody" class="divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SEKSYEN 1.5: SEMAKAN LOG DUTY -->
+            <div id="dutyApprovalSection" class="hidden space-y-4">
+                <div class="flex flex-col sm:flex-row items-center justify-between border-b border-slate-700 pb-3 gap-2">
+                    <div class="flex items-center gap-3">
+                        <button onclick="showSection('managementDashboard')" class="text-amber-400 text-xs font-semibold cursor-pointer">← Menu Utama</button>
+                        <a href="index.html" class="text-slate-400 hover:text-amber-400 text-xs font-semibold">🏠 Menu Umum</a>
+                    </div>
+                    <h2 class="text-sm font-bold text-slate-200 uppercase tracking-wider">Semakan Log Duty Anggota</h2>
+                    
+                    <div class="flex flex-wrap items-center gap-2">
+                        <select id="filterDutyName" onchange="loadDutyApprovals()" class="bg-slate-950 border border-slate-700 text-xs px-2 py-1 rounded text-amber-400 font-bold cursor-pointer">
+                            <option value="ALL">Semua Anggota</option>
+                        </select>
+                        <input type="date" id="filterDutyDate" onchange="loadDutyApprovals()" class="bg-slate-950 border border-slate-700 text-xs px-2 py-1 rounded text-white cursor-pointer">
+                        <select id="filterDutyStatus" onchange="loadDutyApprovals()" class="bg-slate-950 border border-slate-700 text-xs px-2 py-1 rounded text-amber-400 font-bold cursor-pointer">
+                            <option value="ALL">Semua Status</option>
+                            <option value="Menunggu">Menunggu</option>
+                            <option value="Sudah Masuk">Sudah Masuk / Disahkan</option>
+                        </select>
+                        <button onclick="resetDutyFilter()" class="bg-slate-800 hover:bg-slate-700 text-xs px-2 py-1 rounded text-slate-300 cursor-pointer">Reset</button>
+                    </div>
+                </div>
+
+                <div id="dutyApprovalList" class="space-y-3 overflow-y-auto max-h-[400px]">
+                    <p class="text-slate-500 text-xs italic text-center py-4">Memuatkan data log duty...</p>
+                </div>
+            </div>
+
+            <!-- SEKSYEN 2: SEMAKAN CUTI -->
+            <div id="leaveApprovalSection" class="hidden space-y-4">
+                <div class="flex flex-col sm:flex-row items-center justify-between border-b border-slate-700 pb-3 gap-2">
+                    <div class="flex items-center gap-3">
+                        <button onclick="showSection('managementDashboard')" class="text-amber-400 text-xs font-semibold cursor-pointer">← Menu Utama</button>
+                        <a href="index.html" class="text-slate-400 hover:text-amber-400 text-xs font-semibold">🏠 Menu Umum</a>
+                    </div>
+                    <h2 class="text-sm font-bold text-slate-200 uppercase tracking-wider">Semakan & Kelulusan Cuti Anggota</h2>
+                    
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-slate-300">Tapis Anggota:</span>
+                        <select id="filterLeaveName" onchange="loadLeaveApprovals()" class="bg-slate-950 border border-slate-700 text-xs px-3 py-1 rounded text-amber-400 font-bold cursor-pointer">
+                            <option value="ALL">Semua Anggota</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- SUB-TABS UNTUK CUTI -->
+                <div class="flex gap-2 bg-slate-950 p-2 rounded-xl border border-slate-800">
+                    <button id="tabBtnApproved" onclick="switchLeaveTab('approved')" class="flex-1 bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold text-xs py-2 px-4 rounded-lg transition shadow cursor-pointer">
+                        ✅ Lulus (Diluluskan)
+                    </button>
+                    <button id="tabBtnPending" onclick="switchLeaveTab('pending')" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs py-2 px-4 rounded-lg transition shadow cursor-pointer">
+                        ⏳ Belum Diluluskan
+                    </button>
+                </div>
+
+                <!-- KANDUNGAN SENARAI CUTI -->
+                <div id="leaveApprovalList" class="space-y-3 overflow-y-auto max-h-[360px]">
+                    <p class="text-slate-500 text-xs italic text-center py-4">Memuatkan data permohonan...</p>
+                </div>
+            </div>
+
+            <!-- SEKSYEN 3: PENGURUSAN DENDA -->
+            <div id="fineSection" class="hidden space-y-4">
+                <div class="flex flex-col sm:flex-row items-center justify-between border-b border-slate-700 pb-3 gap-2">
+                    <div class="flex items-center gap-3">
+                        <button onclick="showSection('managementDashboard')" class="text-amber-400 text-xs font-semibold cursor-pointer">← Menu Utama</button>
+                        <a href="index.html" class="text-slate-400 hover:text-amber-400 text-xs font-semibold">🏠 Menu Umum</a>
+                    </div>
+                    <h2 class="text-sm font-bold text-slate-200 uppercase tracking-wider">Pengurusan Denda</h2>
+                    
+                    <div class="flex gap-2">
+                        <select id="fineYear" onchange="loadFines()" class="bg-slate-950 border border-slate-700 text-xs px-2 py-1 rounded text-amber-400 font-bold cursor-pointer">
+                            <option value="2026" selected>2026</option>
+                        </select>
+                        <select id="fineMonth" onchange="loadFines()" class="bg-slate-950 border border-slate-700 text-xs px-2 py-1 rounded text-amber-400 font-bold cursor-pointer">
+                            <option value="01">Januari</option><option value="02">Februari</option><option value="03">Mac</option>
+                            <option value="04">April</option><option value="05">Mei</option><option value="06">Jun</option>
+                            <option value="07">Julai</option><option value="08">Ogos</option><option value="09">September</option>
+                            <option value="10" selected>Oktober</option><option value="11">November</option><option value="12">Disember</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto max-h-[400px]">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-slate-950 text-amber-400 border-b border-slate-700">
+                                <th class="p-2.5">Nama Anggota</th>
+                                <th class="p-2.5">Hari Alpha</th>
+                                <th class="p-2.5">Jumlah Denda (RM)</th>
+                                <th class="p-2.5">Status Denda</th>
+                                <th class="p-2.5 text-right">Tindakan / Nota Tarikh</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fineTableBody" class="divide-y divide-slate-800">
+                            <tr><td colspan="5" class="p-4 text-center text-slate-500 italic">Tiada rekod denda untuk bulan ini.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="alphaModal" class="hidden bg-slate-950 border border-amber-500/50 p-4 rounded-xl mt-4 space-y-2">
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                        <h3 id="modalTitle" class="font-bold text-amber-400 text-sm">Senarai Tarikh Alpha</h3>
+                        <button onclick="closeAlphaModal()" class="text-slate-400 hover:text-white text-xs font-bold cursor-pointer">[Tutup]</button>
+                    </div>
+                    <div id="alphaDatesList" class="text-slate-300 text-xs space-y-1 max-h-36 overflow-y-auto"></div>
+                </div>
+            </div>
+
+            <!-- SEKSYEN 4: PENGECUALIAN -->
+            <div id="exemptionSection" class="hidden space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+                    <div class="flex items-center gap-3">
+                        <button onclick="showSection('managementDashboard')" class="text-amber-400 text-xs font-semibold cursor-pointer">← Menu Utama</button>
+                        <a href="index.html" class="text-slate-400 hover:text-amber-400 text-xs font-semibold">🏠 Menu Umum</a>
+                    </div>
+                    <h2 class="text-sm font-bold text-slate-200 uppercase tracking-wider">Pengecualian Denda</h2>
+                </div>
+                <form onsubmit="addExemption(event)" class="flex gap-2">
+                    <select id="exemptName" required class="flex-1 bg-slate-950 border border-slate-700 rounded px-3 py-1.5 text-xs text-white focus:outline-none cursor-pointer">
+                        <option value="">-- Pilih Anggota Berdaftar --</option>
+                    </select>
+                    <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-4 py-1.5 rounded text-xs cursor-pointer">Tambah Pengecualian</button>
+                </form>
+                <div class="overflow-x-auto max-h-[320px]">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-slate-950 text-amber-400 border-b border-slate-700">
+                                <th class="p-2.5">Nama Pegawai / Anggota</th>
+                                <th class="p-2.5 text-right">Tindakan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="exemptTableBody" class="divide-y divide-slate-800">
+                            <tr><td colspan="2" class="p-4 text-center text-slate-500 italic">Tiada senarai pengecualian.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SEKSYEN 5: URUS STAFF -->
+            <div id="staffSection" class="hidden space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+                    <div class="flex items-center gap-3">
+                        <button onclick="showSection('managementDashboard')" class="text-amber-400 text-xs font-semibold cursor-pointer">← Menu Utama</button>
+                        <a href="index.html" class="text-slate-400 hover:text-amber-400 text-xs font-semibold">🏠 Menu Umum</a>
+                    </div>
+                    <h2 class="text-sm font-bold text-slate-200 uppercase tracking-wider">Pengurusan Pendaftaran Staff & Password</h2>
+                </div>
+                <form onsubmit="addStaff(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-slate-950 p-3 rounded border border-slate-800">
+                    <input type="text" id="staffName" placeholder="Nama Penuh" required class="bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-xs text-white">
+                    <input type="text" id="staffBadge" placeholder="No. Badan" required class="bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-xs text-white">
+                    <input type="password" id="staffPass" placeholder="Kata Laluan (Kosongkan = No. Badan)" class="bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-xs text-white">
+                    <button type="submit" class="sm:col-span-3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2 rounded text-xs mt-1 cursor-pointer">Daftar Anggota Baru & Sync</button>
+                </form>
+                <div class="overflow-x-auto max-h-[280px]">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-slate-950 text-amber-400 border-b border-slate-700">
+                                <th class="p-2.5">Nama Penuh</th>
+                                <th class="p-2.5">No. Badan</th>
+                                <th class="p-2.5">Kata Laluan (Password)</th>
+                                <th class="p-2.5 text-right">Tindakan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="staffTableBody" class="divide-y divide-slate-800">
+                            <tr><td colspan="4" class="p-4 text-center text-slate-500 italic">Tiada staff didaftarkan.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+
+        <footer class="bg-slate-950 border-t border-slate-800 p-4 text-center text-xs text-slate-500 flex justify-between items-center px-6">
+            <span>Panel Pentadbiran Rasmi &copy; PDAB System 2026</span>
+            <a href="index.html" class="text-amber-400 hover:underline">🏠 Ke Menu Utama (index.html)</a>
+        </footer>
+    </div>
+
+    <!-- JAVASCRIPT KAWALAN PENGURUSAN -->
+    <script>
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbzu2XdB8CQnMwvv3Bfk0tkLlGW-7c7xNFIOi6GvEyQeQzjc4gtS17eKT9pdNmlTHZRn/exec';
+        let currentLeaveTab = 'approved'; 
+
+        window.onload = function() {
+            const now = new Date();
+            const curYear = now.getFullYear();
+            const curMonth = String(now.getMonth() + 1).padStart(2, '0');
+            
+            document.getElementById('selectYear').value = curYear;
+            document.getElementById('selectMonth').value = curMonth;
+            document.getElementById('fineYear').value = curYear;
+            document.getElementById('fineMonth').value = curMonth;
+
+            fetchAllDataFromGoogleSheet();
+        }
+
+        function showSection(sectionId) {
+            ['matrixSection', 'dutyApprovalSection', 'leaveApprovalSection', 'fineSection', 'exemptionSection', 'staffSection', 'managementDashboard'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            
+            if(sectionId === 'matrixSection') loadMatrixData('full');
+            if(sectionId === 'dutyApprovalSection') {
+                updateFilterOptions();
+                loadDutyApprovals();
+            }
+            if(sectionId === 'leaveApprovalSection') {
+                updateFilterOptions();
+                loadLeaveApprovals();
+            }
+            if(sectionId === 'fineSection') loadFines();
+            if(sectionId === 'exemptionSection') {
+                updateExemptStaffDropdown();
+                loadExemptions();
+            }
+            if(sectionId === 'staffSection') loadStaff();
+        }
+
+        // Fungsi Paparan Notifikasi HTML Kustom
+        function showHtmlModal(title, message) {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalMessage').innerText = message;
+            document.getElementById('htmlModal').classList.remove('hidden');
+        }
+
+        function closeHtmlModal() {
+            document.getElementById('htmlModal').classList.add('hidden');
+        }
+
+        function showLoadingOverlay(text = "Menyegerak data pelayan...") {
+            document.getElementById('loadingText').innerText = text;
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+        }
+
+        function hideLoadingOverlay() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        }
+
+        function fetchAllDataFromGoogleSheet() {
+            showLoadingOverlay("Menghubungkan ke pelayan Google Sheets...");
+            let currentProgress = 0;
+            const progressBarFill = document.getElementById('progress-bar-fill');
+            const progressPercent = document.getElementById('progress-percent');
+            const progressLabel = document.getElementById('progress-label');
+
+            progressBarFill.style.width = '0%';
+            progressPercent.innerText = '0%';
+
+            let progressInterval = setInterval(() => {
+                if (currentProgress < 85) {
+                    currentProgress += Math.floor(Math.random() * 8) + 3;
+                    if (currentProgress > 85) currentProgress = 85;
+                    progressBarFill.style.width = currentProgress + '%';
+                    progressPercent.innerText = currentProgress + '%';
+                }
+            }, 100);
+
+            if (window.location.protocol === 'file:') {
+                clearInterval(progressInterval);
+                progressBarFill.style.width = '100%';
+                progressPercent.innerText = '100%';
+                progressLabel.innerText = 'Mod Luar Talian (Lokal)';
+                setTimeout(() => {
+                    hideLoadingOverlay();
+                    loadLocalDataFallback();
+                }, 500);
+                return;
+            }
+
+            fetch(scriptURL)
+            .then(res => res.json())
+            .then(data => {
+                clearInterval(progressInterval);
+                progressBarFill.style.width = '100%';
+                progressPercent.innerText = '100%';
+                progressLabel.innerText = 'Penyegerakan selesai!';
+
+                if (data.staff && Array.isArray(data.staff)) {
+                    localStorage.setItem('pdab_staff_list', JSON.stringify(data.staff));
+                }
+                if (data.records && Array.isArray(data.records)) {
+                    let formattedRecords = data.records.map(r => {
+                        let type = String(r.type || r[0]).trim();
+                        let name = r.name || r[1];
+                        let val2 = r.dateStart || r.date || r[2]; 
+                        let val3 = r.dateEnd || r.timeIn || r[3];   
+                        let val4 = r.details || r.timeOut || r[4];   
+                        let timestamp = r.timestamp || r[5];
+                        let status = r.status || r[6] || 'Menunggu';
+
+                        if (type === 'Duty') {
+                            return {
+                                type: 'Duty',
+                                name: name,
+                                date: String(val2 || '').trim(),
+                                timeIn: String(val3 || '').trim(),
+                                timeOut: String(val4 || '').trim(),
+                                timestamp: timestamp,
+                                status: status
+                            };
+                        } else {
+                            return {
+                                type: 'Cuti',
+                                name: name,
+                                dateStart: String(val2 || '').trim(),
+                                dateEnd: String(val3 || '').trim(),
+                                details: String(val4 || '').trim(),
+                                timestamp: timestamp,
+                                status: status
+                            };
+                        }
+                    });
+
+                    localStorage.setItem('pdab_records', JSON.stringify(formattedRecords));
+                }
+                if (data.exemptions && Array.isArray(data.exemptions)) {
+                    localStorage.setItem('pdab_exemptions', JSON.stringify(data.exemptions));
+                }
+                if (data.finePayments) {
+                    localStorage.setItem('pdab_fine_payments', JSON.stringify(data.finePayments));
+                }
+
+                setTimeout(() => {
+                    hideLoadingOverlay();
+                    loadLocalDataFallback();
+                }, 600);
+            })
+            .catch(err => {
+                clearInterval(progressInterval);
+                console.log('Gagal tarik dari GS, guna lokal:', err);
+                progressBarFill.style.backgroundColor = '#f43f5e';
+                progressLabel.innerText = 'Menggunakan data simpanan tempatan.';
+                setTimeout(() => {
+                    hideLoadingOverlay();
+                    loadLocalDataFallback();
+                }, 800);
+            });
+        }
+
+        function forceSyncAndReloadMatrix() {
+            fetchAllDataFromGoogleSheet();
+        }
+
+        function downloadMatrixImage(type, weekNum = null) {
+            let originalViewWeek = currentMatrixWeek;
+            if(type === 'week' && weekNum) {
+                currentMatrixWeek = parseInt(weekNum);
+                loadMatrixData('week', currentMatrixWeek);
+            } else {
+                currentMatrixWeek = 'full';
+                loadMatrixData('full');
+            }
+
+            setTimeout(() => {
+                const container = document.getElementById('matrixTableContainer');
+                const originalMaxH = container.style.maxHeight;
+                const originalOverflow = container.style.overflowX;
+                const originalWidth = container.style.width;
+                
+                container.style.maxHeight = 'none';
+                container.style.overflowX = 'visible';
+                container.style.width = 'max-content';
+
+                html2canvas(container, { 
+                    scale: 2, 
+                    backgroundColor: '#ffffff', 
+                    useCORS: true,
+                    windowWidth: 2000 
+                }).then(canvas => {
+                    container.style.maxHeight = originalMaxH;
+                    container.style.overflowX = originalOverflow;
+                    container.style.width = originalWidth;
+
+                    let fileLabel = type === 'full' ? `Bulan_${document.getElementById('selectMonth').value}` : `Minggu_${weekNum}`;
+                    const link = document.createElement('a');
+                    link.download = `Jadual_Matrik_PDAB_${document.getElementById('selectYear').value}_${fileLabel}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+
+                    document.getElementById('selectDownloadWeek').value = "";
+                    currentMatrixWeek = originalViewWeek;
+                    loadMatrixData(currentMatrixWeek);
+                }).catch(err => {
+                    container.style.maxHeight = originalMaxH;
+                    container.style.overflowX = originalOverflow;
+                    container.style.width = originalWidth;
+                    showHtmlModal('Ralat', 'Gagal memuat turun gambar jadual.');
+                });
+            }, 300);
+        }
+
+        function loadLocalDataFallback() {
+            updateFilterOptions();
+            loadMatrixData('full');
+            loadDutyApprovals();
+            loadLeaveApprovals();
+            loadFines();
+            loadExemptions();
+            loadStaff();
+            updateExemptStaffDropdown();
+        }
+
+        function syncStaffToGoogleSheet() {
+            let staffList = JSON.parse(localStorage.getItem('pdab_staff_list')) || [];
+            const payload = { sheetType: 'StaffList', data: JSON.stringify(staffList) };
+            const params = new URLSearchParams(payload).toString();
+            const img = new Image();
+            img.src = `${scriptURL}?${params}`;
+        }
+
+        function syncExemptionsToGoogleSheet() {
+            let list = JSON.parse(localStorage.getItem('pdab_exemptions')) || [];
+            const payload = { sheetType: 'Exemptions', data: JSON.stringify(list) };
+            const params = new URLSearchParams(payload).toString();
+            const img = new Image();
+            img.src = `${scriptURL}?${params}`;
+        }
+
+        function syncFinePaymentsToGoogleSheet() {
+            let payments = JSON.parse(localStorage.getItem('pdab_fine_payments')) || {};
+            const payload = { sheetType: 'FinePayments', data: JSON.stringify(payments) };
+            const params = new URLSearchParams(payload).toString();
+            const img = new Image();
+            img.src = `${scriptURL}?${params}`;
+        }
+
+        let currentMatrixWeek = 'full';
+
+        function loadMatrixData(mode = 'full', weekVal = null) {
+            if(mode === 'week' && weekVal) currentMatrixWeek = parseInt(weekVal);
+            if(mode === 'full') currentMatrixWeek = 'full';
+
+            const selectedYear = parseInt(document.getElementById('selectYear').value);
+            const selectedMonth = document.getElementById('selectMonth').value;
+            const headerRow = document.getElementById('matrixHeader');
+            const tbody = document.getElementById('matrixBody');
+            
+            headerRow.innerHTML = '';
+            tbody.innerHTML = '';
+
+            let daysInMonth = new Date(selectedYear, parseInt(selectedMonth), 0).getDate();
+            
+            let startDay = 1;
+            let endDay = daysInMonth;
+
+            if (currentMatrixWeek !== 'full') {
+                if (currentMatrixWeek === 1) { startDay = 1; endDay = 7; }
+                else if (currentMatrixWeek === 2) { startDay = 8; endDay = 14; }
+                else if (currentMatrixWeek === 3) { startDay = 15; endDay = 21; }
+                else if (currentMatrixWeek === 4) { startDay = 22; endDay = 28; }
+                else if (currentMatrixWeek === 5) { startDay = 29; endDay = daysInMonth; }
+                if (endDay > daysInMonth) endDay = daysInMonth;
+            }
+
+            let headerHtml = `<th class="p-2.5 border-r border-gray-300 sticky left-0 bg-gray-800 text-amber-300 z-20 min-w-[150px]">Nama Anggota / Hari</th>`;
+            for (let d = startDay; d <= endDay; d++) {
+                headerHtml += `<th class="p-2 border-r border-gray-300 text-center min-w-[75px]">${d}</th>`;
+            }
+            headerRow.innerHTML = headerHtml;
+
+            let staffList = JSON.parse(localStorage.getItem('pdab_staff_list')) || [];
+            let records = JSON.parse(localStorage.getItem('pdab_records')) || [];
+            let exemptions = JSON.parse(localStorage.getItem('pdab_exemptions')) || [];
+            
+            let namesSet = new Set();
+            staffList.forEach(s => namesSet.add(s.name));
+            records.forEach(r => namesSet.add(r.name));
+            let allNames = Array.from(namesSet);
+
+            if (allNames.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${(endDay - startDay + 2)}" class="p-4 text-center text-gray-500 italic bg-white">Tiada data anggota atau rekod dijumpai.</td></tr>`;
+                return;
+            }
+
+            allNames.forEach(name => {
+                let isExempt = exemptions.includes(name);
+                let rowClass = isExempt ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-gray-100';
+                let nameCellClass = isExempt ? 'bg-red-100 text-red-950 font-bold' : 'bg-white font-semibold text-gray-900';
+
+                let rowHtml = `<tr class="${rowClass}"><td class="p-2.5 border-r border-gray-300 sticky left-0 ${nameCellClass} truncate max-w-[150px] shadow-sm">${name}</td>`;
+                
+                for (let d = startDay; d <= endDay; d++) {
+                    let dayStr = String(d).padStart(2, '0');
+                    let targetDateFull = `${selectedYear}-${selectedMonth}-${dayStr}`;
+
+                    let dutyRecords = records.filter(r => r.name === name && r.type === 'Duty' && r.date === targetDateFull);
+                    let leaveRecord = records.find(r => r.name === name && r.type === 'Cuti' && (r.status === 'Diluluskan' || r.status === 'Sudah Masuk') && targetDateFull >= r.dateStart && targetDateFull <= r.dateEnd);
+
+                    let cellContent = '';
+                    let cellClass = 'border-r border-gray-200 text-center text-[9px] ';
+                    let contents = [];
+
+                    if (dutyRecords.length > 0) {
+                        dutyRecords.forEach(dr => {
+                            contents.push(`<span class="bg-emerald-100 text-emerald-900 font-bold px-1 rounded block my-0.5">${dr.timeIn}-${dr.timeOut}</span>`);
+                        });
+                    }
+                    if (leaveRecord) {
+                        contents.push(`<span class="bg-blue-100 text-blue-900 font-extrabold px-1 rounded block my-0.5">CUTI</span>`);
+                    }
+
+                    if (contents.length > 0) {
+                        cellContent = contents.join('');
+                        cellClass += isExempt ? 'bg-red-100/80 p-1' : 'bg-gray-50 p-1';
+                    } else {
+                        cellContent = '';
+                        cellClass += isExempt ? 'text-gray-400 bg-red-50' : 'text-gray-300 bg-white';
+                    }
+
+                    rowHtml += `<td class="${cellClass}">${cellContent}</td>`;
+                }
+                rowHtml += `</tr>`;
+                tbody.innerHTML += rowHtml;
+            });
+        }
+
+        function updateFilterOptions() {
+            const staffList = JSON.parse(localStorage.getItem('pdab_staff_list')) || [];
+            const records = JSON.parse(localStorage.getItem('pdab_records')) || [];
+            let namesSet = new Set();
+            staffList.forEach(s => namesSet.add(s.name));
+            records.forEach(r => namesSet.add(r.name));
+
+            ['filterDutyName', 'filterLeaveName'].forEach(elId => {
+                const selectEl = document.getElementById(elId);
+                if(!selectEl) return;
+                const currentVal = selectEl.value;
+                selectEl.innerHTML = `<option value="ALL">Semua Anggota</option>`;
+                namesSet.forEach(name => {
+                    selectEl.innerHTML += `<option value="${name}">${name}</option>`;
+                });
+                selectEl.value = currentVal || "ALL";
+            });
+        }
+
+        function resetDutyFilter() {
+            document.getElementById('filterDutyName').value = 'ALL';
+            document.getElementById('filterDutyDate').value = '';
+            document.getElementById('filterDutyStatus').value = 'ALL';
+            loadDutyApprovals();
+        }
+
+        function loadDutyApprovals() {
+            const container = document.getElementById('dutyApprovalList');
+            const filterName = document.getElementById('filterDutyName').value;
+            const filterDate = document.getElementById('filterDutyDate').value;
+            const filterStatus = document.getElementById('filterDutyStatus').value;
+            container.innerHTML = '';
+
+            let records = JSON.parse(localStorage.getItem('pdab_records')) || [];
+            let filtered = [];
+
+            records.forEach((r, idx) => {
+                if (r.type === 'Duty') {
+                    let status = r.status || 'Menunggu';
+                    let dutyDateVal = r.date || '';
+
+                    if (filterName !== 'ALL' && r.name !== filterName) return;
+                    if (filterDate && dutyDateVal !== filterDate) return;
+                    if (filterStatus !== 'ALL' && status !== filterStatus) return;
+                    
+                    filtered.push({ record: r, originalIndex: idx, dutyDate: dutyDateVal });
+                }
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<p class="text-slate-500 text-xs italic text-center py-4">Tiada rekod log duty dijumpai mengikut tapisan.</p>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                let duty = item.record;
+                let idx = item.originalIndex;
+                let status = duty.status || 'Menunggu';
+                let dutyDate = item.dutyDate;
+                let tIn = duty.timeIn || '';
+                let tOut = duty.timeOut || '';
+
+                container.innerHTML += `
+                    <div class="bg-slate-950 border border-slate-800 p-3 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                        <div>
+                            <span class="font-bold text-amber-400">${duty.name}</span>
+                            <p class="text-slate-300 text-xs">Tarikh Duty: ${dutyDate} | Masa: ${tIn} hingga ${tOut}</p>
+                            <p class="text-slate-500 text-[10px]">Hantar pada: ${new Date(duty.timestamp).toLocaleString()}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800">${status}</span>
+                            <button onclick="deleteRecord(${idx})" class="bg-red-600 hover:bg-red-700 text-white px-2.5 py-1 rounded text-[11px] font-bold cursor-pointer">Padam</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function switchLeaveTab(tabName) {
+            currentLeaveTab = tabName;
+            const btnApp = document.getElementById('tabBtnApproved');
+            const btnPen = document.getElementById('tabBtnPending');
+
+            if (tabName === 'approved') {
+                btnApp.className = "flex-1 bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold text-xs py-2 px-4 rounded-lg transition shadow cursor-pointer";
+                btnPen.className = "flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs py-2 px-4 rounded-lg transition shadow cursor-pointer";
+            } else {
+                btnApp.className = "flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs py-2 px-4 rounded-lg transition shadow cursor-pointer";
+                btnPen.className = "flex-1 bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold text-xs py-2 px-4 rounded-lg transition shadow cursor-pointer";
+            }
+            loadLeaveApprovals();
+        }
+
+        function loadLeaveApprovals() {
+            const container = document.getElementById('leaveApprovalList');
+            const filterName = document.getElementById('filterLeaveName').value;
+            container.innerHTML = '';
+
+            let records = JSON.parse(localStorage.getItem('pdab_records')) || [];
+            let filtered = [];
+            
+            records.forEach((r, idx) => {
+                if(r.type === 'Cuti') {
+                    let status = r.status || 'Menunggu';
+                    let isApproved = (status === 'Diluluskan');
+
+                    if (currentLeaveTab === 'approved' && !isApproved) return;
+                    if (currentLeaveTab === 'pending' && isApproved) return;
+                    if (filterName !== 'ALL' && r.name !== filterName) return;
+
+                    filtered.push({ record: r, originalIndex: idx });
+                }
+            });
+
+            if(filtered.length === 0) {
+                let tabDesc = currentLeaveTab === 'approved' ? 'lulus (diluluskan)' : 'belum diluluskan';
+                container.innerHTML = `<p class="text-slate-500 text-xs italic text-center py-4">Tiada permohonan cuti berstatus ${tabDesc} dijumpai.</p>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                let leave = item.record;
+                let idx = item.originalIndex;
+                let status = leave.status || 'Menunggu';
+                let isApproved = (status === 'Diluluskan');
+
+                container.innerHTML += `
+                    <div class="bg-slate-950 border border-slate-800 p-3 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                        <div>
+                            <span class="font-bold text-amber-400">${leave.name}</span>
+                            <p class="text-slate-300 text-xs">Tarikh: ${leave.dateStart} hingga ${leave.dateEnd}</p>
+                            <p class="text-slate-400 text-[11px]">Sebab: ${leave.details}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isApproved ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-amber-950 text-amber-400 border border-amber-800'}">${status}</span>
+                            ${!isApproved ? `<button onclick="approveLeave(${idx})" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded text-[11px] font-bold cursor-pointer">Luluskan</button>` : ''}
+                            <button onclick="deleteRecord(${idx})" class="bg-red-600 hover:bg-red-700 text-white px-2.5 py-1 rounded text-[11px] font-bold cursor-pointer">Padam</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function approveLeave(index) {
+            let records = JSON.parse(localStorage.getItem('pdab_records')) || [];
+            records[index].status = 'Diluluskan';
+            localStorage.setItem('pdab_records', JSON.stringify(records));
+            
+            const recordUpdate = { sheetType: 'UpdateRecordStatus', name: records[index].name, timestamp: records[index].timestamp, status: 'Diluluskan' };
+            const img = new Image();
+            img.src = `${scriptURL}?${new URLSearchParams(recordUpdate).toString()}`;
+
+            loadLeaveApprovals();
+            showHtmlModal('Berjaya', 'Permohonan cuti telah diluluskan dan diselaraskan ke Google Sheets!');
+        }
+
+        function deleteRecord(index) {
+            if(!confirm('Adakah anda pasti mahu memadam rekod ini dari sistem dan Google Sheets?')) return;
+            let records = JSON.parse(localStorage.getItem('pdab_records')) || [];
+            let target = records[index];
+            
+            records.splice(index, 1);
+            localStorage.setItem('pdab_records', JSON.stringify(records));
+
+            if (target) {
+                const delParams = { sheetType: 'DeleteRecord', name: target.name, timestamp: target.timestamp };
+                const img = new Image();
+                img.src = `${scriptURL}?${new URLSearchParams(delParams).toString()}`;
+            }
+
+            fetchAllDataFromGoogleSheet();
+            showHtmlModal('Berjaya', 'Rekod berjaya dipadam.');
+        }
+
+        function loadFines() {
+            const fYear = parseInt(document.getElementById('fineYear').value);
+            const fMonth = document.getElementById('fineMonth').value;
+            const tbody = document.getElementById('fineTableBody');
+            tbody.innerHTML = '';
+
+            let staffList = JSON.parse(localStorage.getItem('pdab_staff_list')) || [];
+            let records = JSON.parse(localStorage.getItem('pdab_records')) || [];
+            let exemptions = JSON.parse(localStorage.getItem('pdab_exemptions')) || [];
+            let finePayments = JSON.parse(localStorage.getItem('pdab_fine_payments')) || {}; 
+
+            let namesSet = new Set();
+            staffList.forEach(s => namesSet.add(s.name));
+            records.forEach(r => namesSet.add(r.name));
+            let allNames = Array.from(namesSet);
+
+            let daysInMonth = new Date(fYear, parseInt(fMonth), 0).getDate();
+            let totalDefaulters = 0;
+
+            const now = new Date();
+            const currentFormattedDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+            const currentHour = now.getHours();
+
+            allNames.forEach(name => {
+                if (exemptions.includes(name)) return;
+
+                let missingDates = [];
+
+                for (let d = 1; d <= daysInMonth; d++) {
+                    let dayStr = String(d).padStart(2, '0');
+                    let targetDateFull = `${fYear}-${fMonth}-${dayStr}`;
+
+                    if (targetDateFull < '2026-10-01') continue;
+
+                    if (targetDateFull === currentFormattedDate && currentHour < 21) {
+                        continue; 
+                    }
+
+                    if (targetDateFull > currentFormattedDate) {
+                        continue;
+                    }
+
+                    let hasDuty = records.some(r => r.name === name && r.type === 'Duty' && r.date === targetDateFull);
+                    let hasApprovedLeave = records.some(r => r.name === name && r.type === 'Cuti' && r.status === 'Diluluskan' && targetDateFull >= r.dateStart && targetDateFull <= r.dateEnd);
+
+                    if (!hasDuty && !hasApprovedLeave) {
+                        missingDates.push(targetDateFull);
+                    }
+                }
+
+                if (missingDates.length > 0) {
+                    totalDefaulters++;
+                    let fineKey = `${fYear}-${fMonth}-${name}`;
+                    let currentMissingCount = missingDates.length;
+                    let totalFineAmount = currentMissingCount * 1000;
+
+                    let paymentRecord = finePayments[fineKey];
+                    let isPaid = paymentRecord && currentMissingCount <= paymentRecord.paidDatesCount;
+
+                    let statusBadge = isPaid 
+                        ? `<span class="bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded text-[10px] font-bold">Lunas (Sync GS)</span>` 
+                        : `<span class="bg-red-950 text-red-400 border border-red-800 px-2 py-0.5 rounded text-[10px] font-bold">Belum Selesai</span>`;
+
+                    let actionBtn = isPaid
+                        ? `<button onclick="toggleFinePayment('${fineKey}', false, ${currentMissingCount})" class="bg-slate-700 hover:bg-slate-600 text-white px-2 py-1 rounded text-[10px] font-bold cursor-pointer">Ubah ke Belum</button>`
+                        : `<button onclick="toggleFinePayment('${fineKey}', true, ${currentMissingCount})" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1 rounded text-[10px] font-bold cursor-pointer">Bayar / Lunas</button>`;
+
+                    let missingJson = encodeURIComponent(JSON.stringify(missingDates));
+
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-800/50">
+                            <td class="p-2.5 font-medium text-white">${name}</td>
+                            <td class="p-2.5 text-amber-400 font-bold">${currentMissingCount} Hari</td>
+                            <td class="p-2.5 text-red-300 font-bold">RM ${totalFineAmount.toLocaleString()}</td>
+                            <td class="p-2.5">${statusBadge}</td>
+                            <td class="p-2.5 text-right space-x-2">
+                                <button onclick="showAlphaDates('${name}', '${missingJson}')" class="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded text-[10px] font-bold cursor-pointer">Semak Tarikh</button>
+                                ${actionBtn}
+                            </td>
+                        </tr>
+                    `;
+                }
+            });
+
+            if (totalDefaulters === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-500 italic">Tiada denda dikesan bermula dari 1 Oktober 2026 (Selepas Jam 9 Malam).</td></tr>`;
+            }
+        }
+
+        function toggleFinePayment(fineKey, payStatus, count) {
+            let finePayments = JSON.parse(localStorage.getItem('pdab_fine_payments')) || {};
+            if (payStatus) {
+                finePayments[fineKey] = { paidDatesCount: count };
+            } else {
+                delete finePayments[fineKey];
+            }
+            localStorage.setItem('pdab_fine_payments', JSON.stringify(finePayments));
+            syncFinePaymentsToGoogleSheet();
+            loadFines();
+            showHtmlModal('Berjaya', 'Status bayaran denda berjaya dikemas kini dan diselaraskan ke Google Sheets!');
+        }
+
+        function showAlphaDates(name, encodedJson) {
+            let dates = JSON.parse(decodeURIComponent(encodedJson));
+            document.getElementById('modalTitle').innerText = `Senarai Tarikh Alpha (Mula 1 Okt): ${name}`;
+            let listEl = document.getElementById('alphaDatesList');
+            listEl.innerHTML = '';
+
+            dates.forEach(dt => {
+                listEl.innerHTML += `<div class="p-1.5 bg-slate-900 border border-slate-800 rounded flex justify-between"><span>❌ Alpha (Denda RM1,000)</span> <strong class="text-amber-400">${dt}</strong></div>`;
+            });
+
+            document.getElementById('alphaModal').classList.remove('hidden');
+        }
+
+        function closeAlphaModal() {
+            document.getElementById('alphaModal').classList.add('hidden');
+        }
+
+        function updateExemptStaffDropdown() {
+            const selectEl = document.getElementById('exemptName');
+            if(!selectEl) return;
+            selectEl.innerHTML = `<option value="">-- Pilih Anggota Berdaftar --</option>`;
+            
+            let staffList = JSON.parse(localStorage.getItem('pdab_staff_list')) || [];
+            staffList.forEach(s => {
+                selectEl.innerHTML += `<option value="${s.name}">${s.name} (${s.badge})</option>`;
+            });
+        }
+
+        function addExemption(e) {
+            e.preventDefault();
+            const name = document.getElementById('exemptName').value.trim();
+            if(!name) return;
+
+            let list = JSON.parse(localStorage.getItem('pdab_exemptions')) || [];
+            if(!list.includes(name)) {
+                list.push(name);
+                localStorage.setItem('pdab_exemptions', JSON.stringify(list));
+                syncExemptionsToGoogleSheet();
+            }
+            document.getElementById('exemptName').value = '';
+            loadExemptions();
+            loadFines();
+            showHtmlModal('Berjaya', 'Pengecualian berjaya ditambah dan diselaraskan!');
+        }
+
+        function loadExemptions() {
+            const tbody = document.getElementById('exemptTableBody');
+            tbody.innerHTML = '';
+            let list = JSON.parse(localStorage.getItem('pdab_exemptions')) || [];
+
+            if(list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="2" class="p-4 text-center text-slate-500 italic">Tiada senarai pengecualian.</td></tr>`;
+                return;
+            }
+
+            list.forEach((name, idx) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="p-2.5 text-white font-medium">${name}</td>
+                        <td class="p-2.5 text-right"><button onclick="removeExempt(${idx})" class="text-red-400 hover:text-red-300 text-xs cursor-pointer">Buang</button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function removeExempt(idx) {
+            let list = JSON.parse(localStorage.getItem('pdab_exemptions')) || [];
+            list.splice(idx, 1);
+            localStorage.setItem('pdab_exemptions', JSON.stringify(list));
+            syncExemptionsToGoogleSheet();
+            loadExemptions();
+            loadFines();
+        }
+
+        function addStaff(e) {
+            e.preventDefault();
+            const name = document.getElementById('staffName').value.trim();
+            const badge = document.getElementById('staffBadge').value.trim();
+            let pass = document.getElementById('staffPass').value.trim();
+
+            if (!pass) pass = badge;
+
+            const staff = { name, badge, pass };
+
+            let staffList = JSON.parse(localStorage.getItem('pdab_staff_list')) || [];
+            staffList.push(staff);
+            localStorage.setItem('pdab_staff_list', JSON.stringify(staffList));
+
+            syncStaffToGoogleSheet();
+
+            document.getElementById('staffName').value = '';
+            document.getElementById('staffBadge').value = '';
+            document.getElementById('staffPass').value = '';
+            loadLocalDataFallback();
+            showHtmlModal('Berjaya', 'Staff berjaya didaftarkan dan diselaraskan ke Google Sheets.');
+        }
+
+        function loadStaff() {
+            const tbody = document.getElementById('staffTableBody');
+            tbody.innerHTML = '';
+            let staffList = JSON.parse(localStorage.getItem('pdab_staff_list')) || [];
+
+            if(staffList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-500 italic">Tiada staff didaftarkan.</td></tr>`;
+                return;
+            }
+
+            staffList.forEach((s, idx) => {
+                let realPass = s.pass || s.badge;
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="p-2.5 text-white font-medium">${s.name}</td>
+                        <td class="p-2.5 text-slate-300">${s.badge}</td>
+                        <td class="p-2.5 text-amber-300 font-mono">
+                            <span id="pass-mask-${idx}">••••••••</span>
+                            <span id="pass-real-${idx}" class="hidden">${realPass}</span>
+                            <button onclick="toggleStaffPassword(${idx})" id="btn-toggle-${idx}" class="ml-2 bg-slate-800 hover:bg-slate-700 text-amber-400 px-2 py-0.5 rounded text-[10px] font-bold cursor-pointer">Lihat</button>
+                        </td>
+                        <td class="p-2.5 text-right"><button onclick="removeStaff(${idx})" class="text-red-400 hover:text-red-300 text-xs cursor-pointer">Buang</button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function toggleStaffPassword(idx) {
+            let maskEl = document.getElementById(`pass-mask-${idx}`);
+            let realEl = document.getElementById(`pass-real-${idx}`);
+            let btnEl = document.getElementById(`btn-toggle-${idx}`);
+
+            if (maskEl.classList.contains('hidden')) {
+                maskEl.classList.remove('hidden');
+                realEl.classList.add('hidden');
+                btnEl.innerText = 'Lihat';
+            } else {
+                maskEl.classList.add('hidden');
+                realEl.classList.remove('hidden');
+                btnEl.innerText = 'Sembunyi';
+            }
+        }
+
+        function removeStaff(idx) {
+            let staffList = JSON.parse(localStorage.getItem('pdab_staff_list')) || [];
+            staffList.splice(idx, 1);
+            localStorage.setItem('pdab_staff_list', JSON.stringify(staffList));
+            syncStaffToGoogleSheet();
+            loadLocalDataFallback();
+        }
+    </script>
+</body>
+</html>

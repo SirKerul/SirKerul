@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=ai-legible&utm_source=comment&utm_medium=referral&utm_id=918df9c2-aaa3-41a8-9102-7dea843b00b3
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+<meta name="hosting-provider" content="Netlify">
+<meta name="netlify-deploy" content="https://netlify.new/?utm_campaign=ai-legible&amp;utm_source=meta&amp;utm_medium=referral&amp;utm_id=918df9c2-aaa3-41a8-9102-7dea843b00b3">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem PDAB Mobile</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        /* Animasi infinite loop murni untuk 13 gambar */
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            3.8% { opacity: 1; }
+            7.69% { opacity: 1; }
+            11.49% { opacity: 0; }
+            100% { opacity: 0; }
+        }
+        
+        .bg-animated { 
+            position: absolute; 
+            inset: 0; 
+            background-size: cover; 
+            background-position: center; 
+            background-repeat: no-repeat; 
+            opacity: 0;
+            animation: fadeInOut 65s infinite;
+        }
+
+        /* Susunan masa berterusan (5 saat setiap satu gambar tanpa jeda stuck) */
+        .bg-slide-1  { background-image: url('PDABBG.png'); animation-delay: 0s; }
+        .bg-slide-2  { background-image: url('PDABBG2.png'); animation-delay: 5s; }
+        .bg-slide-3  { background-image: url('PDABBG3.png'); animation-delay: 10s; }
+        .bg-slide-4  { background-image: url('PDABBG4.png'); animation-delay: 15s; }
+        .bg-slide-5  { background-image: url('PDABBG5.png'); animation-delay: 20s; }
+        .bg-slide-6  { background-image: url('PDABBG6.png'); animation-delay: 25s; }
+        .bg-slide-7  { background-image: url('PDABBG7.png'); animation-delay: 30s; }
+        .bg-slide-8  { background-image: url('PDABBG8.png'); animation-delay: 35s; }
+        .bg-slide-9  { background-image: url('PDABBG9.png'); animation-delay: 40s; }
+        .bg-slide-10 { background-image: url('PDABBG10.png'); animation-delay: 45s; }
+        .bg-slide-11 { background-image: url('PDABBG11.png'); animation-delay: 50s; }
+        .bg-slide-12 { background-image: url('PDABBG12.png'); animation-delay: 55s; }
+        .bg-slide-13 { background-image: url('PDABBG13.png'); animation-delay: 60s; }
+        
+        .card-bg { background-image: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), url('PDABBG.png'); background-size: cover; background-position: center; }
+
+        @keyframes spinSlow {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+            animation: spinSlow 6s linear infinite;
+        }
+        @keyframes wavePulse {
+            0%, 100% { height: 6px; }
+            50% { height: 18px; }
+        }
+        .wave-bar-1 { animation: wavePulse 0.8s ease-in-out infinite; }
+        .wave-bar-2 { animation: wavePulse 0.5s ease-in-out infinite; animation-delay: 0.2s; }
+        .wave-bar-3 { animation: wavePulse 0.7s ease-in-out infinite; animation-delay: 0.4s; }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="relative min-h-screen flex items-center justify-center overflow-x-hidden font-sans text-white pb-20 py-6">
+
+    <!-- ELEMEN AUDIO SPOTIFY PLAYER -->
+    <audio id="bg-audio" preload="auto"></audio>
+
+    <!-- 13 Slaid Background Berurutan -->
+    <div class="bg-animated bg-slide-1 -z-30"></div>
+    <div class="bg-animated bg-slide-2 -z-30"></div>
+    <div class="bg-animated bg-slide-3 -z-30"></div>
+    <div class="bg-animated bg-slide-4 -z-30"></div>
+    <div class="bg-animated bg-slide-5 -z-30"></div>
+    <div class="bg-animated bg-slide-6 -z-30"></div>
+    <div class="bg-animated bg-slide-7 -z-30"></div>
+    <div class="bg-animated bg-slide-8 -z-30"></div>
+    <div class="bg-animated bg-slide-9 -z-30"></div>
+    <div class="bg-animated bg-slide-10 -z-30"></div>
+    <div class="bg-animated bg-slide-11 -z-30"></div>
+    <div class="bg-animated bg-slide-12 -z-30"></div>
+    <div class="bg-animated bg-slide-13 -z-30"></div>
+    <div class="absolute inset-0 bg-black/50 -z-20"></div>
+
+    <!-- Layout Utama Bersebelahan (Menu Kiri, Gallery Video Kanan) -->
+    <div class="flex flex-col lg:flex-row items-center justify-center gap-6 w-full max-w-5xl mx-4 relative z-10">
+        
+        <!-- KOTAK UTAMA SISTEM (KIRI) -->
+        <div class="card-bg border border-white/25 backdrop-blur-md p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-md transition-all duration-300 relative">
+            
+            <div class="text-center mb-5">
+                <img src="PDAB.png" alt="Logo PDAB" class="w-20 h-20 mx-auto mb-2 object-contain drop-shadow-md hover:scale-105 transition-transform duration-300" onerror="this.src='https://via.placeholder.com/96?text=PDAB'">
+                <h1 class="text-2xl font-bold tracking-wide">PDAB MOBILE</h1>
+                <p id="sub-title" class="text-xs text-gray-300">Sila pilih kategori pengguna anda</p>
+            </div>
+
+            <!-- VIEW MAIN -->
+            <div id="view-main" class="space-y-3">
+                <button onclick="selectRole('Anggota')" class="w-full bg-blue-600/90 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-xl shadow-lg border border-blue-400/30 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-blue-500/25 active:scale-95 cursor-pointer">Anggota</button>
+                <button onclick="selectRole('Pulapol')" class="w-full bg-indigo-600/90 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-xl shadow-lg border border-indigo-400/30 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-indigo-500/25 active:scale-95 cursor-pointer">Pulapol</button>
+                <button onclick="selectRole('Rakyat')" class="w-full bg-emerald-600/90 hover:bg-emerald-700 text-white font-semibold py-3 px-4 rounded-xl shadow-lg border border-emerald-400/30 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-emerald-500/25 active:scale-95 cursor-pointer">Rakyat</button>
+            </div>
+
+            <!-- VIEW FORM (ANGGOTA & PULAPOL) -->
+            <div id="view-form" class="hidden space-y-4">
+                <button onclick="backToMain()" class="text-xs text-blue-300 hover:text-white flex items-center gap-1 font-medium mb-1 transition-all duration-200 hover:translate-x-[-2px]">← Kembali ke Pilihan Peranan</button>
+
+                <div id="form-login" class="space-y-3">
+                    <div id="login-note" class="bg-blue-900/60 border-l-4 border-blue-400 p-2.5 text-xs text-blue-200 rounded backdrop-blur-sm leading-relaxed">
+                        <strong>Nota:</strong> Sila pilih nama anda dari senarai. Kata laluan adalah <strong>Nombor Badan</strong> anda.
+                    </div>
+                    <div>
+                        <label id="label-select-name" class="block text-xs font-medium text-gray-200 mb-1">Pilih Nama</label>
+                        <select id="selectUsername" class="w-full px-3 py-2 bg-black/60 border border-white/20 rounded-xl text-xs text-white outline-none focus:ring-2 focus:ring-blue-400 transition">
+                            <option value="" disabled selected>-- Sila pilih nama anda --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-200 mb-1">Password (No. Badan / Kata Laluan Baharu)</label>
+                        <input type="password" id="password" class="w-full px-3 py-2 bg-black/40 border border-white/20 rounded-xl text-xs text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-400 outline-none transition" placeholder="Masukkan password">
+                    </div>
+                    <p id="error-msg" class="text-red-400 text-xs hidden font-medium">Sila pilih nama dan masukkan password yang sah!</p>
+                    <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl shadow transition-all duration-300 transform hover:scale-[1.02] active:scale-95 text-xs cursor-pointer">Log Masuk</button>
+                </div>
+            </div>
+
+            <!-- VIEW RAKYAT -->
+            <div id="view-rakyat" class="hidden space-y-4">
+                <button onclick="backToMain()" class="text-xs text-emerald-300 hover:text-white flex items-center gap-1 font-medium mb-1 transition-all duration-200 hover:translate-x-[-2px]">← Kembali ke Pilihan Peranan</button>
+
+                <div id="rakyat-register-box" class="space-y-3 hidden">
+                    <div class="bg-emerald-900/60 border-l-4 border-emerald-400 p-2.5 text-xs text-emerald-200 rounded backdrop-blur-sm leading-relaxed">
+                        <strong>Pendaftaran Rakyat:</strong> Sila daftar akaun In-Character (IC) anda. Amaran: <strong>1 Peranti hanya dibenarkan 1 Akaun sahaja!</strong>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-200 mb-1">Nama In-Character (IC)</label>
+                        <input type="text" id="rakyat-reg-name" class="w-full px-3 py-2 bg-black/40 border border-white/20 rounded-xl text-xs text-white placeholder-gray-400 focus:ring-2 focus:ring-emerald-400 outline-none transition" placeholder="Contoh: Ali bin Abu">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-200 mb-1">Kata Laluan Baharu</label>
+                        <input type="password" id="rakyat-reg-pass" class="w-full px-3 py-2 bg-black/40 border border-white/20 rounded-xl text-xs text-white placeholder-gray-400 focus:ring-2 focus:ring-emerald-400 outline-none transition" placeholder="Cipta password">
+                    </div>
+                    <p id="rakyat-reg-error" class="text-red-400 text-xs hidden font-medium"></p>
+                    <button onclick="handleRakyatRegister()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl shadow transition-all duration-300 transform hover:scale-[1.02] active:scale-95 text-xs cursor-pointer">Daftar Akaun Sekarang</button>
+                </div>
+
+                <div id="rakyat-login-box" class="space-y-3 hidden">
+                    <div class="bg-emerald-900/60 border-l-4 border-emerald-400 p-2.5 text-xs text-emerald-200 rounded backdrop-blur-sm leading-relaxed">
+                        <strong>Log Masuk Rakyat:</strong> Peranti ini telah dikunci pada akaun: <span id="registered-device-name" class="font-bold text-white underline"></span>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-200 mb-1">Masukkan Kata Laluan Anda</label>
+                        <input type="password" id="rakyat-login-pass" class="w-full px-3 py-2 bg-black/40 border border-white/20 rounded-xl text-xs text-white placeholder-gray-400 focus:ring-2 focus:ring-emerald-400 outline-none transition" placeholder="Password anda">
+                    </div>
+                    <p id="rakyat-login-error" class="text-red-400 text-xs hidden font-medium"></p>
+                    <button onclick="handleRakyatLogin()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl shadow transition-all duration-300 transform hover:scale-[1.02] active:scale-95 text-xs cursor-pointer">Log Masuk</button>
+                </div>
+            </div>
+
+            <!-- VIEW DASHBOARD (ANGGOTA) -->
+            <div id="view-dashboard" class="hidden space-y-3">
+                <div class="flex justify-between items-center border-b border-white/20 pb-2.5 mb-1">
+                    <div>
+                        <span class="text-[10px] text-gray-400 block">Status: Berjaya Log Masuk</span>
+                        <span id="user-badge" class="font-bold text-blue-300 text-xs"></span>
+                    </div>
+                    <div class="flex gap-1.5">
+                        <button onclick="openChangePasswordModal()" id="btn-change-pass" class="text-[11px] bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 border border-amber-500/30 px-2 py-1 rounded-lg font-medium transition cursor-pointer">Tukar Pass</button>
+                        <button onclick="logout()" class="text-[11px] bg-red-500/20 hover:bg-red-500/40 text-red-300 border border-red-500/30 px-2 py-1 rounded-lg font-medium transition cursor-pointer">Log Keluar</button>
+                    </div>
+                </div>
+
+                <p class="text-xs text-gray-300 mb-1">Sila pilih modul operasi:</p>
+
+                <div class="grid grid-cols-2 gap-2.5">
+                    <button onclick="openMenu('CutidanDuty.html', false)" class="p-3 bg-black/40 hover:bg-blue-900/50 border border-white/10 hover:border-blue-400/80 rounded-xl text-left transition-all duration-300 transform hover:scale-[1.03] hover:shadow-lg active:scale-95 group cursor-pointer">
+                        <span class="block font-semibold text-white group-hover:text-blue-300 text-xs transition-colors">Cuti & Duty</span>
+                        <span class="text-[10px] text-gray-400">Modul Utama</span>
+                    </button>
+                    <button onclick="openMenu('PengurusanPDAB.html', true)" class="p-3 bg-black/40 hover:bg-blue-900/50 border border-white/10 hover:border-blue-400/80 rounded-xl text-left transition-all duration-300 transform hover:scale-[1.03] hover:shadow-lg active:scale-95 group cursor-pointer">
+                        <span class="block font-semibold text-white group-hover:text-blue-300 text-xs transition-colors">Pihak Pengurusan</span>
+                        <span class="text-[10px] text-gray-400">Pengurusan Sahaja 🔒</span>
+                    </button>
+                    <button onclick="openMenu('PDAB SENJATA.html', true)" class="p-3 bg-black/40 hover:bg-blue-900/50 border border-white/10 hover:border-blue-400/80 rounded-xl text-left transition-all duration-300 transform hover:scale-[1.03] hover:shadow-lg active:scale-95 group cursor-pointer">
+                        <span class="block font-semibold text-white group-hover:text-blue-300 text-xs transition-colors">Bekalan PDAB</span>
+                        <span class="text-[10px] text-gray-400">Pengurusan Sahaja 🔒</span>
+                    </button>
+                    <button onclick="openMenu('Report PDAB.html', false)" class="p-3 bg-black/40 hover:bg-blue-900/50 border border-white/10 hover:border-blue-400/80 rounded-xl text-left transition-all duration-300 transform hover:scale-[1.03] hover:shadow-lg active:scale-95 group cursor-pointer">
+                        <span class="block font-semibold text-white group-hover:text-blue-300 text-xs transition-colors">Report PDAB</span>
+                        <span class="text-[10px] text-gray-400">Modul Laporan</span>
+                    </button>
+                </div>
+
+                <!-- Sub-Menu Tambahan untuk Games.html di Bahagian Anggota -->
+                <div class="grid grid-cols-1">
+                    <button onclick="openMenu('Games.html', false)" class="w-full p-3 bg-black/40 hover:bg-blue-900/50 border border-white/10 hover:border-blue-400/80 rounded-xl text-left transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg active:scale-95 group cursor-pointer">
+                        <span class="block font-semibold text-white group-hover:text-blue-300 text-xs transition-colors">🎮 Games</span>
+                        <span class="text-[10px] text-gray-400">Modul Permainan Anggota</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- VIEW DASHBOARD RAKYAT -->
+            <div id="view-dashboard-rakyat" class="hidden space-y-3">
+                <div class="flex justify-between items-center border-b border-white/20 pb-2.5 mb-1">
+                    <div>
+                        <span class="text-[10px] text-gray-400 block">Status: Berjaya Log Masuk (Rakyat)</span>
+                        <span id="rakyat-user-badge" class="font-bold text-emerald-300 text-xs"></span>
+                    </div>
+                    <div class="flex gap-1.5">
+                        <button onclick="openChangePasswordModal()" class="text-[11px] bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 border border-amber-500/30 px-2 py-1 rounded-lg font-medium transition cursor-pointer">Tukar Pass</button>
+                        <button onclick="logout()" class="text-[11px] bg-red-500/20 hover:bg-red-500/40 text-red-300 border border-red-500/30 px-2 py-1 rounded-lg font-medium transition cursor-pointer">Log Keluar</button>
+                    </div>
+                </div>
+
+                <p class="text-xs text-gray-300 mb-1">Sila pilih perkhidmatan Rakyat:</p>
+
+                <div class="grid grid-cols-2 gap-2.5 max-h-72 overflow-y-auto pr-1">
+                    <button onclick="openMenu('AduanSalahLaku.html', false)" class="p-3 bg-black/40 hover:bg-emerald-900/50 border border-white/10 hover:border-emerald-400/80 rounded-xl text-left transition-all duration-300 transform hover:scale-[1.03] hover:shadow-lg active:scale-95 group cursor-pointer">
+                        <span class="block font-semibold text-white group-hover:text-emerald-300 text-xs transition-colors">Aduan Salah Laku Anggota</span>
+                        <span class="text-[10px] text-gray-400">Salurkan aduan rasmi</span>
+                    </button>
+                    
+                    <button onclick="openMenu('ResumeDaftar.html', false)" class="p-3 bg-black/40 hover:bg-emerald-900/50 border border-white/10 hover:border-emerald-400/80 rounded-xl text-left transition-all duration-300 transform hover:scale-[1.03] hover:shadow-lg active:scale-95 group cursor-pointer">
+                        <span class="block font-semibold text-white group-hover:text-emerald-300 text-xs transition-colors">Resume Daftar</span>
+                        <span class="text-[10px] text-gray-400">Hantar resume permohonan</span>
+                    </button>
+
+                    <button onclick="openMenu('UnitPDAB.html', false)" class="p-3 bg-black/40 hover:bg-emerald-900/50 border border-white/10 hover:border-emerald-400/80 rounded-xl text-left transition-all duration-300 transform hover:scale-[1.03] hover:shadow-lg active:scale-95 group cursor-pointer">
+                        <span class="block font-semibold text-white group-hover:text-emerald-300 text-xs transition-colors">Unit PDAB</span>
+                        <span class="text-[10px] text-gray-400">Maklumat jabatan</span>
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1">
+                    <button onclick="openMenu('PengurusanDalamanRakyat.html', true)" class="w-full p-3 bg-black/40 hover:bg-emerald-900/50 border border-white/10 hover:border-emerald-400/80 rounded-xl text-left transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg active:scale-95 group cursor-pointer">
+                        <span class="block font-semibold text-white group-hover:text-emerald-300 text-xs transition-colors">Pengurusan Dalaman Rakyat</span>
+                        <span class="text-[10px] text-gray-400">Portal urusan dalaman 🔒</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- VIEW DASHBOARD PULAPOL -->
+            <div id="view-dashboard-pulapol" class="hidden space-y-3">
+                <div class="flex justify-between items-center border-b border-white/20 pb-2.5 mb-1">
+                    <div>
+                        <span class="text-[10px] text-gray-400 block">Status: Berjaya Log Masuk (Pulapol)</span>
+                        <span id="pulapol-user-badge" class="font-bold text-indigo-300 text-xs"></span>
+                    </div>
+                    <div class="flex gap-1.5">
+                        <button onclick="openChangePasswordModal()" class="text-[11px] bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 border border-amber-500/30 px-2 py-1 rounded-lg font-medium transition cursor-pointer">Tukar Pass</button>
+                        <button onclick="logout()" class="text-[11px] bg-red-500/20 hover:bg-red-500/40 text-red-300 border border-red-500/30 px-2 py-1 rounded-lg font-medium transition cursor-pointer">Log Keluar</button>
+                    </div>
+                </div>
+
+                <p class="text-xs text-gray-300 mb-1">Sila pilih modul latihan Pulapol:</p>
+
+                <div class="grid grid-cols-2 gap-2.5">
+                    <button onclick="openPulapolSubModules()" class="p-3 bg-black/40 hover:bg-indigo-900/50 border border-white/10 hover:border-indigo-400/80 rounded-xl text-left transition-all duration-300 transform hover:scale-[1.03] hover:shadow-lg active:scale-95 group cursor-pointer">
+                        <span class="block font-semibold text-white group-hover:text-indigo-300 text-xs transition-colors">Module Pulapol</span>
+                        <span class="text-[10px] text-gray-400">7 Sub-Modul</span>
+                    </button>
+                    <button onclick="openMenu('AJKPulapol.html', false)" class="p-3 bg-black/40 hover:bg-indigo-900/50 border border-white/10 hover:border-indigo-400/80 rounded-xl text-left transition-all duration-300 transform hover:scale-[1.03] hover:shadow-lg active:scale-95 group cursor-pointer">
+                        <span class="block font-semibold text-white group-hover:text-indigo-300 text-xs transition-colors">AJK</span>
+                        <span class="text-[10px] text-gray-400">Senarai AJK</span>
+                    </button>
+                    <button onclick="openMenu('pengurusan_pulapol_menu', true)" class="p-3 bg-black/40 hover:bg-indigo-900/50 border border-white/10 hover:border-indigo-400/80 rounded-xl text-left transition-all duration-300 transform hover:scale-[1.03] hover:shadow-lg active:scale-95 group cursor-pointer">
+                        <span class="block font-semibold text-white group-hover:text-indigo-300 text-xs transition-colors">Pengurusan Pulapol</span>
+                        <span class="text-[10px] text-gray-400">Pengurusan Sahaja 🔒</span>
+                    </button>
+                    <button onclick="openMenu('KehadiranPulapol.html', false)" class="p-3 bg-black/40 hover:bg-indigo-900/50 border border-white/10 hover:border-indigo-400/80 rounded-xl text-left transition-all duration-300 transform hover:scale-[1.03] hover:shadow-lg active:scale-95 group cursor-pointer">
+                        <span class="block font-semibold text-white group-hover:text-indigo-300 text-xs transition-colors">Kehadiran Pulapol</span>
+                        <span class="text-[10px] text-gray-400">Log Kehadiran</span>
+                    </button>
+                </div>
+                <div class="grid grid-cols-1">
+                    <button onclick="openMenu('CutiPulapol.html', false)" class="w-full p-3 bg-black/40 hover:bg-indigo-900/50 border border-white/10 hover:border-indigo-400/80 rounded-xl text-left transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg active:scale-95 group cursor-pointer">
+                        <span class="block font-semibold text-white group-hover:text-indigo-300 text-xs transition-colors">Cuti Pulapol</span>
+                        <span class="text-[10px] text-gray-400">Permohonan & Rekod Cuti</span>
+                    </button>
+                </div>
+                <div class="w-full">
+                    <button onclick="openMenu('LatihanReport.html', false)" class="w-full p-3 bg-black/40 hover:bg-indigo-900/50 border border-white/10 hover:border-indigo-400/80 rounded-xl text-left transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg active:scale-95 group cursor-pointer">
+                        <span class="block font-semibold text-white group-hover:text-indigo-300 text-xs transition-colors">Latihan Report</span>
+                        <span class="text-[10px] text-gray-400">Laporan Aktiviti Latihan</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- VIEW SUB-MODUL PULAPOL -->
+            <div id="view-pulapol-submodules" class="hidden space-y-3">
+                <div class="flex items-center justify-between border-b border-white/20 pb-2 mb-1">
+                    <button onclick="backToPulapolDashboard()" class="text-xs text-indigo-300 hover:text-white font-medium flex items-center gap-1 transition-all duration-200 hover:translate-x-[-2px]">← Kembali ke Menu Utama</button>
+                    <span class="text-xs font-bold text-amber-400">7 Sub-Modul Pulapol</span>
+                </div>
+
+                <p class="text-xs text-gray-300 mb-1">Sila pilih modul pembelajaran:</p>
+
+                <div class="space-y-2 max-h-64 overflow-y-auto pr-1">
+                    <button onclick="openModulePage('D6JSPT.html')" class="w-full p-2.5 bg-black/50 hover:bg-indigo-900/60 border border-white/10 hover:border-indigo-400 rounded-xl text-left transition-all duration-300 transform hover:translate-x-1 flex items-center justify-between cursor-pointer">
+                        <span class="text-xs font-semibold text-white">1. D6 JSPT</span>
+                        <span class="text-[10px] text-gray-400">Buka →</span>
+                    </button>
+                    <button onclick="openModulePage('D7JSJN.html')" class="w-full p-2.5 bg-black/50 hover:bg-indigo-900/60 border border-white/10 hover:border-indigo-400 rounded-xl text-left transition-all duration-300 transform hover:translate-x-1 flex items-center justify-between cursor-pointer">
+                        <span class="text-xs font-semibold text-white">2. D7 JSJN</span>
+                        <span class="text-[10px] text-gray-400">Buka →</span>
+                    </button>
+                    <button onclick="openModulePage('D9JSJ.html')" class="w-full p-2.5 bg-black/50 hover:bg-indigo-900/60 border border-white/10 hover:border-indigo-400 rounded-xl text-left transition-all duration-300 transform hover:translate-x-1 flex items-center justify-between cursor-pointer">
+                        <span class="text-xs font-semibold text-white">3. D9 JSJ</span>
+                        <span class="text-[10px] text-gray-400">Buka →</span>
+                    </button>
+                    <button onclick="openModulePage('ModulWalkieGirn.html')" class="w-full p-2.5 bg-black/50 hover:bg-indigo-900/60 border border-white/10 hover:border-indigo-400 rounded-xl text-left transition-all duration-300 transform hover:translate-x-1 flex items-center justify-between cursor-pointer">
+                        <span class="text-xs font-semibold text-white">4. Modul Penggunaan Walkie dan Girn</span>
+                        <span class="text-[10px] text-gray-400">Buka →</span>
+                    </button>
+                    <button onclick="openModulePage('PenggunaanWalkieGirn.html')" class="w-full p-2.5 bg-black/50 hover:bg-indigo-900/60 border border-white/10 hover:border-indigo-400 rounded-xl text-left transition-all duration-300 transform hover:translate-x-1 flex items-center justify-between cursor-pointer">
+                        <span class="text-xs font-semibold text-white">5. Penggunaan Walkie dan Girn</span>
+                        <span class="text-[10px] text-gray-400">Buka →</span>
+                    </button>
+                    <button onclick="openModulePage('PengenalanAsasPDAB.html')" class="w-full p-2.5 bg-black/50 hover:bg-indigo-900/60 border border-white/10 hover:border-indigo-400 rounded-xl text-left transition-all duration-300 transform hover:translate-x-1 flex items-center justify-between cursor-pointer">
+                        <span class="text-xs font-semibold text-white">6. Pengenalan Asas PDAB</span>
+                        <span class="text-[10px] text-gray-400">Buka →</span>
+                    </button>
+                    <button onclick="openModulePage('LaguPDAB.html')" class="w-full p-2.5 bg-black/50 hover:bg-indigo-900/60 border border-white/10 hover:border-indigo-400 rounded-xl text-left transition-all duration-300 transform hover:translate-x-1 flex items-center justify-between cursor-pointer">
+                        <span class="text-xs font-semibold text-white">7. Lagu PDAB</span>
+                        <span class="text-[10px] text-gray-400">Buka →</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- VIEW PENGURUSAN PULAPOL MENU -->
+            <div id="view-pengurusan-pulapol-menu" class="hidden space-y-3">
+                <div class="flex items-center justify-between border-b border-white/20 pb-2 mb-1">
+                    <button onclick="backToPulapolDashboard()" class="text-xs text-indigo-300 hover:text-white font-medium flex items-center gap-1 transition-all duration-200 hover:translate-x-[-2px]">← Kembali ke Menu Utama</button>
+                    <span class="text-xs font-bold text-amber-400">Pengurusan Pulapol</span>
+                </div>
+
+                <p class="text-xs text-gray-300 mb-1">Sila pilih sub-menu pengurusan:</p>
+
+                <div class="space-y-2.5 max-h-64 overflow-y-auto pr-1">
+                    <button onclick="openModulePage('UrusPulapolPelatih.html')" class="w-full p-3 bg-black/50 hover:bg-indigo-900/60 border border-white/10 hover:border-indigo-400 rounded-xl text-left transition-all duration-300 transform hover:translate-x-1 flex items-center justify-between group cursor-pointer">
+                        <div>
+                            <span class="block font-semibold text-white group-hover:text-indigo-300 text-xs">Urus Pulapol dan Pelatih</span>
+                            <span class="text-[10px] text-gray-400">Pengurusan rekod & profil pelatih</span>
+                        </div>
+                        <span class="text-xs text-gray-400">Buka →</span>
+                    </button>
+                    <button onclick="openModulePage('LatihanPulapol.html')" class="w-full p-3 bg-black/50 hover:bg-indigo-900/60 border border-white/10 hover:border-indigo-400 rounded-xl text-left transition-all duration-300 transform hover:translate-x-1 flex items-center justify-between group cursor-pointer">
+                        <div>
+                            <span class="block font-semibold text-white group-hover:text-indigo-300 text-xs">Latihan Pulapol</span>
+                            <span class="text-[10px] text-gray-400">Modul & jadual latihan</span>
+                        </div>
+                        <span class="text-xs text-gray-400">Buka →</span>
+                    </button>
+                    <button onclick="openModulePage('LogKehadiranPulapol.html')" class="w-full p-3 bg-black/50 hover:bg-indigo-900/60 border border-white/10 hover:border-indigo-400 rounded-xl text-left transition-all duration-300 transform hover:translate-x-1 flex items-center justify-between group cursor-pointer">
+                        <div>
+                            <span class="block font-semibold text-white group-hover:text-indigo-300 text-xs">Kehadiran Pulapol</span>
+                            <span class="text-[10px] text-gray-400">Log kehadiran pelatih</span>
+                        </div>
+                        <span class="text-xs text-gray-400">Buka →</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- SPOTIFY PLAYER MINI WIDGET -->
+            <div class="mt-4 pt-2.5 border-t border-white/15 bg-black/50 px-3 py-2.5 rounded-xl backdrop-blur-md shadow-inner space-y-2">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2.5 overflow-hidden">
+                        <div class="relative w-8 h-8 rounded-full bg-slate-900 border border-amber-400/50 flex items-center justify-center shadow-md shrink-0">
+                            <div id="vinyl-disc" class="w-full h-full rounded-full border border-dashed border-amber-500/40 flex items-center justify-center">
+                                <div class="w-2 h-2 bg-amber-400 rounded-full shadow"></div>
+                            </div>
+                        </div>
+                        <div class="truncate">
+                            <div class="flex items-center gap-1.5">
+                                <span id="current-song-title" class="text-xs font-bold text-amber-300 tracking-wide truncate">TopGun.mp3</span>
+                                <div id="audio-waves" class="flex items-end gap-0.5 h-3 opacity-30">
+                                    <span class="w-0.5 bg-emerald-400 rounded-full wave-bar-1"></span>
+                                    <span class="w-0.5 bg-emerald-400 rounded-full wave-bar-2"></span>
+                                    <span class="w-0.5 bg-emerald-400 rounded-full wave-bar-3"></span>
+                                </div>
+                            </div>
+                            <span id="audio-status-text" class="text-[9px] text-gray-400 block truncate">Tekan Play untuk mula</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 shrink-0">
+                        <button onclick="prevSong()" class="text-gray-300 hover:text-white transition text-xs p-1 cursor-pointer" title="Lagu Sebelumnya">⏮</button>
+                        <button onclick="toggleAudioPlay()" id="play-pause-btn" class="w-7 h-7 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 flex items-center justify-center shadow transition font-bold text-xs cursor-pointer">▶</button>
+                        <button onclick="nextSong()" class="text-gray-300 hover:text-white transition text-xs p-1 cursor-pointer" title="Lagu Seterusnya">⏭</button>
+                        
+                        <div class="flex items-center gap-1 bg-black/60 px-1.5 py-1 rounded border border-white/10 ml-1">
+                            <span class="text-[9px] text-gray-400" id="vol-icon">🔊</span>
+                            <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.5" onchange="changeVolume(this.value)" oninput="changeVolume(this.value)" class="w-10 accent-emerald-400 cursor-pointer h-1 bg-gray-700 rounded-lg">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 text-[10px] text-gray-400 font-mono">
+                    <span id="current-time">0:00</span>
+                    <input type="range" id="progress-bar" value="0" max="100" step="0.1" oninput="seekAudio(this.value)" class="w-full accent-emerald-400 cursor-pointer h-1 bg-gray-700 rounded-lg">
+                    <span id="total-duration">0:00</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- KOTAK GALLERY VIDEO DI KANAN -->
+        <div class="card-bg border border-white/25 backdrop-blur-md p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-md transition-all duration-300 relative flex flex-col justify-between">
+            <div class="space-y-3">
+                <div class="flex items-center gap-2 border-b border-white/15 pb-2.5">
+                    <span class="text-xl">🎬</span>
+                    <h3 class="font-bold text-amber-400 text-sm">Gallery Video PDAB</h3>
+                </div>
+
+                <!-- Slider Melintang Video -->
+                <div id="video-slider-container" class="flex overflow-x-auto no-scrollbar snap-x snap-mandatory gap-4 w-full scroll-smooth rounded-xl bg-black/60 p-2 border border-white/10">
+                    <!-- Video 1 -->
+                    <div class="w-full shrink-0 snap-center flex flex-col items-center justify-center">
+                        <video id="vid-0" class="w-full h-44 rounded-lg object-cover bg-black" src="Video.mp4" onended="handleVideoEnded()" ontimeupdate="updateVideoProgress(0)" onplay="updateVideoUI(0)"></video>
+                    </div>
+                    <!-- Video 2 -->
+                    <div class="w-full shrink-0 snap-center flex flex-col items-center justify-center">
+                        <video id="vid-1" class="w-full h-44 rounded-lg object-cover bg-black" src="Video2.mp4" onended="handleVideoEnded()" ontimeupdate="updateVideoProgress(1)" onplay="updateVideoUI(1)"></video>
+                    </div>
+                    <!-- Video 3 -->
+                    <div class="w-full shrink-0 snap-center flex flex-col items-center justify-center">
+                        <video id="vid-2" class="w-full h-44 rounded-lg object-cover bg-black" src="Video3.mp4" onended="handleVideoEnded()" ontimeupdate="updateVideoProgress(2)" onplay="updateVideoUI(2)"></video>
+                    </div>
+                    <!-- Video 4 -->
+                    <div class="w-full shrink-0 snap-center flex flex-col items-center justify-center">
+                        <video id="vid-3" class="w-full h-44 rounded-lg object-cover bg-black" src="Video4.mp4" onended="handleVideoEnded()" ontimeupdate="updateVideoProgress(3)" onplay="updateVideoUI(3)"></video>
+                    </div>
+                </div>
+
+                <!-- Bar Seekbar & Masa Video -->
+                <div class="space-y-1">
+                    <input type="range" id="vid-progress-bar" value="0" max="100" step="0.1" oninput="seekVideo(this.value)" class="w-full accent-amber-400 cursor-pointer h-1.5 bg-gray-700 rounded-lg">
+                    <div class="flex justify-between text-[10px] font-mono text-gray-400">
+                        <span id="vid-current-time">0:00</span>
+                        <span id="vid-total-duration">0:00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kawalan Pemain Video -->
+            <div class="bg-black/50 p-3 rounded-xl border border-white/10 space-y-2.5 mt-3">
+                <div class="flex items-center justify-between gap-2">
+                    <button onclick="prevVideo()" class="bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-xs transition cursor-pointer" title="Video Sebelumnya">⏮ Prev</button>
+                    
+                    <button id="vid-play-pause-btn" onclick="toggleVideoPlay()" class="w-9 h-9 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold flex items-center justify-center shadow transition text-sm cursor-pointer">▶</button>
+
+                    <button onclick="nextVideo()" class="bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-xs transition cursor-pointer" title="Video Seterusnya">Next ⏭</button>
+                </div>
+
+                <!-- Bar Kawalan Volume & Mute Sebaris -->
+                <div class="flex items-center justify-center gap-3 pt-2 border-t border-white/10 text-xs">
+                    <button id="vid-mute-btn" onclick="toggleVideoMute()" class="bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded text-xs transition cursor-pointer">🔊 Mute</button>
+                    <input type="range" id="vid-volume-slider" min="0" max="1" step="0.05" value="1" oninput="changeVideoVolume(this.value)" class="w-32 accent-amber-400 cursor-pointer h-1.5 bg-gray-700 rounded-lg">
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL KESELAMATAN PIN -->
+    <div id="pin-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+        <div class="bg-slate-900 border border-slate-700 p-6 rounded-2xl w-full max-w-sm space-y-4 shadow-2xl">
+            <div class="text-center">
+                <span class="text-2xl">🔒</span>
+                <h3 class="font-bold text-amber-400 text-base mt-1">Akses Terhad</h3>
+                <p class="text-xs text-gray-400 mt-0.5">Sila masukkan PIN keselamatan untuk membuka modul ini.</p>
+            </div>
+            <div>
+                <input type="password" id="pin-input" class="w-full px-4 py-2.5 bg-black/60 border border-slate-600 rounded-xl text-white text-center text-lg tracking-widest outline-none focus:ring-2 focus:ring-amber-500" placeholder="•••••••">
+                <p id="pin-error" class="text-red-400 text-xs text-center mt-1 hidden font-medium">PIN keselamatan salah!</p>
+            </div>
+            <div class="flex gap-2 pt-1">
+                <button onclick="verifyPin()" class="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition cursor-pointer">Hantar</button>
+                <button onclick="closePinModal()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-medium py-2.5 rounded-xl text-xs transition cursor-pointer">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL TUKAR PASSWORD -->
+    <div id="password-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+        <div class="bg-slate-900 border border-slate-700 p-6 rounded-2xl w-full max-w-sm space-y-4">
+            <h3 class="font-bold text-amber-400 text-base">Tukar Kata Laluan</h3>
+            <div>
+                <label class="block text-xs text-gray-300 mb-1">Kata Laluan Baharu (Nombor / Huruf)</label>
+                <input type="text" id="new-password" class="w-full px-3 py-2 bg-black/40 border border-slate-600 rounded-xl text-white text-sm outline-none focus:ring-2 focus:ring-amber-500" placeholder="Masukkan password baru">
+            </div>
+            <div class="flex gap-2 pt-2">
+                <button onclick="saveNewPassword()" class="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2 rounded-xl text-xs cursor-pointer">Simpan</button>
+                <button onclick="closeChangePasswordModal()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 rounded-xl text-xs cursor-pointer">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbzu2XdB8CQnMwvv3Bfk0tkLlGW-7c7xNFIOi6GvEyQeQzjc4gtS17eKT9pdNmlTHZRn/exec';
+        let currentRole = '';
+        let targetMenuPage = '';
+
+        // --- SISTEM PEMAIN AUDIO (SPOTIFY) TERMASUK LAGU BAHARU ---
+        const playlist = [
+            { title: "TopGun.mp3", src: "TopGun.mp3" },
+            { title: "DangerZone.mp3", src: "DangerZone.mp3" },
+            { title: "BadBoys.mp3", src: "BadBoys.mp3" },
+            { title: "Evo.mp3", src: "Evo.mp3" },
+            { title: "PDABSong.mp3", src: "PDABSong.mp3" },
+            { title: "Ayuh.mp3", src: "Ayuh.mp3" },
+            { title: "Senorita.mp3", src: "Senorita.mp3" },
+            { title: "SoundOfThePolice.mp3", src: "SoundOfThePolice.mp3" },
+            { title: "SangSakaBiru.mp3", src: "SangSakaBiru.mp3" },
+            { title: "LampuBiru.mp3", src: "LampuBiru.mp3" }
+        ];
+        let currentSongIndex = parseInt(localStorage.getItem('pdab_song_index')) || 0;
+
+        const audio = document.getElementById('bg-audio');
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const volumeSlider = document.getElementById('volume-slider');
+        const vinylDisc = document.getElementById('vinyl-disc');
+        const audioWaves = document.getElementById('audio-waves');
+        const audioStatusText = document.getElementById('audio-status-text');
+        const currentSongTitle = document.getElementById('current-song-title');
+        const progressBar = document.getElementById('progress-bar');
+        const currentTimeEl = document.getElementById('current-time');
+        const totalDurationEl = document.getElementById('total-duration');
+        const volIcon = document.getElementById('vol-icon');
+
+        let savedVolume = localStorage.getItem('pdab_audio_volume');
+        let initialVolume = savedVolume !== null ? parseFloat(savedVolume) : 0.5;
+        audio.volume = initialVolume;
+        volumeSlider.value = initialVolume;
+        updateVolumeIcon(initialVolume);
+
+        function loadSong(index) {
+            currentSongIndex = index;
+            localStorage.setItem('pdab_song_index', currentSongIndex);
+            audio.src = playlist[currentSongIndex].src;
+            currentSongTitle.innerText = playlist[currentSongIndex].title;
+            audio.load();
+        }
+
+        function toggleAudioPlay() {
+            if (audio.paused) {
+                audio.play().then(() => {
+                    playPauseBtn.innerText = "⏸";
+                    audioStatusText.innerText = "Sedang dimainkan...";
+                    vinylDisc.classList.add('animate-spin-slow');
+                    audioWaves.style.opacity = "1";
+                }).catch(err => {
+                    audioStatusText.innerText = "Tekan Play untuk mula";
+                });
+            } else {
+                audio.pause();
+                playPauseBtn.innerText = "▶";
+                audioStatusText.innerText = "Dijeda (Paused)";
+                vinylDisc.classList.remove('animate-spin-slow');
+                audioWaves.style.opacity = "0.3";
+            }
+        }
+
+        function nextSong() {
+            currentSongIndex = (currentSongIndex + 1) % playlist.length;
+            loadSong(currentSongIndex);
+            audio.play();
+            playPauseBtn.innerText = "⏸";
+            audioStatusText.innerText = "Sedang dimainkan...";
+            vinylDisc.classList.add('animate-spin-slow');
+            audioWaves.style.opacity = "1";
+        }
+
+        function prevSong() {
+            currentSongIndex = (currentSongIndex - 1 + playlist.length) % playlist.length;
+            loadSong(currentSongIndex);
+            audio.play();
+            playPauseBtn.innerText = "⏸";
+            audioStatusText.innerText = "Sedang dimainkan...";
+            vinylDisc.classList.add('animate-spin-slow');
+            audioWaves.style.opacity = "1";
+        }
+
+        function changeVolume(val) {
+            let vol = parseFloat(val);
+            audio.volume = vol;
+            localStorage.setItem('pdab_audio_volume', vol);
+            updateVolumeIcon(vol);
+        }
+
+        function updateVolumeIcon(vol) {
+            if (vol === 0) {
+                volIcon.innerText = "🔇";
+            } else if (vol < 0.5) {
+                volIcon.innerText = "🔉";
+            } else {
+                volIcon.innerText = "🔊";
+            }
+        }
+
+        audio.addEventListener('timeupdate', () => {
+            if (audio.duration) {
+                let progressPercent = (audio.currentTime / audio.duration) * 100;
+                progressBar.value = progressPercent;
+                currentTimeEl.innerText = formatTime(audio.currentTime);
+                totalDurationEl.innerText = formatTime(audio.duration);
+            }
+        });
+
+        audio.addEventListener('ended', () => {
+            nextSong();
+        });
+
+        function seekAudio(val) {
+            if (audio.duration) {
+                let seekTime = (val / 100) * audio.duration;
+                audio.currentTime = seekTime;
+            }
+        }
+
+        function formatTime(seconds) {
+            let mins = Math.floor(seconds / 60);
+            let secs = Math.floor(seconds % 60);
+            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+        // ----------------------------------------------------
+
+        // --- SISTEM GALLERY VIDEO TETAP & PERSISTENT VOLUME (LOCAL STORAGE) ---
+        const videoFiles = ["Video.mp4", "Video2.mp4", "Video3.mp4", "Video4.mp4"];
+        let currentVideoIndex = 0;
+
+        function initVideoGallery() {
+            let savedVidVol = localStorage.getItem('pdab_video_volume');
+            let savedMuted = localStorage.getItem('pdab_video_muted') === 'true';
+            
+            let initialVol = savedVidVol !== null ? parseFloat(savedVidVol) : 1.0;
+            let vidSlider = document.getElementById('vid-volume-slider');
+            if (vidSlider) vidSlider.value = initialVol;
+
+            for (let i = 0; i < videoFiles.length; i++) {
+                let v = document.getElementById('vid-' + i);
+                if (v) {
+                    v.volume = initialVol;
+                    v.muted = savedMuted;
+                }
+            }
+            updateMuteButtonUI(savedMuted);
+            playVideoIndex(0);
+        }
+
+        function pauseAllVideos() {
+            for (let i = 0; i < videoFiles.length; i++) {
+                let v = document.getElementById('vid-' + i);
+                if (v) v.pause();
+            }
+        }
+
+        function playVideoIndex(index) {
+            pauseAllVideos();
+            currentVideoIndex = index;
+            let activeVid = document.getElementById('vid-' + currentVideoIndex);
+            let container = document.getElementById('video-slider-container');
+            
+            if (activeVid && container) {
+                let scrollLeftPos = activeVid.parentElement.offsetLeft - container.offsetLeft;
+                container.scrollTo({ left: scrollLeftPos, behavior: 'smooth' });
+
+                let savedVidVol = localStorage.getItem('pdab_video_volume');
+                let savedMuted = localStorage.getItem('pdab_video_muted') === 'true';
+                if (savedVidVol !== null) activeVid.volume = parseFloat(savedVidVol);
+                activeVid.muted = savedMuted;
+
+                activeVid.play().catch(e => console.log("Auto-play restricted:", e));
+                updateVideoUI(currentVideoIndex);
+            }
+        }
+
+        function updateVideoUI(index) {
+            currentVideoIndex = index;
+            let activeVid = document.getElementById('vid-' + currentVideoIndex);
+            let playBtn = document.getElementById('vid-play-pause-btn');
+            if (activeVid && playBtn) {
+                playBtn.innerText = activeVid.paused ? "▶" : "⏸";
+            }
+        }
+
+        function toggleVideoPlay() {
+            let activeVid = document.getElementById('vid-' + currentVideoIndex);
+            let playBtn = document.getElementById('vid-play-pause-btn');
+            if (activeVid) {
+                if (activeVid.paused) {
+                    activeVid.play();
+                    playBtn.innerText = "⏸";
+                } else {
+                    activeVid.pause();
+                    playBtn.innerText = "▶";
+                }
+            }
+        }
+
+        function nextVideo() {
+            let nextIdx = (currentVideoIndex + 1) % videoFiles.length;
+            playVideoIndex(nextIdx);
+        }
+
+        function prevVideo() {
+            let prevIdx = (currentVideoIndex - 1 + videoFiles.length) % videoFiles.length;
+            playVideoIndex(prevIdx);
+        }
+
+        function seekVideo(val) {
+            let activeVid = document.getElementById('vid-' + currentVideoIndex);
+            if (activeVid && activeVid.duration) {
+                let seekTime = (val / 100) * activeVid.duration;
+                activeVid.currentTime = seekTime;
+            }
+        }
+
+        function updateVideoProgress(index) {
+            if (index !== currentVideoIndex) return;
+            let activeVid = document.getElementById('vid-' + index);
+            let progressBar = document.getElementById('vid-progress-bar');
+            let currTimeEl = document.getElementById('vid-current-time');
+            let totalDurEl = document.getElementById('vid-total-duration');
+
+            if (activeVid && activeVid.duration) {
+                let percent = (activeVid.currentTime / activeVid.duration) * 100;
+                progressBar.value = percent;
+                currTimeEl.innerText = formatTime(activeVid.currentTime);
+                totalDurEl.innerText = formatTime(activeVid.duration);
+            }
+        }
+
+        function handleVideoEnded() {
+            let nextIdx = currentVideoIndex + 1;
+            if (nextIdx < videoFiles.length) {
+                playVideoIndex(nextIdx);
+            } else {
+                playVideoIndex(0);
+            }
+        }
+
+        function toggleVideoMute() {
+            let activeVid = document.getElementById('vid-' + currentVideoIndex);
+            let slider = document.getElementById('vid-volume-slider');
+            if (activeVid) {
+                let newMutedState = !activeVid.muted;
+                
+                for (let i = 0; i < videoFiles.length; i++) {
+                    let v = document.getElementById('vid-' + i);
+                    if (v) v.muted = newMutedState;
+                }
+                
+                localStorage.setItem('pdab_video_muted', newMutedState);
+                updateMuteButtonUI(newMutedState);
+                if (newMutedState) slider.value = 0;
+                else slider.value = activeVid.volume;
+            }
+        }
+
+        function updateMuteButtonUI(isMuted) {
+            let muteBtn = document.getElementById('vid-mute-btn');
+            if (muteBtn) {
+                muteBtn.innerText = isMuted ? "🔇 Unmute" : "🔊 Mute";
+            }
+        }
+
+        function changeVideoVolume(val) {
+            let vol = parseFloat(val);
+            let slider = document.getElementById('vid-volume-slider');
+            if (slider) slider.value = vol;
+
+            localStorage.setItem('pdab_video_volume', vol);
+            let isMuted = (vol === 0);
+            localStorage.setItem('pdab_video_muted', isMuted);
+            updateMuteButtonUI(isMuted);
+
+            for (let i = 0; i < videoFiles.length; i++) {
+                let v = document.getElementById('vid-' + i);
+                if (v) {
+                    v.volume = vol;
+                    v.muted = isMuted;
+                }
+            }
+        }
+        // ----------------------------------------------------
+
+        window.onload = function() {
+            checkUserAuthorizationStatus();
+            loadStaffDropdown();
+            fetchStaffFromGoogleSheet();
+
+            loadSong(currentSongIndex);
+            audio.play().then(() => {
+                playPauseBtn.innerText = "⏸";
+                audioStatusText.innerText = "Sedang dimainkan...";
+                vinylDisc.classList.add('animate-spin-slow');
+                audioWaves.style.opacity = "1";
+            }).catch(() => {
+                audioStatusText.innerText = "Tekan Play untuk mula";
+                audioWaves.style.opacity = "0.3";
+            });
+
+            initVideoGallery();
+        };
+
+        function checkUserAuthorizationStatus() {
+            const isLoggedIn = localStorage.getItem('pdab_logged_in');
+            if (isLoggedIn === 'true') {
+                currentRole = localStorage.getItem('pdab_role') || 'Anggota';
+                let activeUser = localStorage.getItem('pdab_current_user') || '';
+
+                if (currentRole === 'Anggota' || currentRole === 'Pulapol') {
+                    let listKey = currentRole === 'Pulapol' ? 'pdab_pulapol_list' : 'pdab_staff_list';
+                    let listData = JSON.parse(localStorage.getItem(listKey)) || [];
+
+                    if (listData.length > 0) {
+                        let userExists = listData.some(s => s.name === activeUser);
+                        if (!userExists) {
+                            alert("Akses ditolak: Nama anda telah dikeluarkan daripada senarai rasmi.");
+                            logout();
+                            return;
+                        }
+                    }
+                }
+
+                document.getElementById('view-main').classList.add('hidden');
+                
+                if(currentRole === 'Pulapol') {
+                    document.getElementById('view-dashboard-pulapol').classList.remove('hidden');
+                    document.getElementById('pulapol-user-badge').innerText = `Pulapol (${activeUser})`;
+                } else if(currentRole === 'Rakyat') {
+                    document.getElementById('view-dashboard-rakyat').classList.remove('hidden');
+                    document.getElementById('rakyat-user-badge').innerText = `Rakyat (${activeUser})`;
+                } else {
+                    document.getElementById('view-dashboard').classList.remove('hidden');
+                    document.getElementById('user-badge').innerText = `${currentRole} (${activeUser})`;
+                }
+                document.getElementById('sub-title').innerText = "Menu Utama Sistem";
+            }
+        }
+
+        function fetchStaffFromGoogleSheet() {
+            fetch(scriptURL)
+            .then(res => res.json())
+            .then(data => {
+                if (data.staff && Array.isArray(data.staff) && data.staff.length > 0) {
+                    localStorage.setItem('pdab_staff_list', JSON.stringify(data.staff));
+                }
+                
+                if (data.pulapol && Array.isArray(data.pulapol) && data.pulapol.length > 0) {
+                    localStorage.setItem('pdab_pulapol_list', JSON.stringify(data.pulapol));
+                } else if (data.staff && Array.isArray(data.staff)) {
+                    localStorage.setItem('pdab_pulapol_list', JSON.stringify(data.staff));
+                }
+                
+                checkUserAuthorizationStatus();
+                loadStaffDropdown();
+            })
+            .catch(err => {
+                console.log('Gagal sync data dari GS, guna cache tempatan:', err);
+                loadStaffDropdown();
+            });
+        }
+
+        function loadStaffDropdown() {
+            const selectEl = document.getElementById('selectUsername');
+            let listData = [];
+            
+            if (currentRole === 'Pulapol') {
+                listData = JSON.parse(localStorage.getItem('pdab_pulapol_list')) || [];
+            } else {
+                listData = JSON.parse(localStorage.getItem('pdab_staff_list')) || [];
+            }
+            
+            selectEl.innerHTML = `<option value="" disabled selected>-- Sila pilih nama anda --</option>`;
+            listData.forEach(s => {
+                selectEl.innerHTML += `<option value="${s.name}">${s.name} (${s.badge})</option>`;
+            });
+        }
+
+        function selectRole(role) {
+            currentRole = role;
+            document.getElementById('view-main').classList.add('hidden');
+            const subTitle = document.getElementById('sub-title');
+
+            if (role === 'Rakyat') {
+                document.getElementById('view-form').classList.add('hidden');
+                document.getElementById('view-rakyat').classList.remove('hidden');
+                subTitle.innerText = "Akses Rakyat (Portal Khas)";
+                checkRakyatDeviceLock();
+            } else {
+                document.getElementById('view-rakyat').classList.add('hidden');
+                document.getElementById('view-form').classList.remove('hidden');
+                subTitle.innerText = `Log Masuk ${role}`;
+                
+                let noteText = role === 'Pulapol' ? 
+                    "<strong>Nota Pulapol:</strong> Sila pilih nama anda dari senarai database Pulapol. Kata laluan adalah <strong>Nombor Badan</strong> anda." :
+                    "<strong>Nota Anggota:</strong> Sila pilih nama anda dari senarai. Kata laluan pertama kali adalah <strong>Nombor Badan</strong> anda.";
+                document.getElementById('login-note').innerHTML = noteText;
+                document.getElementById('label-select-name').innerText = `Pilih Nama ${role}`;
+                loadStaffDropdown();
+            }
+        }
+
+        function checkRakyatDeviceLock() {
+            let registeredRakyat = localStorage.getItem('pdab_rakyat_registered_account');
+            let regBox = document.getElementById('rakyat-register-box');
+            let loginBox = document.getElementById('rakyat-login-box');
+
+            if (registeredRakyat) {
+                regBox.classList.add('hidden');
+                loginBox.classList.remove('hidden');
+                document.getElementById('registered-device-name').innerText = registeredRakyat;
+            } else {
+                regBox.classList.remove('hidden');
+                loginBox.classList.add('hidden');
+            }
+        }
+
+        function handleRakyatRegister() {
+            let nameInput = document.getElementById('rakyat-reg-name').value.trim();
+            let passInput = document.getElementById('rakyat-reg-pass').value.trim();
+            let errEl = document.getElementById('rakyat-reg-error');
+
+            if (!nameInput || !passInput) {
+                errEl.innerText = "Sila masukkan Nama IC dan Password!";
+                errEl.classList.remove('hidden');
+                return;
+            }
+
+            localStorage.setItem('pdab_rakyat_registered_account', nameInput);
+            localStorage.setItem('pdab_rakyat_pass_' + nameInput, passInput);
+
+            localStorage.setItem('pdab_logged_in', 'true');
+            localStorage.setItem('pdab_role', 'Rakyat');
+            localStorage.setItem('pdab_current_user', nameInput);
+
+            document.getElementById('view-rakyat').classList.add('hidden');
+            document.getElementById('view-dashboard-rakyat').classList.remove('hidden');
+            document.getElementById('rakyat-user-badge').innerText = `Rakyat (${nameInput})`;
+            document.getElementById('sub-title').innerText = "Menu Utama Sistem";
+        }
+
+        function handleRakyatLogin() {
+            let registeredRakyat = localStorage.getItem('pdab_rakyat_registered_account');
+            let passInput = document.getElementById('rakyat-login-pass').value.trim();
+            let errEl = document.getElementById('rakyat-login-error');
+            let correctPass = localStorage.getItem('pdab_rakyat_pass_' + registeredRakyat);
+
+            if (passInput === correctPass) {
+                errEl.classList.add('hidden');
+                localStorage.setItem('pdab_logged_in', 'true');
+                localStorage.setItem('pdab_role', 'Rakyat');
+                localStorage.setItem('pdab_current_user', registeredRakyat);
+
+                document.getElementById('view-rakyat').classList.add('hidden');
+                document.getElementById('view-dashboard-rakyat').classList.remove('hidden');
+                document.getElementById('rakyat-user-badge').innerText = `Rakyat (${registeredRakyat})`;
+                document.getElementById('sub-title').innerText = "Menu Utama Sistem";
+            } else {
+                errEl.innerText = "Password Rakyat salah!";
+                errEl.classList.remove('hidden');
+            }
+        }
+
+        function backToMain() {
+            document.getElementById('view-form').classList.add('hidden');
+            document.getElementById('view-rakyat').classList.add('hidden');
+            document.getElementById('view-dashboard').classList.add('hidden');
+            document.getElementById('view-dashboard-rakyat').classList.add('hidden');
+            document.getElementById('view-dashboard-pulapol').classList.add('hidden');
+            document.getElementById('view-pulapol-submodules').classList.add('hidden');
+            document.getElementById('view-pengurusan-pulapol-menu').classList.add('hidden');
+            document.getElementById('view-main').classList.remove('hidden');
+            document.getElementById('error-msg').classList.add('hidden');
+            document.getElementById('selectUsername').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('sub-title').innerText = "Sila pilih kategori pengguna anda";
+        }
+
+        function handleLogin() {
+            const selectedName = document.getElementById('selectUsername').value;
+            const pass = document.getElementById('password').value.trim();
+            const errorMsg = document.getElementById('error-msg');
+
+            if (!selectedName) {
+                errorMsg.innerText = "Sila pilih nama!";
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            let listData = [];
+            if (currentRole === 'Pulapol') {
+                listData = JSON.parse(localStorage.getItem('pdab_pulapol_list')) || [];
+            } else {
+                listData = JSON.parse(localStorage.getItem('pdab_staff_list')) || [];
+            }
+
+            const staff = listData.find(s => s.name === selectedName);
+
+            if (!staff) {
+                errorMsg.innerText = "Data pengguna tidak dijumpai!";
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            if (pass === String(staff.pass)) {
+                errorMsg.classList.add('hidden');
+                localStorage.setItem('pdab_logged_in', 'true');
+                localStorage.setItem('pdab_role', currentRole);
+                localStorage.setItem('pdab_current_user', staff.name);
+
+                document.getElementById('view-form').classList.add('hidden');
+                
+                if (currentRole === 'Pulapol') {
+                    document.getElementById('view-dashboard-pulapol').classList.remove('hidden');
+                    document.getElementById('pulapol-user-badge').innerText = `Pulapol (${staff.name})`;
+                } else {
+                    document.getElementById('view-dashboard').classList.remove('hidden');
+                    document.getElementById('user-badge').innerText = `${currentRole} (${staff.name})`;
+                }
+                document.getElementById('sub-title').innerText = "Menu Utama Sistem";
+            } else {
+                errorMsg.innerText = "Password salah! (Nota: Password asal adalah No. Badan anda)";
+                errorMsg.classList.add('hidden');
+            }
+        }
+
+        function logout() {
+            const activeUser = localStorage.getItem('pdab_current_user');
+            if (activeUser) {
+                localStorage.removeItem('pdab_pin_verified_' + activeUser);
+            }
+            localStorage.removeItem('pdab_logged_in');
+            localStorage.removeItem('pdab_role');
+            localStorage.removeItem('pdab_current_user');
+            backToMain();
+        }
+
+        function openChangePasswordModal() {
+            document.getElementById('password-modal').classList.remove('hidden');
+        }
+
+        function closeChangePasswordModal() {
+            document.getElementById('password-modal').classList.add('hidden');
+            document.getElementById('new-password').value = '';
+        }
+
+        function saveNewPassword() {
+            const newPass = document.getElementById('new-password').value.trim();
+            const activeUser = localStorage.getItem('pdab_current_user');
+            const role = localStorage.getItem('pdab_role');
+
+            if (!newPass) {
+                alert('Sila masukkan kata laluan baharu.');
+                return;
+            }
+
+            if (role === 'Rakyat') {
+                localStorage.setItem('pdab_rakyat_pass_' + activeUser, newPass);
+            } else if (role === 'Pulapol') {
+                let pulapolList = JSON.parse(localStorage.getItem('pdab_pulapol_list')) || [];
+                const idx = pulapolList.findIndex(s => s.name === activeUser);
+                if (idx !== -1) {
+                    pulapolList[idx].pass = String(newPass);
+                    localStorage.setItem('pdab_pulapol_list', JSON.stringify(pulapolList));
+                    syncPulapolToGoogleSheet();
+                }
+            } else {
+                let staffList = JSON.parse(localStorage.getItem('pdab_staff_list')) || [];
+                const staffIndex = staffList.findIndex(s => s.name === activeUser);
+                if (staffIndex !== -1) {
+                    staffList[staffIndex].pass = String(newPass);
+                    localStorage.setItem('pdab_staff_list', JSON.stringify(staffList));
+                    syncStaffToGoogleSheet();
+                }
+            }
+
+            alert('Kata laluan berjaya ditukar!');
+            closeChangePasswordModal();
+        }
+
+        function syncStaffToGoogleSheet() {
+            let staffList = JSON.parse(localStorage.getItem('pdab_staff_list')) || [];
+            const formData = new FormData();
+            formData.append('sheetType', 'StaffList');
+            formData.append('data', JSON.stringify(staffList));
+            fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: formData }).catch(err => console.log(err));
+        }
+
+        function syncPulapolToGoogleSheet() {
+            let pulapolList = JSON.parse(localStorage.getItem('pdab_pulapol_list')) || [];
+            const formData = new FormData();
+            formData.append('sheetType', 'PulapolList');
+            formData.append('data', JSON.stringify(pulapolList));
+            fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: formData }).catch(err => console.log(err));
+        }
+
+        function openPulapolSubModules() {
+            document.getElementById('view-dashboard-pulapol').classList.add('hidden');
+            document.getElementById('view-pulapol-submodules').classList.remove('hidden');
+            document.getElementById('sub-title').innerText = "Sub-Modul Pulapol";
+        }
+
+        function openPengurusanPulapolMenu() {
+            document.getElementById('view-dashboard-pulapol').classList.add('hidden');
+            document.getElementById('view-pengurusan-pulapol-menu').classList.remove('hidden');
+            document.getElementById('sub-title').innerText = "Pengurusan Pulapol";
+        }
+
+        function backToPulapolDashboard() {
+            document.getElementById('view-pulapol-submodules').classList.add('hidden');
+            document.getElementById('view-pengurusan-pulapol-menu').classList.add('hidden');
+            document.getElementById('view-dashboard-pulapol').classList.remove('hidden');
+            document.getElementById('sub-title').innerText = "Menu Utama Sistem";
+        }
+
+        function openModulePage(pageFilename) {
+            window.location.href = pageFilename;
+        }
+
+        function openMenu(pageName, requirePin) {
+            if (requirePin) {
+                const activeUser = localStorage.getItem('pdab_current_user') || 'default';
+                const isVerified = localStorage.getItem('pdab_pin_verified_' + activeUser) === 'true';
+
+                if (isVerified) {
+                    if (pageName === 'pengurusan_pulapol_menu') {
+                        openPengurusanPulapolMenu();
+                    } else {
+                        window.location.href = pageName;
+                    }
+                } else {
+                    targetMenuPage = pageName;
+                    document.getElementById('pin-input').value = '';
+                    document.getElementById('pin-error').classList.add('hidden');
+                    document.getElementById('pin-modal').classList.remove('hidden');
+                    document.getElementById('pin-input').focus();
+                }
+            } else {
+                window.location.href = pageName;
+            }
+        }
+
+        function closePinModal() {
+            document.getElementById('pin-modal').classList.add('hidden');
+            targetMenuPage = '';
+        }
+
+        function verifyPin() {
+            const pinVal = document.getElementById('pin-input').value.trim();
+            const pinError = document.getElementById('pin-error');
+
+            if (pinVal === '0389236') {
+                pinError.classList.add('hidden');
+                document.getElementById('pin-modal').classList.add('hidden');
+                
+                const activeUser = localStorage.getItem('pdab_current_user') || 'default';
+                localStorage.setItem('pdab_pin_verified_' + activeUser, 'true');
+
+                if (targetMenuPage === 'pengurusan_pulapol_menu') {
+                    openPengurusanPulapolMenu();
+                } else {
+                    window.location.href = targetMenuPage;
+                }
+            } else {
+                pinError.classList.remove('hidden');
+                document.getElementById('pin-input').value = '';
+                document.getElementById('pin-input').focus();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const pinInput = document.getElementById('pin-input');
+            if (pinInput) {
+                pinInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        verifyPin();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html><script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="918df9c2-aaa3-41a8-9102-7dea843b00b3" data-app-host="app.netlify.com"></script>

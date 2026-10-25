@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Log Duty, Cuti & Jadual Matrik PDAB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Pustaka html2canvas untuk jana gambar surat dan jadual matrik -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Google Fonts untuk Font Tandatangan -->
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #0A192F;
+            background-image: linear-gradient(135deg, #0A192F 0%, #112240 100%);
+        }
+        .signature-font {
+            font-family: 'Great Vibes', cursive;
+        }
+        /* Tetapan ikon kalendar dan jam supaya cerah/putih */
+        input[type="date"]::-webkit-calendar-picker-indicator,
+        input[type="time"]::-webkit-calendar-picker-indicator {
+            filter: invert(1) brightness(1.5);
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="relative min-h-screen flex items-center justify-center p-2 sm:p-6 overflow-x-hidden text-gray-100 font-sans">
+
+    <!-- LOADING / BLOCKING OVERLAY (Menyekat akses & memaparkan animasi semasa hantar ke GS) -->
+    <div id="loadingOverlay" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center space-y-3">
+        <div class="w-12 h-12 border-4 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
+        <p id="loadingText" class="text-amber-400 font-bold text-sm tracking-wide">Sedang menghantar data ke Google Sheets...</p>
+    </div>
+
+    <!-- CUSTOM HTML NOTIFICATION MODAL -->
+    <div id="htmlModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+        <div class="bg-slate-900 border border-slate-700 p-6 rounded-2xl w-full max-w-sm space-y-4 shadow-2xl text-center">
+            <div id="modalIcon" class="text-3xl text-amber-400 mb-1"><i class="fa-solid fa-circle-info"></i></div>
+            <h3 id="modalTitle" class="font-bold text-amber-400 text-base">Makluman Sistem</h3>
+            <p id="modalMessage" class="text-xs text-slate-300 leading-relaxed"></p>
+            <button onclick="closeHtmlModal()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition shadow">Tutup</button>
+        </div>
+    </div>
+
+    <div class="absolute inset-0 bg-cover bg-center opacity-30 -z-20" style="background-image: url('PDABBG4.png');"></div>
+    <div class="absolute inset-0 bg-black/60 -z-10"></div>
+
+    <div class="w-full max-w-4xl bg-slate-900/90 border border-slate-700/60 rounded-2xl shadow-2xl overflow-hidden flex flex-col justify-between min-h-[600px] backdrop-blur-md">
+
+        <header class="relative border-b border-slate-800 p-6 text-center shadow-md overflow-hidden bg-slate-950">
+            <div class="absolute inset-0 bg-cover bg-center opacity-40" style="background-image: url('PDABBG4.png');"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-900/75 to-slate-950/85"></div>
+
+            <div class="relative z-10 flex flex-col items-center justify-center space-y-2">
+                <img src="PDAB.png" alt="Logo PDAB" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/2/26/Royal_Malaysian_Police.svg';" class="w-16 h-16 object-contain drop-shadow-[0_0_12px_rgba(234,179,8,0.4)]">
+                <div>
+                    <h1 class="text-lg sm:text-xl font-bold tracking-wider text-amber-400 uppercase drop-shadow-md">PDAB Mobile System</h1>
+                    <p class="text-xs text-slate-200 tracking-wide font-medium">Sistem Pengurusan Log Duty, Permohonan Cuti & Jadual Matrik</p>
+                </div>
+            </div>
+        </header>
+
+        <main class="p-5 sm:p-8 flex-1 flex flex-col justify-center">
+
+            <!-- DASHBOARD UTAMA -->
+            <div id="dashboardPage" class="space-y-4">
+                <div class="bg-slate-800/80 border border-slate-700 p-4 rounded-xl shadow-inner flex items-center justify-between">
+                    <div>
+                        <span class="block text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Anggota Log Masuk Aktif</span>
+                        <span id="activeUserBadge" class="text-sm font-bold text-amber-400">Memuatkan...</span>
+                    </div>
+                    <span class="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-1 rounded-lg font-medium">Auto-Sync</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <button onclick="showPage('leavePage')" class="group bg-gradient-to-br from-blue-950 to-slate-900 border border-blue-800/50 hover:border-amber-400/80 p-4 rounded-xl text-left transition-all shadow-lg flex items-center space-x-3">
+                        <div class="p-2.5 bg-blue-900/40 border border-blue-700/50 rounded-lg text-amber-400 text-xl group-hover:scale-110 transition">📋</div>
+                        <div>
+                            <h2 class="font-bold text-white text-sm group-hover:text-amber-400 transition">Borang Cuti</h2>
+                            <p class="text-[11px] text-slate-400">Mohon cuti & hantar ke GS</p>
+                        </div>
+                    </button>
+
+                    <button onclick="showPage('dutyPage')" class="group bg-gradient-to-br from-emerald-950 to-slate-900 border border-emerald-800/50 hover:border-amber-400/80 p-4 rounded-xl text-left transition-all shadow-lg flex items-center space-x-3">
+                        <div class="p-2.5 bg-emerald-900/40 border border-emerald-700/50 rounded-lg text-amber-400 text-xl group-hover:scale-110 transition">🛡️</div>
+                        <div>
+                            <h2 class="font-bold text-white text-sm group-hover:text-amber-400 transition">Log Duty</h2>
+                            <p class="text-[11px] text-slate-400">Rekod masa masuk & keluar</p>
+                        </div>
+                    </button>
+                </div>
+
+                <div>
+                    <button onclick="showPage('matrixPage')" class="w-full group bg-gradient-to-br from-cyan-950/80 to-slate-900 border border-cyan-800/60 hover:border-amber-400/80 p-4 rounded-xl text-left transition-all shadow-lg flex items-center space-x-4">
+                        <div class="p-3 bg-cyan-900/40 border border-cyan-700/50 rounded-lg text-amber-400 text-xl group-hover:scale-110 transition">📊</div>
+                        <div class="flex-1">
+                            <h2 class="font-bold text-white text-sm group-hover:text-amber-400 transition">Jadual Matrik Bulanan Anggota</h2>
+                            <p class="text-[11px] text-slate-400">Semak jadual bertugas penuh & muat turun imej landskap</p>
+                        </div>
+                    </button>
+                </div>
+
+                <div>
+                    <button onclick="showPage('suratPage')" class="w-full group bg-gradient-to-br from-indigo-950/80 to-slate-900 border border-indigo-800/60 hover:border-amber-400/80 p-4 rounded-xl text-left transition-all shadow-lg flex items-center space-x-4">
+                        <div class="p-3 bg-indigo-900/40 border border-indigo-700/50 rounded-lg text-amber-400 text-xl group-hover:scale-110 transition">📄</div>
+                        <div class="flex-1">
+                            <h2 class="font-bold text-white text-sm group-hover:text-amber-400 transition">Jana Surat Cuti (Format Rasmi)</h2>
+                            <p class="text-[11px] text-slate-400">Isi borang & muat turun surat dalam bentuk gambar (Tanpa GS)</p>
+                        </div>
+                    </button>
+                </div>
+
+                <div>
+                    <button onclick="showPage('historyPage')" class="w-full group bg-gradient-to-br from-amber-950/60 to-slate-900 border border-amber-800/50 hover:border-amber-400/80 p-3.5 rounded-xl text-left transition-all shadow-lg flex items-center space-x-4">
+                        <div class="p-2.5 bg-amber-900/40 border border-amber-700/50 rounded-lg text-amber-400 text-lg group-hover:scale-110 transition">🔍</div>
+                        <div class="flex-1">
+                            <h2 class="font-bold text-white text-xs group-hover:text-amber-400 transition">Semakan Log & Status Cuti Saya</h2>
+                            <p class="text-[10px] text-slate-400">Semak kelulusan cuti dari Google Sheets</p>
+                        </div>
+                    </button>
+                </div>
+
+                <div class="pt-1">
+                    <button onclick="window.location.href='index.html'" class="w-full bg-slate-800 hover:bg-slate-700 text-amber-400 font-semibold py-2.5 px-4 rounded-xl border border-slate-700 transition flex items-center justify-center gap-2 text-xs shadow">
+                        <i class="fa-solid fa-arrow-left"></i> Kembali ke Menu Utama
+                    </button>
+                </div>
+            </div>
+
+            <!-- BORANG CUTI -->
+            <div id="leavePage" class="hidden space-y-5">
+                <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+                    <button onclick="showPage('dashboardPage')" class="text-amber-400 hover:text-amber-300 text-sm font-semibold flex items-center space-x-1">
+                        <span>← Kembali ke Menu</span>
+                    </button>
+                    <h2 class="text-sm font-bold text-slate-300 uppercase tracking-wider">Modul Permohonan Cuti</h2>
+                </div>
+
+                <form id="leaveForm" onsubmit="submitLeave(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Nama Pegawai</label>
+                        <input type="text" id="leaveName" readonly class="w-full px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-lg text-slate-300 text-sm font-medium">
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Tarikh Mula Cuti</label>
+                            <input type="date" id="startDate" required onchange="calculateDays()" class="w-full px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-white focus:ring-1 focus:ring-amber-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Tarikh Tamat Cuti</label>
+                            <input type="date" id="endDate" required onchange="calculateDays()" class="w-full px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-white focus:ring-1 focus:ring-amber-500 focus:outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Bilangan Hari (Auto)</label>
+                        <input type="text" id="totalDays" readonly class="w-full px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-lg font-bold text-amber-400 text-sm" value="0 hari">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Sebab / Nota Cuti</label>
+                        <textarea id="leaveReason" rows="2" class="w-full px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-white focus:ring-1 focus:ring-amber-500 focus:outline-none" placeholder="Nyatakan sebab permohonan..."></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2.5 rounded-lg transition shadow-lg tracking-wide text-sm mt-2">Hantar Permohonan Cuti</button>
+                </form>
+            </div>
+
+            <!-- LOG DUTY -->
+            <div id="dutyPage" class="hidden space-y-5">
+                <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+                    <button onclick="showPage('dashboardPage')" class="text-amber-400 hover:text-amber-300 text-sm font-semibold flex items-center space-x-1">
+                        <span>← Kembali ke Menu</span>
+                    </button>
+                    <h2 class="text-sm font-bold text-slate-300 uppercase tracking-wider">Modul Log Duty</h2>
+                </div>
+
+                <form id="dutyForm" onsubmit="submitDuty(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Nama Pegawai</label>
+                        <input type="text" id="dutyName" readonly class="w-full px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-lg text-slate-300 text-sm font-medium">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Tarikh Duty</label>
+                        <input type="date" id="dutyDate" required class="w-full px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-white focus:ring-1 focus:ring-amber-500 focus:outline-none">
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Masa Masuk Duty (Time In)</label>
+                            <input type="time" id="timeIn" required class="w-full px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-white focus:ring-1 focus:ring-amber-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Masa Keluar Duty (Time Out)</label>
+                            <input type="time" id="timeOut" required class="w-full px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-white focus:ring-1 focus:ring-amber-500 focus:outline-none">
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2.5 rounded-lg transition shadow-lg tracking-wide text-sm mt-4">Hantar Log Duty</button>
+                </form>
+            </div>
+
+            <!-- SEKSYEN JADUAL MATRIK BULANAN -->
+            <div id="matrixPage" class="hidden space-y-4">
+                <div class="flex flex-col sm:flex-row items-center justify-between border-b border-slate-700 pb-3 gap-2">
+                    <button onclick="showPage('dashboardPage')" class="text-amber-400 hover:text-amber-300 text-sm font-semibold flex items-center space-x-1">
+                        <span>← Kembali ke Menu</span>
+                    </button>
+                    <h2 class="text-xs sm:text-sm font-bold text-slate-200 uppercase tracking-wider">Jadual Matrik Bulanan Anggota</h2>
+                    
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button onclick="downloadMatrixImage('full')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-2.5 py-1.5 rounded shadow flex items-center gap-1 transition">
+                            <span>📥 Download Bulan Penuh</span>
+                        </button>
+                        <select id="selectDownloadWeek" onchange="downloadMatrixImage('week', this.value)" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-2 py-1.5 rounded shadow cursor-pointer outline-none">
+                            <option value="" disabled selected>📥 Download By Minggu</option>
+                            <option value="1">Minggu 1 (Hari 1-7)</option>
+                            <option value="2">Minggu 2 (Hari 8-14)</option>
+                            <option value="3">Minggu 3 (Hari 15-21)</option>
+                            <option value="4">Minggu 4 (Hari 22-28)</option>
+                            <option value="5">Minggu 5 (Hari 29-Akhir)</option>
+                        </select>
+
+                        <select id="selectYear" onchange="loadMatrixData('full')" class="bg-slate-950 border border-slate-700 text-xs px-2 py-1.5 rounded text-amber-400 font-bold">
+                            <option value="2025">2025</option>
+                            <option value="2026" selected>2026</option>
+                            <option value="2027">2027</option>
+                        </select>
+                        <select id="selectMonth" onchange="loadMatrixData('full')" class="bg-slate-950 border border-slate-700 text-xs px-2 py-1.5 rounded text-amber-400 font-bold">
+                            <option value="01">Januari</option><option value="02">Februari</option><option value="03">Mac</option>
+                            <option value="04">April</option><option value="05">Mei</option><option value="06">Jun</option>
+                            <option value="07">Julai</option><option value="08">Ogos</option><option value="09">September</option>
+                            <option value="10" selected>Oktober</option><option value="11">November</option><option value="12">Disember</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="matrixTableContainer" class="overflow-x-auto max-h-[420px] border border-gray-300 rounded-lg bg-white shadow-xl p-2 text-xs">
+                    <table class="w-auto text-center border-collapse whitespace-nowrap text-gray-900">
+                        <thead id="matrixHeader" class="bg-gray-800 text-amber-300 sticky top-0 z-10"></thead>
+                        <tbody id="matrixBody" class="divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- MODUL: JANA SURAT CUTI RASMI -->
+            <div id="suratPage" class="hidden space-y-4 text-xs">
+                <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+                    <button onclick="showPage('dashboardPage')" class="text-amber-400 hover:text-amber-300 text-sm font-semibold flex items-center space-x-1">
+                        <span>← Kembali ke Menu</span>
+                    </button>
+                    <h2 class="text-sm font-bold text-slate-300 uppercase tracking-wider">Jana Surat Cuti Rasmi</h2>
+                </div>
+
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-3">
+                    <p class="text-slate-400 text-[11px]">Alamat penerima & pengirim ditetapkan secara automatik. Sila masukkan tajuk surat dan keterangan lengkap anda.</p>
+                    
+                    <div>
+                        <label class="block font-medium text-slate-300 mb-1">Tajuk Surat (Isi Sendiri Sepenuhnya)</label>
+                        <input type="text" id="suratTajuk" placeholder="Contoh: URUSAN KERJA LUAR DAN HARI KELUARGA" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white outline-none focus:ring-1 focus:ring-amber-500">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div>
+                            <label class="block font-medium text-slate-300 mb-1">Tarikh Mula</label>
+                            <input type="date" id="suratTarikhMula" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white outline-none">
+                        </div>
+                        <div>
+                            <label class="block font-medium text-slate-300 mb-1">Tarikh Tamat</label>
+                            <input type="date" id="suratTarikhTamat" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block font-medium text-slate-300 mb-1">Keterangan Surat (Isi Sendiri - Bermula dengan 'kerana')</label>
+                        <textarea id="suratKeterangan" rows="3" placeholder="Contoh: kerana mempunyai urusan keluarga penting dan tidak dapat dielakkan." class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white outline-none resize-none"></textarea>
+                    </div>
+
+                    <p id="suratError" class="text-rose-400 hidden font-medium"></p>
+
+                    <button onclick="janaDanMuatTurunSurat()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-lg shadow transition flex items-center justify-center gap-1.5 text-xs">
+                        <span>📥</span> Jana & Muat Turun Surat (Format Gambar)
+                    </button>
+                    <div id="suratStatus" class="text-center text-amber-400 font-medium"></div>
+                </div>
+            </div>
+
+            <!-- HALAMAN SEMAKAN STATUS PERSENDIRIAN -->
+            <div id="historyPage" class="hidden space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+                    <button onclick="showPage('dashboardPage')" class="text-amber-400 hover:text-amber-300 text-sm font-semibold flex items-center space-x-1">
+                        <span>← Kembali ke Menu</span>
+                    </button>
+                    <h2 class="text-sm font-bold text-slate-300 uppercase tracking-wider">Semakan Log & Cuti Saya</h2>
+                </div>
+
+                <div class="flex justify-between items-center bg-slate-950 p-3 rounded-xl border border-slate-800">
+                    <span class="text-xs text-slate-400">Papar rekod untuk: <strong id="currentUserLabel" class="text-amber-400"></strong></span>
+                    <button onclick="fetchPersonalRecords()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 shadow">
+                        <i class="fa-solid fa-sync"></i> Muat Naik Data
+                    </button>
+                </div>
+
+                <div class="max-h-[320px] overflow-y-auto space-y-2.5 pr-1" id="recordsListContainer">
+                    <div class="text-center py-8 text-slate-500 text-xs italic">
+                        <i class="fa-solid fa-spinner fa-spin text-2xl mb-2 block text-amber-400"></i>
+                        Sedang mengambil data daripada Google Sheets...
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <footer class="bg-slate-950 border-t border-slate-800 p-4 text-center text-xs text-slate-500">
+            Hak Cipta Terpelihara &copy; PDAB System 2026
+        </footer>
+    </div>
+
+    <!-- TEMPLAT SURAT RASMI -->
+    <div style="position: absolute; left: -9999px; top: 0;">
+        <div id="suratTemplate" style="width: 794px; background-color: #ffffff; color: #000000; font-family: 'Inter', sans-serif; padding: 40px 60px; box-sizing: border-box; position: relative;">
+            
+            <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0.08; pointer-events: none; z-index: 0;">
+                <img src="PDAB.png" style="width: 450px; height: 450px; object-fit: contain;">
+            </div>
+
+            <div style="position: relative; z-index: 1;">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <img src="PDAB.png" style="width: 65px; height: 65px; object-fit: contain; margin-bottom: 5px;" crossorigin="anonymous">
+                </div>
+
+                <div style="font-size: 12px; line-height: 1.4; margin-bottom: 18px;">
+                    Pengurusan PDAB Mobile<br>
+                    NO 1, Jalan JPN LAMA ABRPM,<br>
+                    Balai PDAB Los Santos
+                </div>
+                <hr style="border: none; border-top: 1.5px solid #000; margin-bottom: 15px;">
+
+                <div style="font-size: 12px; line-height: 1.4; margin-bottom: 18px;">
+                    <strong id="tplNamaPegawai">INSP PokJeru</strong><br>
+                    <span id="tplNoBadan">G0041</span><br>
+                    Kuaters Kediaman Penjawat Awam ABRPM MOBILE
+                </div>
+                <hr style="border: none; border-top: 1px solid #000; margin-bottom: 18px;">
+
+                <div style="font-size: 13px; font-weight: bold; margin-bottom: 12px;">
+                    Tuan/Puan,
+                </div>
+
+                <div id="tplTajuk" style="font-size: 13px; font-weight: bold; text-transform: uppercase; margin-bottom: 15px;">
+                    URUSAN KERJA LUAR DAN HARI KELUARGA
+                </div>
+
+                <div style="font-size: 12px; line-height: 1.5; text-align: justify; margin-bottom: 12px; display: flex;">
+                    <span style="width: 30px; flex-shrink: 0; font-weight: bold;">1.</span>
+                    <span>Merujuk kepada perkara di atas, saya <strong id="tplNamaP1">INSP PokJeru</strong> (No. Badan: <strong id="tplBadanP1">G0041</strong>) dengan ini memohon kelulusan cuti bermula dari <strong id="tplTarikhMula">31 Ogos 2026</strong> hingga <strong id="tplTarikhTamat">3 September 2026</strong> <span id="tplKeterangan">kerana menghadiri kursus khas dan urusan rasmi luar kawasan.</span></span>
+                </div>
+
+                <div style="font-size: 12px; line-height: 1.5; text-align: justify; margin-bottom: 12px; display: flex;">
+                    <span style="width: 30px; flex-shrink: 0; font-weight: bold;">2.</span>
+                    <span>Saya menyusun jari memohon maaf sekiranya permohonan cuti ini menyebabkan sebarang kekurangan keanggotaan di lapangan.</span>
+                </div>
+
+                <div style="font-size: 12px; line-height: 1.5; margin-bottom: 18px;">
+                    Segala pertimbangan dan kelulusan daripada pihak pengurusan amatlah dihargai dan didahului dengan ucapan ribuan terima kasih.
+                </div>
+
+                <div style="font-size: 12px; margin-bottom: 25px;">
+                    Sekian.
+                </div>
+
+                <div style="margin-top: 10px;">
+                    <div style="font-size: 11px; font-weight: bold; margin-bottom: 2px;">YANG BENAR,</div>
+                    <div id="tplTandatangan" style="font-size: 30px; font-family: 'Great Vibes', cursive; font-weight: bold; margin-bottom: 0px; height: 38px; line-height: 38px;">PokJeru</div>
+                    <div style="font-size: 11px; line-height: 1.3;">
+                        (<strong id="tplNamaBawah">INSP POKJERU</strong>)<br>
+                        Polis Diraja Adik-Beradik Mobile
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbzu2XdB8CQnMwvv3Bfk0tkLlGW-7c7xNFIOi6GvEyQeQzjc4gtS17eKT9pdNmlTHZRn/exec';
+        let currentMatrixWeek = 'full';
+
+        window.onload = function() {
+            const savedUser = localStorage.getItem('pdab_current_user') || 'Pelawat / Belum Log Masuk';
+            document.getElementById('activeUserBadge').innerText = savedUser;
+            document.getElementById('leaveName').value = savedUser;
+            document.getElementById('dutyName').value = savedUser;
+            document.getElementById('currentUserLabel').innerText = savedUser;
+
+            const now = new Date();
+            const curYear = now.getFullYear();
+            const curMonth = String(now.getMonth() + 1).padStart(2, '0');
+            
+            document.getElementById('selectYear').value = curYear;
+            document.getElementById('selectMonth').value = curMonth;
+
+            const today = now.toISOString().split('T')[0];
+            document.getElementById('suratTarikhMula').value = today;
+            document.getElementById('suratTarikhTamat').value = today;
+
+            fetchAllDataForMatrix();
+        }
+
+        function showPage(pageId) {
+            document.getElementById('dashboardPage').classList.add('hidden');
+            document.getElementById('leavePage').classList.add('hidden');
+            document.getElementById('dutyPage').classList.add('hidden');
+            document.getElementById('suratPage').classList.add('hidden');
+            document.getElementById('historyPage').classList.add('hidden');
+            document.getElementById('matrixPage').classList.add('hidden');
+            
+            document.getElementById(pageId).classList.remove('hidden');
+            
+            const today = new Date().toISOString().split('T')[0];
+            if(pageId === 'leavePage') {
+                document.getElementById('startDate').value = today;
+                document.getElementById('endDate').value = today;
+                calculateDays();
+            } else if(pageId === 'dutyPage') {
+                document.getElementById('dutyDate').value = today;
+            } else if(pageId === 'historyPage') {
+                fetchPersonalRecords();
+            } else if(pageId === 'matrixPage') {
+                loadMatrixData('full');
+            }
+        }
+
+        // Fungsi paparan notifikasi HTML kustom ganti alert()
+        function showHtmlModal(title, message, isError = false) {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalMessage').innerText = message;
+            const iconEl = document.getElementById('modalIcon');
+            if(isError) {
+                iconEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-rose-400"></i>';
+            } else {
+                iconEl.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400"></i>';
+            }
+            document.getElementById('htmlModal').classList.remove('hidden');
+        }
+
+        function closeHtmlModal() {
+            document.getElementById('htmlModal').classList.add('hidden');
+        }
+
+        function calculateDays() {
+            const start = new Date(document.getElementById('startDate').value);
+            const end = new Date(document.getElementById('endDate').value);
+            
+            if (start && end && end >= start) {
+                const diffTime = Math.abs(end - start);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                document.getElementById('totalDays').value = diffDays + " hari";
+            } else {
+                document.getElementById('totalDays').value = "0 hari";
+            }
+        }
+
+        function formatDateMY(dateString) {
+            if (!dateString) return '';
+            let date = new Date(dateString);
+            return date.toLocaleDateString('ms-MY', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+
+        function fetchAllDataForMatrix() {
+            if (window.location.protocol === 'file:') return;
+            fetch(scriptURL)
+            .then(res => res.json())
+            .then(data => {
+                if (data.staff && Array.isArray(data.staff)) {
+                    localStorage.setItem('pdab_staff_list', JSON.stringify(data.staff));
+                }
+                if (data.records && Array.isArray(data.records)) {
+                    let formattedRecords = data.records.map(r => {
+                        let type = String(r.type || r[0]).trim();
+                        let name = r.name || r[1];
+                        let val2 = r.dateStart || r.date || r[2]; 
+                        let val3 = r.dateEnd || r.timeIn || r[3];   
+                        let val4 = r.details || r.timeOut || r[4];   
+                        let timestamp = r.timestamp || r[5];
+                        let status = r.status || r[6] || 'Menunggu';
+
+                        if (type === 'Duty') {
+                            return { type: 'Duty', name: name, date: String(val2 || '').trim(), timeIn: String(val3 || '').trim(), timeOut: String(val4 || '').trim(), timestamp: timestamp, status: status };
+                        } else {
+                            return { type: 'Cuti', name: name, dateStart: String(val2 || '').trim(), dateEnd: String(val3 || '').trim(), details: String(val4 || '').trim(), timestamp: timestamp, status: status };
+                        }
+                    });
+                    localStorage.setItem('pdab_records', JSON.stringify(formattedRecords));
+                }
+                if (data.exemptions && Array.isArray(data.exemptions)) {
+                    localStorage.setItem('pdab_exemptions', JSON.stringify(data.exemptions));
+                }
+            })
+            .catch(err => console.log('Gagal sync data matrix:', err));
+        }
+
+        function loadMatrixData(mode = 'full', weekVal = null) {
+            if(mode === 'week' && weekVal) currentMatrixWeek = parseInt(weekVal);
+            if(mode === 'full') currentMatrixWeek = 'full';
+
+            const selectedYear = parseInt(document.getElementById('selectYear').value);
+            const selectedMonth = document.getElementById('selectMonth').value;
+            const headerRow = document.getElementById('matrixHeader');
+            const tbody = document.getElementById('matrixBody');
+            
+            headerRow.innerHTML = '';
+            tbody.innerHTML = '';
+
+            let daysInMonth = new Date(selectedYear, parseInt(selectedMonth), 0).getDate();
+            
+            let startDay = 1;
+            let endDay = daysInMonth;
+
+            if (currentMatrixWeek !== 'full') {
+                if (currentMatrixWeek === 1) { startDay = 1; endDay = 7; }
+                else if (currentMatrixWeek === 2) { startDay = 8; endDay = 14; }
+                else if (currentMatrixWeek === 3) { startDay = 15; endDay = 21; }
+                else if (currentMatrixWeek === 4) { startDay = 22; endDay = 28; }
+                else if (currentMatrixWeek === 5) { startDay = 29; endDay = daysInMonth; }
+                if (endDay > daysInMonth) endDay = daysInMonth;
+            }
+
+            let headerHtml = `<th class="p-2.5 border-r border-gray-300 sticky left-0 bg-gray-800 text-amber-300 z-20 min-w-[150px]">Nama Anggota / Hari</th>`;
+            for (let d = startDay; d <= endDay; d++) {
+                headerHtml += `<th class="p-2 border-r border-gray-300 text-center min-w-[75px]">${d}</th>`;
+            }
+            headerRow.innerHTML = headerHtml;
+
+            let staffList = JSON.parse(localStorage.getItem('pdab_staff_list')) || [];
+            let records = JSON.parse(localStorage.getItem('pdab_records')) || [];
+            let exemptions = JSON.parse(localStorage.getItem('pdab_exemptions')) || [];
+            
+            let namesSet = new Set();
+            staffList.forEach(s => namesSet.add(s.name));
+            records.forEach(r => namesSet.add(r.name));
+            let allNames = Array.from(namesSet);
+
+            if (allNames.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${(endDay - startDay + 2)}" class="p-4 text-center text-gray-500 italic bg-white">Tiada data anggota atau rekod dijumpai.</td></tr>`;
+                return;
+            }
+
+            allNames.forEach(name => {
+                let isExempt = exemptions.includes(name);
+                let rowClass = isExempt ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-gray-100';
+                let nameCellClass = isExempt ? 'bg-red-100 text-red-950 font-bold' : 'bg-white font-semibold text-gray-900';
+
+                let rowHtml = `<tr class="${rowClass}"><td class="p-2.5 border-r border-gray-300 sticky left-0 ${nameCellClass} truncate max-w-[150px] shadow-sm">${name}</td>`;
+                
+                for (let d = startDay; d <= endDay; d++) {
+                    let dayStr = String(d).padStart(2, '0');
+                    let targetDateFull = `${selectedYear}-${selectedMonth}-${dayStr}`;
+
+                    let dutyRecords = records.filter(r => r.name === name && r.type === 'Duty' && r.date === targetDateFull);
+                    let leaveRecord = records.find(r => r.name === name && r.type === 'Cuti' && (r.status === 'Diluluskan' || r.status === 'Sudah Masuk') && targetDateFull >= r.dateStart && targetDateFull <= r.dateEnd);
+
+                    let cellContent = '';
+                    let cellClass = 'border-r border-gray-200 text-center text-[10px] ';
+                    let contents = [];
+
+                    if (dutyRecords.length > 0) {
+                        dutyRecords.forEach(dr => {
+                            contents.push(`<span class="bg-emerald-100 text-emerald-900 font-bold px-1 rounded block my-0.5">${dr.timeIn}-${dr.timeOut}</span>`);
+                        });
+                    }
+                    if (leaveRecord) {
+                        contents.push(`<span class="bg-blue-100 text-blue-900 font-extrabold px-1 rounded block my-0.5">CUTI</span>`);
+                    }
+
+                    if (contents.length > 0) {
+                        cellContent = contents.join('');
+                        cellClass += isExempt ? 'bg-red-100/80 p-1' : 'bg-gray-50 p-1';
+                    } else {
+                        cellContent = '';
+                        cellClass += isExempt ? 'text-gray-400 bg-red-50' : 'text-gray-300 bg-white';
+                    }
+
+                    rowHtml += `<td class="${cellClass}">${cellContent}</td>`;
+                }
+                rowHtml += `</tr>`;
+                tbody.innerHTML += rowHtml;
+            });
+        }
+
+        function downloadMatrixImage(type, weekNum = null) {
+            let originalViewWeek = currentMatrixWeek;
+            if(type === 'week' && weekNum) {
+                currentMatrixWeek = parseInt(weekNum);
+                loadMatrixData('week', currentMatrixWeek);
+            } else {
+                currentMatrixWeek = 'full';
+                loadMatrixData('full');
+            }
+
+            setTimeout(() => {
+                const container = document.getElementById('matrixTableContainer');
+                const originalMaxH = container.style.maxHeight;
+                const originalOverflow = container.style.overflowX;
+                const originalWidth = container.style.width;
+                
+                container.style.maxHeight = 'none';
+                container.style.overflowX = 'visible';
+                container.style.width = 'max-content';
+
+                html2canvas(container, { 
+                    scale: 2, 
+                    backgroundColor: '#ffffff', 
+                    useCORS: true,
+                    windowWidth: 2000 
+                }).then(canvas => {
+                    container.style.maxHeight = originalMaxH;
+                    container.style.overflowX = originalOverflow;
+                    container.style.width = originalWidth;
+
+                    let fileLabel = type === 'full' ? `Bulan_${document.getElementById('selectMonth').value}` : `Minggu_${weekNum}`;
+                    const link = document.createElement('a');
+                    link.download = `Jadual_Matrik_PDAB_${document.getElementById('selectYear').value}_${fileLabel}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+
+                    document.getElementById('selectDownloadWeek').value = "";
+                    currentMatrixWeek = originalViewWeek;
+                    loadMatrixData(currentMatrixWeek);
+                }).catch(err => {
+                    container.style.maxHeight = originalMaxH;
+                    container.style.overflowX = originalOverflow;
+                    container.style.width = originalWidth;
+                    showHtmlModal('Ralat', 'Gagal memuat turun gambar jadual.', true);
+                });
+            }, 300);
+        }
+
+        function janaDanMuatTurunSurat() {
+            const currentUser = localStorage.getItem('pdab_current_user') || 'INSP PokJeru';
+            if(!currentUser || currentUser === 'Pelawat / Belum Log Masuk') {
+                showHtmlModal('Akses Disekat', 'Sila log masuk melalui menu utama (index.html) terlebih dahulu untuk memuatkan nama dan no. badan!', true);
+                setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+                return;
+            }
+
+            const tajuk = document.getElementById('suratTajuk').value.trim();
+            const tarikhMula = document.getElementById('suratTarikhMula').value;
+            const tarikhTamat = document.getElementById('suratTarikhTamat').value;
+            const keteranganInput = document.getElementById('suratKeterangan').value.trim();
+            const errEl = document.getElementById('suratError');
+            const statusEl = document.getElementById('suratStatus');
+
+            if (!tajuk || !tarikhMula || !tarikhTamat || !keteranganInput) {
+                errEl.innerText = "Sila lengkapkan tajuk, tarikh, dan keterangan surat!";
+                errEl.classList.remove('hidden');
+                return;
+            }
+
+            errEl.classList.add('hidden');
+            statusEl.innerText = "Sedang melakar surat dan menjana imej...";
+
+            let keteranganFinal = keteranganInput;
+            if (!keteranganFinal.toLowerCase().startsWith('kerana')) {
+                keteranganFinal = 'kerana ' + keteranganFinal;
+            }
+
+            let badgeNo = "G0041";
+            let staffList = JSON.parse(localStorage.getItem('pdab_staff_list')) || [];
+            let foundStaff = staffList.find(s => s.name.toLowerCase() === currentUser.toLowerCase());
+            if (foundStaff && foundStaff.badge) {
+                badgeNo = foundStaff.badge;
+            }
+
+            document.getElementById('tplNamaPegawai').innerText = currentUser.toUpperCase();
+            document.getElementById('tplNoBadan').innerText = badgeNo;
+            document.getElementById('tplTajuk').innerText = tajuk.toUpperCase();
+            document.getElementById('tplNamaP1').innerText = currentUser.toUpperCase();
+            document.getElementById('tplBadanP1').innerText = badgeNo;
+            document.getElementById('tplTarikhMula').innerText = formatDateMY(tarikhMula);
+            document.getElementById('tplTarikhTamat').innerText = formatDateMY(tarikhTamat);
+            document.getElementById('tplKeterangan').innerText = keteranganFinal;
+            
+            document.getElementById('tplTandatangan').innerText = currentUser;
+            document.getElementById('tplNamaBawah').innerText = currentUser.toUpperCase();
+
+            let suratElement = document.getElementById('suratTemplate');
+
+            setTimeout(() => {
+                html2canvas(suratElement, { scale: 2, useCORS: true, backgroundColor: '#ffffff' }).then(canvas => {
+                    let imageURL = canvas.toDataURL('image/png');
+                    
+                    let downloadLink = document.createElement('a');
+                    downloadLink.href = imageURL;
+                    downloadLink.download = `Surat_Cuti_${currentUser.replace(/\s+/g, '_')}.png`;
+                    downloadLink.click();
+
+                    statusEl.innerText = "Surat berjaya dijana dan dimuat turun!";
+                    setTimeout(() => { statusEl.innerText = ""; }, 4000);
+                }).catch(err => {
+                    console.error(err);
+                    showHtmlModal('Ralat', 'Gagal menjana imej surat.', true);
+                    statusEl.innerText = "";
+                });
+            }, 500);
+        }
+
+        function submitLeave(event) {
+            event.preventDefault();
+            const name = localStorage.getItem('pdab_current_user');
+            if(!name || name === 'Pelawat / Belum Log Masuk') {
+                showHtmlModal('Akses Disekat', 'Sila log masuk melalui menu utama (index.html) terlebih dahulu!', true);
+                setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+                return;
+            }
+
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            let records = JSON.parse(localStorage.getItem('pdab_records')) || [];
+            const isDuplicateLeave = records.some(r => 
+                r.name.toLowerCase() === name.toLowerCase() && 
+                r.type === 'Cuti' && 
+                r.dateStart === startDate && 
+                r.dateEnd === endDate
+            );
+
+            if (isDuplicateLeave) {
+                showHtmlModal('Amaran', 'Permohonan cuti dengan tarikh mula dan tamat yang sama telah wujud dalam sistem!', true);
+                return;
+            }
+
+            const record = {
+                sheetType: 'Records',
+                type: 'Cuti',
+                name: name,
+                dateStart: startDate,
+                dateEnd: endDate,
+                details: document.getElementById('leaveReason').value || 'Tiada nota',
+                timestamp: new Date().toISOString(),
+                status: 'Menunggu'
+            };
+            
+            saveRecordLocally(record);
+            
+            // Paparkan animasi loading & sekat akses
+            document.getElementById('loadingText').innerText = "Sedang menghantar permohonan cuti ke Google Sheets...";
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+
+            syncRecordToGoogleSheet(record, () => {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                showHtmlModal('Berjaya', 'Permohonan cuti berjaya direkodkan dan diselaraskan ke Google Sheets.');
+                showPage('dashboardPage');
+            });
+        }
+
+        function submitDuty(event) {
+            event.preventDefault();
+            const name = localStorage.getItem('pdab_current_user');
+            if(!name || name === 'Pelawat / Belum Log Masuk') {
+                showHtmlModal('Akses Disekat', 'Sila log masuk melalui menu utama (index.html) terlebih dahulu!', true);
+                setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+                return;
+            }
+
+            const dutyDate = document.getElementById('dutyDate').value;
+            const timeIn = document.getElementById('timeIn').value;
+            const timeOut = document.getElementById('timeOut').value;
+
+            let records = JSON.parse(localStorage.getItem('pdab_records')) || [];
+            const isDuplicateDuty = records.some(r => 
+                r.name.toLowerCase() === name.toLowerCase() && 
+                r.type === 'Duty' && 
+                r.date === dutyDate && 
+                r.timeIn === timeIn && 
+                r.timeOut === timeOut
+            );
+
+            if (isDuplicateDuty) {
+                showHtmlModal('Amaran', 'Log duty dengan tarikh dan masa yang sama telah wujud dalam sistem!', true);
+                return;
+            }
+
+            const record = {
+                sheetType: 'Records',
+                type: 'Duty',
+                name: name,
+                date: dutyDate,
+                timeIn: timeIn,
+                timeOut: timeOut,
+                timestamp: new Date().toISOString(),
+                status: 'Selesai'
+            };
+            
+            saveRecordLocally(record);
+            
+            // Paparkan animasi loading & sekat akses
+            document.getElementById('loadingText').innerText = "Sedang menghantar log duty ke Google Sheets...";
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+
+            syncRecordToGoogleSheet(record, () => {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                showHtmlModal('Berjaya', 'Log duty berjaya direkodkan dan diselaraskan ke Google Sheets.');
+                showPage('dashboardPage');
+            });
+        }
+
+        function saveRecordLocally(record) {
+            let records = JSON.parse(localStorage.getItem('pdab_records')) || [];
+            records.push(record);
+            localStorage.setItem('pdab_records', JSON.stringify(records));
+        }
+
+        function syncRecordToGoogleSheet(record, callback) {
+            const params = new URLSearchParams(record).toString();
+            const targetURL = `${scriptURL}?${params}`;
+            const img = new Image();
+            
+            let isFinished = false;
+            const finishProcess = () => {
+                if(!isFinished) {
+                    isFinished = true;
+                    if(typeof callback === 'function') callback();
+                }
+            };
+
+            img.onload = finishProcess;
+            img.onerror = finishProcess;
+            img.src = targetURL;
+
+            // Fallback keselamatan sekiranya load mengambil masa yang terlalu lama
+            setTimeout(finishProcess, 3500);
+        }
+
+        function fetchPersonalRecords() {
+            const container = document.getElementById('recordsListContainer');
+            container.innerHTML = `
+                <div class="text-center py-8 text-slate-500 text-xs italic">
+                    <i class="fa-solid fa-spinner fa-spin text-2xl mb-2 block text-amber-400"></i>
+                    Sedang memuat turun data dari Google Sheets...
+                </div>
+            `;
+
+            const currentUser = localStorage.getItem('pdab_current_user') || '';
+
+            fetch(`${scriptURL}?sheetType=GetRecords`)
+                .then(res => res.json())
+                .then(data => {
+                    container.innerHTML = '';
+                    
+                    const userRecords = (data && Array.isArray(data)) 
+                        ? data.filter(r => r.name && r.name.toLowerCase() === currentUser.toLowerCase())
+                        : [];
+
+                    if (userRecords.length === 0) {
+                        container.innerHTML = `
+                            <div class="text-center py-10 text-slate-500 text-xs italic bg-slate-950 rounded-xl border border-slate-800">
+                                <i class="fa-solid fa-folder-open text-2xl mb-2 block"></i>
+                                Tiada rekod Cuti atau Log Duty ditemui untuk anda.
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    userRecords.reverse().forEach(rec => {
+                        const card = document.createElement('div');
+                        card.className = "bg-slate-950 border border-slate-800 p-3.5 rounded-xl space-y-2 shadow-sm text-xs";
+                        
+                        let badgeColor = "bg-amber-500/20 text-amber-300 border-amber-500/30";
+                        const statusVal = rec.status || 'Menunggu';
+                        if (statusVal === 'Lulus' || statusVal === 'Selesai' || statusVal === 'Diluluskan') {
+                            badgeColor = "bg-emerald-500/20 text-emerald-300 border-emerald-500/30";
+                        } else if (statusVal === 'Ditolak') {
+                            badgeColor = "bg-rose-500/20 text-rose-300 border-rose-500/30";
+                        }
+
+                        if (rec.type === 'Cuti') {
+                            card.innerHTML = `
+                                <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                                    <span class="font-bold text-blue-400"><i class="fa-solid fa-plane-departure mr-1"></i> Permohonan Cuti</span>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-semibold border ${badgeColor}">${statusVal}</span>
+                                </div>
+                                <div class="text-slate-300 space-y-1 pt-1">
+                                    <div><strong>Tarikh Mula:</strong> ${rec.dateStart}</div>
+                                    <div><strong>Tarikh Tamat:</strong> ${rec.dateEnd}</div>
+                                    <div><strong>Nota:</strong> ${rec.details || 'Tiada nota'}</div>
+                                </div>
+                            `;
+                        } else {
+                            card.innerHTML = `
+                                <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                                    <span class="font-bold text-emerald-400"><i class="fa-solid fa-shield-halved mr-1"></i> Log Duty</span>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-semibold border ${badgeColor}">${statusVal}</span>
+                                </div>
+                                <div class="text-slate-300 space-y-1 pt-1">
+                                    <div><strong>Tarikh Duty:</strong> ${rec.date}</div>
+                                    <div><strong>Masa Masuk:</strong> ${rec.timeIn} | <strong>Masa Keluar:</strong> ${rec.timeOut}</div>
+                                </div>
+                            `;
+                        }
+                        container.appendChild(card);
+                    });
+                })
+                .catch(err => {
+                    console.error(err);
+                    container.innerHTML = `
+                        <div class="text-center py-8 text-rose-400 text-xs italic bg-slate-950 rounded-xl border border-slate-800">
+                            <i class="fa-solid fa-triangle-exclamation text-2xl mb-2 block"></i>
+                            Gagal memuat turun data dari Google Sheets. Sila cuba lagi.
+                        </div>
+                    `;
+                });
+        }
+    </script>
+</body>
+</html>

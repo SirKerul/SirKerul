@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modul D6 JSPT - Sistem PDAB Mobile</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        .bg-custom {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.85)), url('PDABBG5.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+    </style>
+</head>
+<body class="bg-custom relative min-h-screen flex flex-col items-center justify-start font-sans text-white p-3 sm:p-5 pb-12">
+
+    <div class="w-full max-w-xl mx-auto space-y-3">
+        
+        <!-- HEADER KEPALA -->
+        <div class="bg-black/60 border border-white/20 backdrop-blur-md p-4 rounded-2xl shadow-xl text-center relative">
+            <a href="index.html" class="absolute left-3 top-3 text-[11px] text-indigo-300 hover:text-white font-medium flex items-center gap-1 transition">← Kembali</a>
+            <img src="PDAB.png" alt="Logo PDAB" class="w-12 h-12 mx-auto mb-1 object-contain drop-shadow-md" onerror="this.src='https://via.placeholder.com/80?text=PDAB'">
+            <h1 class="text-base sm:text-lg font-bold tracking-wide text-indigo-400">MODUL D6 JSPT</h1>
+            <p class="text-[11px] text-gray-300 mt-0.5">Jabatan Siasatan dan Penguatkuasaan Trafik</p>
+            <div class="mt-1 text-[9px] text-amber-300 bg-amber-950/50 border border-amber-500/30 py-0.5 px-2 rounded-lg inline-block">
+                Oleh: DIGP | Johnny Luis [ABRP], OP (27/10/2025)
+            </div>
+        </div>
+
+        <!-- MENU PECAHAN SECTION (TAB NAVIGASI DI ATAS) -->
+        <div class="grid grid-cols-4 gap-1 bg-black/70 p-1.5 rounded-xl border border-white/15 backdrop-blur-md">
+            <button onclick="switchSection(1)" id="tab-btn-1" class="py-2 px-1 text-[11px] font-bold rounded-lg transition bg-indigo-600 text-white shadow">1. Pengenalan</button>
+            <button onclick="switchSection(2)" id="tab-btn-2" class="py-2 px-1 text-[11px] font-semibold rounded-lg transition text-gray-300 hover:bg-white/10">2. Penahanan</button>
+            <button onclick="switchSection(3)" id="tab-btn-3" class="py-2 px-1 text-[11px] font-semibold rounded-lg transition text-gray-300 hover:bg-white/10">3. Sekatan SJR</button>
+            <button onclick="switchSection(4)" id="tab-btn-4" class="py-2 px-1 text-[11px] font-semibold rounded-lg transition text-gray-300 hover:bg-white/10">4. URB</button>
+        </div>
+
+        <!-- KOTAK UTAMA KANDUNGAN SECTION -->
+        <div class="bg-black/60 border border-white/20 backdrop-blur-md p-4 sm:p-5 rounded-2xl shadow-xl flex flex-col justify-between space-y-4 min-h-[350px]">
+            
+            <!-- SECTION 1: PENGENALAN, VISI, MISI & OBJEKTIF -->
+            <div id="section-1" class="space-y-3">
+                <h2 class="font-bold text-amber-400 text-xs sm:text-sm border-b border-white/10 pb-2 flex items-center gap-2">
+                    <span>🚦</span> 1. Mengenai JSPT / D6
+                </h2>
+                <div class="space-y-2 text-[11px] text-gray-300">
+                    <p class="text-indigo-200 leading-relaxed">
+                        <strong>JABATAN SIASATAN DAN PENGUATKUASAAN TRAFIK (JSPT):</strong> Jabatan di dalam PDAB yang bertanggungjawab untuk kesemua perkara berkaitan penguatkuasaan undang-undang lalu lintas dan keselamatan di jalan raya dalam negara.
+                    </p>
+                    <div class="grid grid-cols-1 gap-2 mt-2">
+                        <div class="bg-black/40 p-2.5 rounded border border-white/10">
+                            <span class="text-amber-400 font-bold block mb-0.5">VISI:</span>
+                            Jabatan peneraju penguatkuasaan lalu lintas dalam menentukan keselamatan dan keselesaan pengguna jalan raya.
+                        </div>
+                        <div class="bg-black/40 p-2.5 rounded border border-white/10">
+                            <span class="text-amber-400 font-bold block mb-0.5">MISI:</span>
+                            Memberi perkhidmatan yang cekap, profesional dan berkualiti dalam melindungi serta menjamin persekitaran yang selamat kepada pengguna jalan raya.
+                        </div>
+                        <div class="bg-black/40 p-2.5 rounded border border-white/10">
+                            <span class="text-amber-400 font-bold block mb-0.5">OBJEKTIF:</span>
+                            Menjadi sebuah jabatan yang menerajui pengurusan trafik dengan teras perkhidmatan utama.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 2: TATACARA PENAHANAN TRAFFIC -->
+            <div id="section-2" class="space-y-3 hidden">
+                <h2 class="font-bold text-amber-400 text-xs sm:text-sm border-b border-white/10 pb-2 flex items-center gap-2">
+                    <span>🚔</span> 2. Tatacara Penahanan Traffic
+                </h2>
+                <div class="space-y-2 text-[11px] text-gray-300">
+                    <div class="bg-black/40 p-2.5 rounded space-y-2">
+                        <p>• Jika terdapat rakyat membuat kesalahan lalu lintas/jalan raya, anggota unit D6/lain unit boleh lakukan penahanan dan keluarkan saman trafik.</p>
+                        <p>• <strong>Langkah Keselamatan:</strong> Tahan di kawasan selamat. Minta rakyat matikan enjin, turun/keluar dari kenderaan dan menjauhkan diri.</p>
+                        <p>• Setelah rakyat turun, baru anggota MPV dibenarkan turun (pastikan <strong>seorang sahaja</strong> turun dari MPV, driver kekal dalam kenderaan).</p>
+                        <p>• Tunjukkan kad kuasa, minta kad pengenalan & lesen, serta terangkan kesalahan.</p>
+                        <p>• Minta driver turun dari kenderaan untuk mendapatkan elaun penugasan semasa proses saman.</p>
+                        <p>• <strong>Budi bicara:</strong> Maksimum sehingga 50% dari jumlah asal boleh diberikan kepada rakyat.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 3: MENU OPS SEKATAN JALAN RAYA (BDG6.png) -->
+            <div id="section-3" class="space-y-3 hidden">
+                <h2 class="font-bold text-amber-400 text-xs sm:text-sm border-b border-white/10 pb-2 flex items-center gap-2">
+                    <span>🚧</span> 3. Ops Sekatan Jalan Raya (SJR)
+                </h2>
+                <div class="space-y-2 text-[11px] text-gray-300 text-center">
+                    <p class="text-gray-300 mb-1">Rujukan Rajah / Menu Ops Sekatan Jalan Raya Rasmi:</p>
+                    <div class="bg-black/50 p-2 rounded-xl border border-white/15 inline-block w-full">
+                        <img src="BDG6.png" alt="Ops Sekatan Jalan Raya" class="w-full max-h-56 object-contain mx-auto rounded-lg shadow-md" onerror="this.src='https://via.placeholder.com/400x200?text=BDG6.png+Tidak+Dijumpai'">
+                    </div>
+                    <p class="text-[10px] text-gray-400 italic">Sila pastikan prosedur operasi standard (SOP) SJR dipatuhi sepenuhnya di lapangan.</p>
+                </div>
+            </div>
+
+            <!-- SECTION 4: TATACARA PENGGUNAAN URB (BGD62.png) -->
+            <div id="section-4" class="space-y-3 hidden">
+                <h2 class="font-bold text-amber-400 text-xs sm:text-sm border-b border-white/10 pb-2 flex items-center gap-2">
+                    <span>🏍️</span> 4. Tatacara Penggunaan URB
+                </h2>
+                <div class="space-y-2 text-[11px] text-gray-300 text-center">
+                    <p class="text-gray-300 mb-1">Rujukan Rajah / Menu Tatacara Penggunaan URB:</p>
+                    <div class="bg-black/50 p-2 rounded-xl border border-white/15 inline-block w-full">
+                        <img src="BGD62.png" alt="Tatacara Penggunaan URB" class="w-full max-h-52 object-contain mx-auto rounded-lg shadow-md" onerror="this.src='https://via.placeholder.com/400x200?text=BGD62.png+Tidak+Dijumpai'">
+                    </div>
+                    <!-- PENUTUP MODUL -->
+                    <div class="bg-emerald-950/60 border border-emerald-500/40 p-2.5 rounded-xl text-center space-y-0.5 mt-2">
+                        <p class="font-bold text-emerald-300 text-xs">MODUL TAMAT JUMPA DILAPANGAN</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BUTANG KAWALAN NEXT / PREV DI BAWAH KOTAK -->
+            <div class="flex justify-between items-center pt-3 border-t border-white/10 mt-2">
+                <button onclick="changeSection(-1)" id="prev-btn" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition opacity-50 cursor-not-allowed" disabled>← Sebelumnya</button>
+                <span id="page-indicator" class="text-[11px] text-gray-400 font-mono">1 / 4</span>
+                <button onclick="changeSection(1)" id="next-btn" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition">Seterusnya →</button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        let currentSection = 1;
+        const totalSections = 4;
+
+        function switchSection(sectionNum) {
+            currentSection = sectionNum;
+            updateView();
+        }
+
+        function changeSection(direction) {
+            currentSection += direction;
+            if (currentSection < 1) currentSection = 1;
+            if (currentSection > totalSections) currentSection = totalSections;
+            updateView();
+        }
+
+        function updateView() {
+            for (let i = 1; i <= totalSections; i++) {
+                document.getElementById(`section-${i}`).classList.add('hidden');
+                let tabBtn = document.getElementById(`tab-btn-${i}`);
+                tabBtn.classList.remove('bg-indigo-600', 'text-white', 'shadow');
+                tabBtn.classList.add('text-gray-300', 'hover:bg-white/10');
+            }
+
+            document.getElementById(`section-${currentSection}`).classList.remove('hidden');
+            let activeTab = document.getElementById(`tab-btn-${currentSection}`);
+            activeTab.classList.remove('text-gray-300', 'hover:bg-white/10');
+            activeTab.classList.add('bg-indigo-600', 'text-white', 'shadow');
+
+            document.getElementById('page-indicator').innerText = `${currentSection} / ${totalSections}`;
+            
+            let prevBtn = document.getElementById('prev-btn');
+            let nextBtn = document.getElementById('next-btn');
+
+            if (currentSection === 1) {
+                prevBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                prevBtn.disabled = true;
+            } else {
+                prevBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                prevBtn.disabled = false;
+            }
+
+            if (currentSection === totalSections) {
+                nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                nextBtn.disabled = true;
+            } else {
+                nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                nextBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
