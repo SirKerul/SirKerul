@@ -79,6 +79,40 @@
     <!-- Notification Toast Container -->
     <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
+    <!-- PROFILE EDIT MODAL -->
+    <div id="profile-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fade-in">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 sm:p-8 space-y-6 relative">
+            <button onclick="closeProfileModal()" class="absolute top-5 right-5 p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-all">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div>
+                <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
+                    <i class="fa-solid fa-user-pen text-blue-600"></i> Kemaskini Profil Akaun
+                </h3>
+                <p class="text-xs text-slate-500 mt-1">Nama penuh anda kekal. Anda boleh menukar Username dan Password baharu di sini.</p>
+            </div>
+            <form onsubmit="handleUpdateProfile(event)" class="space-y-4 text-xs">
+                <div>
+                    <label class="block font-semibold uppercase text-slate-600 mb-1">Nama Penuh (Kekal)</label>
+                    <input type="text" id="profile-fullname" readonly class="w-full p-2.5 bg-slate-100 border border-corporate-border rounded-xl text-slate-700 font-semibold">
+                </div>
+                <div>
+                    <label class="block font-semibold uppercase text-slate-600 mb-1">Username Baharu</label>
+                    <input type="text" id="profile-username" required class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl text-slate-900">
+                </div>
+                <div>
+                    <label class="block font-semibold uppercase text-slate-600 mb-1">Password Baharu</label>
+                    <input type="password" id="profile-password" required placeholder="••••••••" class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl text-slate-900">
+                </div>
+                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                    <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-xs shadow transition-all">
+                        Simpan & Log Keluar Automatik
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- REPORT PREVIEW & PNG EXPORT MODAL -->
     <div id="report-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fade-in">
         <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-6 sm:p-8 space-y-6 relative max-h-[90vh] overflow-y-auto">
@@ -133,7 +167,7 @@
                             <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
                                 <i class="fa-solid fa-user"></i>
                             </span>
-                            <input type="text" id="login-username" required placeholder="cth: test" 
+                            <input type="text" id="login-username" required placeholder="Masukkan username..." 
                                 class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-corporate-border rounded-xl text-corporate-textDark placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white focus:ring-2 focus:ring-blue-600/10 transition-all text-sm">
                         </div>
                     </div>
@@ -154,7 +188,6 @@
                             <input type="checkbox" id="remember-me" class="w-4 h-4 rounded bg-slate-50 border-corporate-border text-blue-600 focus:ring-blue-500">
                             <span class="text-corporate-textMuted text-xs font-medium">Ingat Saya</span>
                         </label>
-                        <span class="text-xs font-semibold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100">Demo: test / 123</span>
                     </div>
 
                     <button type="submit" class="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-600/25 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all text-sm flex items-center justify-center gap-2">
@@ -187,9 +220,14 @@
                                 <p class="text-[11px] text-corporate-textMuted">Portal Pengurusan & Kawalan Operasi</p>
                             </div>
                         </div>
-                        <button onclick="handleLogout()" class="xl:hidden p-2 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 rounded-xl text-xs font-semibold transition-all">
-                            <i class="fa-solid fa-power-off"></i>
-                        </button>
+                        <div class="flex items-center gap-2 xl:hidden">
+                            <button onclick="openProfileModal()" class="p-2 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 rounded-xl text-xs font-semibold transition-all">
+                                <i class="fa-solid fa-user-gear"></i>
+                            </button>
+                            <button onclick="handleLogout()" class="p-2 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 rounded-xl text-xs font-semibold transition-all">
+                                <i class="fa-solid fa-power-off"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- 5 Sub-Menu Navigation Buttons -->
@@ -220,17 +258,19 @@
                         </button>
                     </div>
 
-                    <div class="flex items-center gap-3 w-full xl:w-auto justify-between xl:justify-end border-t xl:border-t-0 pt-2 xl:pt-0 border-corporate-border">
-                        <div class="hidden xl:flex items-center gap-2">
-                            <div class="flex items-center gap-2 bg-slate-50 border border-corporate-border px-3 py-1.5 rounded-xl text-xs font-medium">
-                                <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                                <span class="text-slate-600"><strong id="active-username" class="text-slate-900"></strong></span>
-                            </div>
-                            <button onclick="handleLogout()" class="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 rounded-xl text-xs font-semibold transition-all">
-                                <i class="fa-solid fa-power-off"></i>
-                                <span>Keluar</span>
-                            </button>
+                    <div class="hidden xl:flex items-center gap-3 justify-end border-t xl:border-t-0 pt-2 xl:pt-0 border-corporate-border">
+                        <div class="flex items-center gap-2 bg-slate-50 border border-corporate-border px-3 py-1.5 rounded-xl text-xs font-medium">
+                            <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                            <span class="text-slate-600"><strong id="active-username" class="text-slate-900"></strong></span>
                         </div>
+                        <button onclick="openProfileModal()" class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 rounded-xl text-xs font-semibold transition-all">
+                            <i class="fa-solid fa-user-gear"></i>
+                            <span>Kemaskini Profil</span>
+                        </button>
+                        <button onclick="handleLogout()" class="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 rounded-xl text-xs font-semibold transition-all">
+                            <i class="fa-solid fa-power-off"></i>
+                            <span>Keluar</span>
+                        </button>
                     </div>
 
                 </div>
@@ -306,11 +346,11 @@
                             </div>
                         </div>
 
-                        <!-- Combined Records Table (Deletable by member) -->
+                        <!-- Combined Records Table (Private to user only) -->
                         <div class="bg-white/95 backdrop-blur-md border border-corporate-border rounded-3xl p-6 shadow-xl">
                             <h3 class="text-base font-bold text-corporate-textDark mb-4 flex items-center gap-2">
                                 <i class="fa-solid fa-clipboard-list text-blue-600"></i>
-                                <span>Senarai Cuti & Duty Terkini (Boleh Padam Rekod Sendiri)</span>
+                                <span>Senarai Cuti & Duty Peribadi Anda (Hanya Papar Rekod Anda Sahaja)</span>
                             </h3>
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left text-sm">
@@ -324,7 +364,7 @@
                                         </tr>
                                     </thead>
                                     <tbody id="leave-duty-table-body" class="divide-y divide-slate-100 text-slate-700">
-                                        <tr><td colspan="5" class="p-6 text-center text-slate-400 italic">Tiada rekod cuti atau duty dimasukkan lagi.</td></tr>
+                                        <tr><td colspan="5" class="p-6 text-center text-slate-400 italic">Tiada rekod cuti atau duty anda dimasukkan lagi.</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -339,7 +379,7 @@
                             </div>
                             <div>
                                 <h3 class="text-xl font-bold text-corporate-textDark">Kawasan Terhad Pengurusan</h3>
-                                <p class="text-xs text-corporate-textMuted mt-1">Sila masukkan kata laluan pengurusan rasmi
+                                <p class="text-xs text-corporate-textMuted mt-1">Sila masukkan kata laluan pengurusan rasmi (Kata laluan: <code class="text-amber-600 font-mono font-bold">0389236</code>)</p>
                             </div>
                             <form onsubmit="verifyManagement(event)" class="space-y-3">
                                 <input type="password" id="mgm-password-input" required placeholder="Masukkan kata laluan..." class="w-full p-3 bg-slate-50 border border-corporate-border rounded-xl text-corporate-textDark text-center tracking-widest text-sm focus:outline-none focus:border-amber-500 focus:bg-white">
@@ -402,7 +442,7 @@
 
                             <div class="bg-white/95 backdrop-blur-md border border-corporate-border rounded-3xl p-6 shadow-xl">
                                 <h4 class="font-bold text-corporate-textDark mb-3 flex items-center gap-2 text-sm">
-                                    <i class="fa-solid fa-id-badge text-amber-600"></i> Direktori Anggota Berdaftar (Lihat Password & Padam User Dibenarkan)
+                                    <i class="fa-solid fa-id-badge text-amber-600"></i> Direktori Anggota Berdaftar (Edit Unit & Padam User)
                                 </h4>
                                 <div class="overflow-x-auto">
                                     <table class="w-full text-left text-sm">
@@ -411,7 +451,7 @@
                                                 <th class="p-3 rounded-l-xl">Nama / Pangkat</th>
                                                 <th class="p-3">Username</th>
                                                 <th class="p-3">Password</th>
-                                                <th class="p-3">Unit</th>
+                                                <th class="p-3">Unit Jabatan</th>
                                                 <th class="p-3 rounded-r-xl text-right">Tindakan</th>
                                             </tr>
                                         </thead>
@@ -426,6 +466,46 @@
 
                     <!-- ==================== PANEL 3: REPORT PDAB (3 TYPES: RAKYAT, KES, SITAAN) ==================== -->
                     <div id="panel-report" class="dashboard-panel hidden space-y-6 animate-fade-in">
+                        
+                        <!-- ANALISIS REPORT SUMMARY & SORT BY UNIT -->
+                        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                            <div class="bg-white/95 backdrop-blur-md border border-corporate-border rounded-2xl p-4 shadow-sm flex items-center justify-between">
+                                <div>
+                                    <p class="text-xs font-semibold text-slate-500 uppercase">Kes Selesai</p>
+                                    <h4 id="stat-kes-selesai" class="text-2xl font-bold text-emerald-600 mt-0.5">0</h4>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
+                                    <i class="fa-solid fa-circle-check text-lg"></i>
+                                </div>
+                            </div>
+
+                            <div class="bg-white/95 backdrop-blur-md border border-corporate-border rounded-2xl p-4 shadow-sm flex items-center justify-between">
+                                <div>
+                                    <p class="text-xs font-semibold text-slate-500 uppercase">Belum Selesai</p>
+                                    <h4 id="stat-kes-pending" class="text-2xl font-bold text-amber-600 mt-0.5">0</h4>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600">
+                                    <i class="fa-solid fa-clock-rotate-left text-lg"></i>
+                                </div>
+                            </div>
+
+                            <div class="lg:col-span-2 bg-white/95 backdrop-blur-md border border-corporate-border rounded-2xl p-4 shadow-sm flex items-center justify-between gap-4">
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-filter text-emerald-600 text-sm"></i>
+                                    <span class="text-xs font-bold uppercase text-slate-700">Sort by Unit:</span>
+                                </div>
+                                <select id="report-unit-filter" onchange="renderAllReportTables()" class="p-2 bg-slate-50 border border-corporate-border rounded-xl text-xs font-bold text-slate-900 flex-1 max-w-xs">
+                                    <option value="ALL">Semua Unit</option>
+                                    <option value="PENGURUSAN">PENGURUSAN</option>
+                                    <option value="JIPS">JIPS</option>
+                                    <option value="D7">D7</option>
+                                    <option value="D6">D6</option>
+                                    <option value="D4">D4</option>
+                                    <option value="D9">D9</option>
+                                </select>
+                            </div>
+                        </div>
+
                         <!-- Sub-nav for the 3 report types -->
                         <div class="flex items-center gap-2 bg-white/95 backdrop-blur-md border border-corporate-border p-2 rounded-2xl shadow-sm">
                             <button onclick="switchReportTab('rakyat')" id="btn-rep-rakyat" class="rep-tab-btn flex-1 py-2 px-4 rounded-xl text-xs font-bold transition-all bg-emerald-600 text-white shadow">
@@ -499,7 +579,7 @@
                                             <tr>
                                                 <th class="p-3 rounded-l-xl">Kes / Pengadu</th>
                                                 <th class="p-3">Tarikh / Masa</th>
-                                                <th class="p-3">Penerima</th>
+                                                <th class="p-3">Pegawai & Unit</th>
                                                 <th class="p-3 rounded-r-xl text-right">Tindakan</th>
                                             </tr>
                                         </thead>
@@ -566,14 +646,14 @@
                             <div class="lg:col-span-2 bg-white/95 backdrop-blur-md border border-corporate-border rounded-3xl p-6 shadow-xl flex flex-col">
                                 <h3 class="text-base font-bold text-corporate-textDark mb-4 flex items-center gap-2">
                                     <i class="fa-solid fa-folder-open text-emerald-600"></i>
-                                    <span>Rekod Report Kes</span>
+                                    <span>Rekod Report Kes (Beserta Nama Pegawai & Unit)</span>
                                 </h3>
                                 <div class="overflow-x-auto flex-1">
                                     <table class="w-full text-left text-sm">
                                         <thead class="bg-slate-50 text-corporate-textMuted text-xs uppercase">
                                             <tr>
                                                 <th class="p-3 rounded-l-xl">Jenis Kes / Tarikh</th>
-                                                <th class="p-3">Pegawai / Incharge</th>
+                                                <th class="p-3">Pegawai & Unit Jabatan</th>
                                                 <th class="p-3">Status</th>
                                                 <th class="p-3 rounded-r-xl text-right">Tindakan</th>
                                             </tr>
@@ -634,14 +714,14 @@
                             <div class="lg:col-span-2 bg-white/95 backdrop-blur-md border border-corporate-border rounded-3xl p-6 shadow-xl flex flex-col">
                                 <h3 class="text-base font-bold text-corporate-textDark mb-4 flex items-center gap-2">
                                     <i class="fa-solid fa-folder-open text-emerald-600"></i>
-                                    <span>Rekod Report Sitaan</span>
+                                    <span>Rekod Report Sitaan (Beserta Nama Pegawai & Unit)</span>
                                 </h3>
                                 <div class="overflow-x-auto flex-1">
                                     <table class="w-full text-left text-sm">
                                         <thead class="bg-slate-50 text-corporate-textMuted text-xs uppercase">
                                             <tr>
                                                 <th class="p-3 rounded-l-xl">Suspek / Kesalahan</th>
-                                                <th class="p-3">Plate / Incharge</th>
+                                                <th class="p-3">Pegawai & Unit</th>
                                                 <th class="p-3">Barangan</th>
                                                 <th class="p-3 rounded-r-xl text-right">Tindakan</th>
                                             </tr>
@@ -695,8 +775,71 @@
                         </div>
                     </div>
 
-                    <!-- ==================== PANEL 5: ANALISIS KEHADIRAN (2026-2099 FULL MONTHLY MATRIX) ==================== -->
+                    <!-- ==================== PANEL 5: ANALISIS KEHADIRAN (DIAGRAM 0-360 & TARIKH) ==================== -->
                     <div id="panel-analytics" class="dashboard-panel hidden space-y-6 animate-fade-in">
+                        
+                        <!-- ANALISIS KEHADIRAN & CARTA 360 -->
+                        <div class="bg-white/95 backdrop-blur-md border border-corporate-border rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
+                            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                                <div>
+                                    <h3 class="text-lg font-bold text-corporate-textDark flex items-center gap-2">
+                                        <i class="fa-solid fa-chart-pie text-indigo-600"></i>
+                                        <span>Analisis Kehadiran & Diagram Putaran 0 - 360°</span>
+                                    </h3>
+                                    <p class="text-xs text-corporate-textMuted mt-0.5">Papar peratusan kehadiran (Hadir, Cuti, Ponteng) mengikut tarikh yang dipilih.</p>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div>
+                                        <label class="block text-[10px] uppercase font-bold text-slate-500 mb-0.5">Pilih Tarikh Analisis</label>
+                                        <input type="date" id="analytics-date-filter" onchange="renderAttendanceAnalytics()" class="p-2 bg-slate-50 border border-corporate-border rounded-xl text-xs font-bold text-slate-900">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Circular 360 Progress & Legend -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center py-4">
+                                <div class="flex justify-center">
+                                    <div class="relative w-48 h-48 rounded-full flex items-center justify-center shadow-inner" id="attendance-pie-chart" style="background: conic-gradient(#2563eb 0deg 360deg);">
+                                        <div class="absolute w-36 h-36 bg-white rounded-full flex flex-col items-center justify-center shadow">
+                                            <span class="text-xs text-slate-500 font-semibold uppercase">Jumlah</span>
+                                            <span id="analytics-total-count" class="text-2xl font-bold text-slate-900">0</span>
+                                            <span class="text-[10px] text-slate-400">Anggota</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="md:col-span-2 space-y-4">
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                        <div class="bg-indigo-50 border border-indigo-200 p-4 rounded-2xl flex items-center justify-between">
+                                            <div>
+                                                <p class="text-xs font-semibold text-indigo-700 uppercase">Hadir (Duty)</p>
+                                                <h4 id="analytics-hadir-count" class="text-xl font-bold text-indigo-900 mt-1">0</h4>
+                                            </div>
+                                            <div class="w-3 h-3 rounded-full bg-indigo-600 animate-pulse"></div>
+                                        </div>
+
+                                        <div class="bg-blue-50 border border-blue-200 p-4 rounded-2xl flex items-center justify-between">
+                                            <div>
+                                                <p class="text-xs font-semibold text-blue-700 uppercase">Cuti</p>
+                                                <h4 id="analytics-cuti-count" class="text-xl font-bold text-blue-900 mt-1">0</h4>
+                                            </div>
+                                            <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+                                        </div>
+
+                                        <div class="bg-rose-50 border border-rose-200 p-4 rounded-2xl flex items-center justify-between">
+                                            <div>
+                                                <p class="text-xs font-semibold text-rose-700 uppercase">Ponteng</p>
+                                                <h4 id="analytics-ponteng-count" class="text-xl font-bold text-rose-900 mt-1">0</h4>
+                                            </div>
+                                            <div class="w-3 h-3 rounded-full bg-rose-500"></div>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-slate-500 italic">* <strong>Hadir</strong>: Mengisi log duty pada tarikh dipilih. <strong>Cuti</strong>: Memohon cuti sah. <strong>Ponteng</strong>: Anggota berdaftar yang tiada sebarang rekod duty atau cuti pada tarikh tersebut.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Full Monthly Matrix Table (2026-2099) -->
                         <div class="bg-white/95 backdrop-blur-md border border-corporate-border rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
                             <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
                                 <div>
@@ -743,9 +886,8 @@
         const FIREBASE_URL = "https://pdab-f5e35-default-rtdb.asia-southeast1.firebasedatabase.app";
 
         let currentUser = null;
-        let registeredUsers = [
-            { name: 'Demo Test Account', user: 'test', pass: '123', unit: 'PENGURUSAN' }
-        ];
+        let currentFullUser = null;
+        let registeredUsers = [];
         let leavesData = [];
         let dutyData = [];
         let rakyatReports = [];
@@ -834,14 +976,24 @@
                 document.getElementById('matrix-month').value = currentMonth;
             }
 
+            const todayStr = new Date().toISOString().split('T')[0];
+            const analyticsDateInput = document.getElementById('analytics-date-filter');
+            if (analyticsDateInput) analyticsDateInput.value = todayStr;
+
             const savedUser = localStorage.getItem('pdab_corp_user');
             if (savedUser) {
-                currentUser = savedUser;
-                enterDashboard(currentUser);
+                const found = registeredUsers.find(u => u.name === savedUser);
+                if (found) {
+                    currentFullUser = found;
+                    currentUser = found.name;
+                    enterDashboard(currentUser);
+                } else {
+                    localStorage.removeItem('pdab_corp_user');
+                }
             }
         });
 
-        // Strict Login Handler
+        // Strict Login Handler (Firebase data based)
         function handleLogin(e) {
             e.preventDefault();
             const usernameInput = document.getElementById('login-username').value.trim().toLowerCase();
@@ -850,6 +1002,7 @@
 
             const found = registeredUsers.find(u => u.user.toLowerCase() === usernameInput && u.pass === passwordInput);
             if (found) {
+                currentFullUser = found;
                 currentUser = found.name;
                 if (rememberMe) {
                     localStorage.setItem('pdab_corp_user', currentUser);
@@ -857,35 +1010,71 @@
                 showToast(`Log masuk berjaya! Selamat datang, ${currentUser}`, 'success');
                 enterDashboard(currentUser);
             } else {
-                showToast('Akses Ditolak! Hanya anggota berdaftar sahaja dibenarkan (Demo: test / 123)', 'error');
+                showToast('Akses Ditolak! Sila pastikan username dan password betul berdasarkan rekod sistem.', 'error');
             }
         }
 
         function enterDashboard(username) {
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('dashboard-screen').classList.remove('hidden');
-            document.getElementById('active-username').innerText = username;
+            document.getElementById('active-username').innerText = `${username} (${currentFullUser ? currentFullUser.unit : ''})`;
             
             // Auto-sync report receivers
             document.getElementById('rakyat-receiver').value = username;
-            document.getElementById('kes-officer').value = username;
-            document.getElementById('sitaan-officer').value = username;
+            document.getElementById('kes-officer').value = `${username} [${currentFullUser ? currentFullUser.unit : 'PENGURUSAN'}]`;
+            document.getElementById('sitaan-officer').value = `${username} [${currentFullUser ? currentFullUser.unit : 'PENGURUSAN'}]`;
 
             renderLeaveDutyTable();
             renderAllReportTables();
             renderManagementPersonnel();
             renderSupplies();
             renderAttendanceMatrix();
+            renderAttendanceAnalytics();
             switchTab('panel-leave');
         }
 
         function handleLogout() {
             localStorage.removeItem('pdab_corp_user');
             currentUser = null;
+            currentFullUser = null;
             document.getElementById('dashboard-screen').classList.add('hidden');
             document.getElementById('login-screen').classList.remove('hidden');
             document.getElementById('login-form').reset();
             showToast('Anda telah berjaya log keluar.', 'success');
+        }
+
+        // Profile Modal
+        function openProfileModal() {
+            if (!currentFullUser) return;
+            document.getElementById('profile-fullname').value = currentFullUser.name;
+            document.getElementById('profile-username').value = currentFullUser.user;
+            document.getElementById('profile-password').value = currentFullUser.pass;
+            document.getElementById('profile-modal').classList.remove('hidden');
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profile-modal').classList.add('hidden');
+        }
+
+        async function handleUpdateProfile(e) {
+            e.preventDefault();
+            const newUsername = document.getElementById('profile-username').value.trim().toLowerCase();
+            const newPassword = document.getElementById('profile-password').value;
+
+            if (registeredUsers.some(u => u.user.toLowerCase() === newUsername && u.user.toLowerCase() !== currentFullUser.user.toLowerCase())) {
+                showToast('Username telah digunakan oleh anggota lain!', 'error');
+                return;
+            }
+
+            const index = registeredUsers.findIndex(u => u.name === currentFullUser.name);
+            if (index !== -1) {
+                registeredUsers[index].user = newUsername;
+                registeredUsers[index].pass = newPassword;
+                await saveToFirebase();
+                showToast('Profil berjaya dikemaskini! Sila log masuk semula.', 'success');
+                closeProfileModal();
+                setTimeout(() => handleLogout(), 1200);
+            }
         }
 
         // Tab Switching
@@ -907,6 +1096,7 @@
 
             if (panelId === 'panel-analytics') {
                 renderAttendanceMatrix();
+                renderAttendanceAnalytics();
             }
         }
 
@@ -958,8 +1148,17 @@
             await saveToFirebase();
             renderManagementPersonnel();
             renderAttendanceMatrix();
+            renderAttendanceAnalytics();
             showToast('Anggota berjaya didaftarkan ke dalam sistem!');
             e.target.reset();
+        }
+
+        async function updatePersonnelUnit(index, newUnit) {
+            registeredUsers[index].unit = newUnit;
+            await saveToFirebase();
+            renderManagementPersonnel();
+            renderAttendanceMatrix();
+            showToast('Unit jabatan anggota berjaya dikemaskini.');
         }
 
         async function deletePersonnel(index) {
@@ -971,6 +1170,7 @@
             await saveToFirebase();
             renderManagementPersonnel();
             renderAttendanceMatrix();
+            renderAttendanceAnalytics();
             showToast('Akaun anggota berjaya dipadam.');
         }
 
@@ -997,6 +1197,9 @@
 
             tbody.innerHTML = '';
             registeredUsers.forEach((p, idx) => {
+                let units = ['PENGURUSAN', 'JIPS', 'D7', 'D6', 'D4', 'D9'];
+                let unitOptions = units.map(u => `<option value="${u}" ${p.unit === u ? 'selected' : ''}>${u}</option>`).join('');
+
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50 transition-colors">
                         <td class="p-3 font-semibold text-slate-900">${p.name}</td>
@@ -1007,7 +1210,11 @@
                                 <i id="pass-icon-${idx}" class="fa-solid fa-eye text-xs"></i>
                             </button>
                         </td>
-                        <td class="p-3"><span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-semibold border border-blue-200 text-xs">${p.unit}</span></td>
+                        <td class="p-3">
+                            <select onchange="updatePersonnelUnit(${idx}, this.value)" class="px-2 py-1 rounded bg-blue-50 text-blue-700 font-semibold border border-blue-200 text-xs">
+                                ${unitOptions}
+                            </select>
+                        </td>
                         <td class="p-3 text-right">
                             <button onclick="deletePersonnel(${idx})" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-lg text-xs font-semibold transition-all">
                                 <i class="fa-solid fa-trash-can"></i> Padam
@@ -1055,12 +1262,6 @@
                 return;
             }
 
-            const exists = leavesData.some(l => l.officer === currentUser && l.start === start && l.ret === ret);
-            if (exists) {
-                showToast('Ralat: Permohonan cuti yang sama telah direkodkan.', 'error');
-                return;
-            }
-
             leavesData.unshift({
                 id: 'leave_' + Date.now(),
                 officer: currentUser || 'Anggota',
@@ -1074,6 +1275,7 @@
             await saveToFirebase();
             renderLeaveDutyTable();
             renderAttendanceMatrix();
+            renderAttendanceAnalytics();
             showToast('Permohonan cuti berjaya disimpan!');
             e.target.reset();
             document.getElementById('leave-days-display').innerText = '0 Hari';
@@ -1084,12 +1286,6 @@
             const start = document.getElementById('duty-start').value;
             const end = document.getElementById('duty-end').value;
             const date = document.getElementById('duty-date').value;
-
-            const exists = dutyData.some(d => d.officer === currentUser && d.date === date && d.start === start && d.end === end);
-            if (exists) {
-                showToast('Ralat: Rekod Duty masa yang sama telah wujud untuk tarikh ini.', 'error');
-                return;
-            }
 
             dutyData.unshift({
                 id: 'duty_' + Date.now(),
@@ -1105,6 +1301,7 @@
             await saveToFirebase();
             renderLeaveDutyTable();
             renderAttendanceMatrix();
+            renderAttendanceAnalytics();
             showToast('Log Duty berjaya disimpan!');
             e.target.reset();
         }
@@ -1118,15 +1315,19 @@
             await saveToFirebase();
             renderLeaveDutyTable();
             renderAttendanceMatrix();
+            renderAttendanceAnalytics();
             showToast('Rekod berjaya dipadam.');
         }
 
+        // Senarai cuti & duty HANYA PAPAR REKOD SENDIRI
         function renderLeaveDutyTable() {
             const tbody = document.getElementById('leave-duty-table-body');
-            const combined = [...leavesData, ...dutyData];
+            const myLeaves = leavesData.filter(item => item.officer === currentUser);
+            const myDuty = dutyData.filter(item => item.officer === currentUser);
+            const combined = [...myLeaves, ...myDuty];
 
             if (combined.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400 italic">Tiada rekod cuti atau duty dimasukkan lagi.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400 italic">Tiada rekod cuti atau duty anda dimasukkan lagi.</td></tr>`;
                 return;
             }
 
@@ -1169,11 +1370,11 @@
             const date = document.getElementById('rakyat-date').value;
             const time = document.getElementById('rakyat-time').value;
             const desc = document.getElementById('rakyat-desc').value;
-            const receiver = document.getElementById('rakyat-receiver').value;
+            const receiver = `${currentUser} [${currentFullUser ? currentFullUser.unit : 'PENGURUSAN'}]`;
 
             rakyatReports.unshift({
                 id: 'rakyat_' + Date.now(),
-                kes, complainant, phone, job, date, time, desc, receiver, status: 'Selesai'
+                kes, complainant, phone, job, date, time, desc, receiver, unit: currentFullUser ? currentFullUser.unit : 'PENGURUSAN', status: 'Selesai'
             });
             await saveToFirebase();
             renderAllReportTables();
@@ -1197,13 +1398,13 @@
 
             kesReports.unshift({
                 id: 'kes_' + Date.now(),
-                type, date, time, officer, incharge, status, desc, imgData
+                type, date, time, officer, incharge, status, desc, imgData, unit: currentFullUser ? currentFullUser.unit : 'PENGURUSAN'
             });
             await saveToFirebase();
             renderAllReportTables();
             showToast('Report Kes berjaya disimpan!');
             e.target.reset();
-            document.getElementById('kes-officer').value = currentUser;
+            document.getElementById('kes-officer').value = `${currentUser} [${currentFullUser ? currentFullUser.unit : 'PENGURUSAN'}]`;
         }
 
         // Report Sitaan Submission
@@ -1220,13 +1421,13 @@
 
             sitaanReports.unshift({
                 id: 'sitaan_' + Date.now(),
-                officer, incharge, suspect, plate, offense, items, imgData, status: 'Selesai'
+                officer, incharge, suspect, plate, offense, items, imgData, unit: currentFullUser ? currentFullUser.unit : 'PENGURUSAN', status: 'Selesai'
             });
             await saveToFirebase();
             renderAllReportTables();
             showToast('Report Sitaan berjaya disimpan!');
             e.target.reset();
-            document.getElementById('sitaan-officer').value = currentUser;
+            document.getElementById('sitaan-officer').value = `${currentUser} [${currentFullUser ? currentFullUser.unit : 'PENGURUSAN'}]`;
         }
 
         async function updateReportStatus(id, type, newStatus) {
@@ -1259,7 +1460,6 @@
             let item = null;
             let title = '';
             let bodyHtml = '';
-            let imgHtml = '';
 
             if (type === 'rakyat') {
                 item = rakyatReports.find(i => i.id === id);
@@ -1277,7 +1477,8 @@
                 title = `Report Kes: ${item.type}`;
                 bodyHtml = `
                     <div><strong>Tarikh / Masa:</strong> ${item.date} (${item.time})</div>
-                    <div><strong>Pegawai / Incharge:</strong> ${item.officer} / ${item.incharge}</div>
+                    <div><strong>Pegawai & Unit:</strong> ${item.officer}</div>
+                    <div><strong>Incharge:</strong> ${item.incharge}</div>
                     <div class="col-span-2"><strong>Ringkasan Kes:</strong> ${item.desc}</div>
                 `;
             } else if (type === 'sitaan') {
@@ -1286,7 +1487,8 @@
                 bodyHtml = `
                     <div><strong>Suspek:</strong> ${item.suspect}</div>
                     <div><strong>No. Plate:</strong> ${item.plate}</div>
-                    <div><strong>Pegawai / Incharge:</strong> ${item.officer} / ${item.incharge}</div>
+                    <div><strong>Pegawai & Unit:</strong> ${item.officer}</div>
+                    <div><strong>Incharge:</strong> ${item.incharge}</div>
                     <div class="col-span-2"><strong>Barangan Sita:</strong> ${item.items}</div>
                 `;
             }
@@ -1314,7 +1516,6 @@
             document.getElementById('report-modal').classList.add('hidden');
         }
 
-        // Download Report as PNG using html2canvas
         function downloadReportPNG() {
             const card = document.getElementById('printable-report-card');
             html2canvas(card, { scale: 2 }).then(canvas => {
@@ -1327,20 +1528,30 @@
         }
 
         function renderAllReportTables() {
-            // Rakyat Table
+            const unitFilter = document.getElementById('report-unit-filter').value;
+
+            // Update Kes Selesai & Pending Statistics
+            const allKes = [...kesReports, ...sitaanReports, ...rakyatReports];
+            const totalSelesai = allKes.filter(k => (k.status || 'Selesai') === 'Selesai').length;
+            const totalPending = allKes.filter(k => k.status === 'Masih Berjalan').length;
+            document.getElementById('stat-kes-selesai').innerText = totalSelesai;
+            document.getElementById('stat-kes-pending').innerText = totalPending;
+
+            // Filtered Rakyat Table
             const tbodyRakyat = document.getElementById('table-body-rakyat');
-            if (rakyatReports.length === 0) {
-                tbodyRakyat.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-400 italic">Tiada report rakyat dimasukkan.</td></tr>`;
+            const filteredRakyat = rakyatReports.filter(r => unitFilter === 'ALL' || (r.unit && r.unit.toUpperCase() === unitFilter));
+            if (filteredRakyat.length === 0) {
+                tbodyRakyat.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-400 italic">Tiada report rakyat dijumpai.</td></tr>`;
             } else {
                 tbodyRakyat.innerHTML = '';
-                rakyatReports.forEach(r => {
+                filteredRakyat.forEach(r => {
                     tbodyRakyat.innerHTML += `
                         <tr class="hover:bg-slate-50">
                             <td class="p-3 font-semibold text-slate-900">${r.kes}<br><span class="text-xs text-slate-500 font-normal">${r.complainant}</span></td>
                             <td class="p-3 text-slate-500 text-xs">${r.date}<br>${r.time}</td>
-                            <td class="p-3 text-slate-700">${r.receiver}</td>
+                            <td class="p-3 text-slate-700 font-medium text-xs">${r.receiver}</td>
                             <td class="p-3 text-right space-x-1">
-                                <button onclick="previewReport('${r.id}', 'rakyat')" class="px-2.5 py-1 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg text-xs font-semibold"><i class="fa-solid fa-eye"></i> Preview</button>
+                                <button onclick="previewReport('${r.id}', 'rakyat')" class="px-2.5 py-1 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg text-xs font-semibold"><i class="fa-solid fa-eye"></i></button>
                                 <button onclick="deleteReport('${r.id}', 'rakyat')" class="px-2.5 py-1 bg-rose-50 text-rose-600 border border-rose-200 rounded-lg text-xs font-semibold"><i class="fa-solid fa-trash-can"></i></button>
                             </td>
                         </tr>
@@ -1348,13 +1559,14 @@
                 });
             }
 
-            // Kes Table
+            // Filtered Kes Table
             const tbodyKes = document.getElementById('table-body-kes');
-            if (kesReports.length === 0) {
-                tbodyKes.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-400 italic">Tiada report kes dimasukkan.</td></tr>`;
+            const filteredKes = kesReports.filter(k => unitFilter === 'ALL' || (k.unit && k.unit.toUpperCase() === unitFilter));
+            if (filteredKes.length === 0) {
+                tbodyKes.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-400 italic">Tiada report kes dijumpai.</td></tr>`;
             } else {
                 tbodyKes.innerHTML = '';
-                kesReports.forEach(k => {
+                filteredKes.forEach(k => {
                     let badgeColor = k.status === 'Selesai' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-amber-50 text-amber-600 border-amber-200';
                     tbodyKes.innerHTML += `
                         <tr class="hover:bg-slate-50">
@@ -1375,17 +1587,18 @@
                 });
             }
 
-            // Sitaan Table
+            // Filtered Sitaan Table
             const tbodySitaan = document.getElementById('table-body-sitaan');
-            if (sitaanReports.length === 0) {
-                tbodySitaan.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-400 italic">Tiada report sitaan dimasukkan.</td></tr>`;
+            const filteredSitaan = sitaanReports.filter(s => unitFilter === 'ALL' || (s.unit && s.unit.toUpperCase() === unitFilter));
+            if (filteredSitaan.length === 0) {
+                tbodySitaan.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-400 italic">Tiada report sitaan dijumpai.</td></tr>`;
             } else {
                 tbodySitaan.innerHTML = '';
-                sitaanReports.forEach(s => {
+                filteredSitaan.forEach(s => {
                     tbodySitaan.innerHTML += `
                         <tr class="hover:bg-slate-50">
                             <td class="p-3 font-semibold text-slate-900">${s.suspect}<br><span class="text-xs text-slate-500 font-normal">${s.offense}</span></td>
-                            <td class="p-3 text-slate-700 text-xs font-mono">${s.plate}<br><span class="text-slate-400 font-sans">Incharge: ${s.incharge}</span></td>
+                            <td class="p-3 text-slate-700 text-xs">${s.officer}<br><span class="text-slate-400 font-mono">Plate: ${s.plate}</span></td>
                             <td class="p-3 text-slate-700 text-xs">${s.items}</td>
                             <td class="p-3 text-right space-x-1">
                                 <button onclick="previewReport('${s.id}', 'sitaan')" class="px-2.5 py-1 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg text-xs font-semibold"><i class="fa-solid fa-eye"></i></button>
@@ -1452,6 +1665,51 @@
                     </div>
                 `;
             }
+        }
+
+        // Render Attendance Analytics with 0-360 Animated Pie Chart & Date Filter
+        function renderAttendanceAnalytics() {
+            const dateFilter = document.getElementById('analytics-date-filter').value;
+            const totalCount = registeredUsers.length;
+
+            if (totalCount === 0 || !dateFilter) {
+                document.getElementById('analytics-total-count').innerText = 0;
+                document.getElementById('analytics-hadir-count').innerText = 0;
+                document.getElementById('analytics-cuti-count').innerText = 0;
+                document.getElementById('analytics-ponteng-count').innerText = 0;
+                document.getElementById('attendance-pie-chart').style.background = 'conic-gradient(#cbd5e1 0deg 360deg)';
+                return;
+            }
+
+            let hadirCount = 0;
+            let cutiCount = 0;
+            let pontengCount = 0;
+
+            registeredUsers.forEach(person => {
+                let hasDuty = dutyData.some(d => d.officer === person.name && d.date === dateFilter);
+                let hasLeave = leavesData.some(l => l.officer === person.name && l.start <= dateFilter && l.ret >= dateFilter);
+
+                if (hasDuty) {
+                    hadirCount++;
+                } else if (hasLeave) {
+                    cutiCount++;
+                } else {
+                    pontengCount++;
+                }
+            });
+
+            document.getElementById('analytics-total-count').innerText = totalCount;
+            document.getElementById('analytics-hadir-count').innerText = hadirCount;
+            document.getElementById('analytics-cuti-count').innerText = cutiCount;
+            document.getElementById('analytics-ponteng-count').innerText = pontengCount;
+
+            // Calculate degrees for Conic Gradient (0 - 360 degrees)
+            let hadirDeg = (hadirCount / totalCount) * 360;
+            let cutiDeg = hadirDeg + (cutiCount / totalCount) * 360;
+            let pontengDeg = cutiDeg + (pontengCount / totalCount) * 360;
+
+            const pieChart = document.getElementById('attendance-pie-chart');
+            pieChart.style.background = `conic-gradient(#4f46e5 0deg ${hadirDeg}deg, #2563eb ${hadirDeg}deg ${cutiDeg}deg, #f43f5e ${cutiDeg}deg 360deg)`;
         }
 
         // Render Full Monthly Matrix Attendance Table (2026-2099)
