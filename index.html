@@ -12,6 +12,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- html2canvas for PNG Export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- PWA Manifest & Meta -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PDAB Sistem">
+    <link rel="apple-touch-icon" href="PDAB.png">
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -58,6 +65,17 @@
             background-repeat: no-repeat;
             background-attachment: fixed;
         }
+        /* Circular 360 Progress Static starting from 12 o'clock */
+        .circular-progress {
+            position: relative;
+            width: 192px;
+            height: 192px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.5s ease;
+        }
         ::-webkit-scrollbar {
             width: 5px;
             height: 5px;
@@ -79,6 +97,43 @@
     <!-- Notification Toast Container -->
     <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
+    <!-- BUFFERING OVERLAY WITH PERCENTAGE COUNTER (0 to 100%) -->
+    <div id="db-buffering-overlay" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-950/70 backdrop-blur-sm animate-fade-in">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 text-center space-y-5 mx-4 border border-corporate-border">
+            <div class="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center mx-auto text-2xl animate-spin">
+                <i class="fa-solid fa-circle-notch"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-slate-900 text-base">Menghantar ke Pangkalan Data</h3>
+                <p class="text-xs text-slate-500 mt-1">Sila tunggu sebentar mengikut kelajuan rangkaian...</p>
+            </div>
+            <div class="space-y-2">
+                <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden p-0.5 border border-slate-200">
+                    <div id="buffering-bar" class="bg-blue-600 h-full rounded-full transition-all duration-100" style="width: 0%"></div>
+                </div>
+                <div class="flex justify-between text-xs font-bold text-slate-600">
+                    <span>Proses Sync</span>
+                    <span id="buffering-percentage">0%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PWA INSTALL BANNER -->
+    <div id="pwa-install-banner" class="hidden fixed bottom-5 left-5 z-50 bg-white/95 backdrop-blur-md border border-slate-200 rounded-2xl p-4 shadow-2xl flex items-center gap-3 animate-fade-in max-w-sm">
+        <img src="PDAB.png" alt="PDAB Logo" class="w-12 h-12 rounded-xl object-contain border border-slate-100 p-1 bg-slate-50">
+        <div class="flex-1">
+            <h4 class="font-bold text-xs text-slate-900">Install Sistem PDAB</h4>
+            <p class="text-[11px] text-slate-500">Tambah ke skrin telefon untuk akses pantas (PWA).</p>
+        </div>
+        <button id="pwa-install-btn" class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow transition-all">
+            Add to Home
+        </button>
+        <button onclick="document.getElementById('pwa-install-banner').classList.add('hidden')" class="p-1 text-slate-400 hover:text-slate-600">
+            <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+    </div>
+
     <!-- PROFILE EDIT MODAL -->
     <div id="profile-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fade-in">
         <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 sm:p-8 space-y-6 relative">
@@ -89,7 +144,7 @@
                 <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
                     <i class="fa-solid fa-user-pen text-blue-600"></i> Kemaskini Profil Akaun
                 </h3>
-                <p class="text-xs text-slate-500 mt-1">Nama penuh anda kekal. Anda boleh menukar Username dan Password baharu di sini.</p>
+                <p class="text-xs text-slate-500 mt-1">Nama penuh anda kekal. Sistem menyemak keunikan username baharu.</p>
             </div>
             <form onsubmit="handleUpdateProfile(event)" class="space-y-4 text-xs">
                 <div>
@@ -141,6 +196,31 @@
                     Tutup
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- EDIT REPORT MODAL -->
+    <div id="edit-report-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fade-in">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 sm:p-8 space-y-6 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeEditReportModal()" class="absolute top-5 right-5 p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-all">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div>
+                <h3 id="edit-modal-title" class="font-bold text-slate-900 text-base flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-emerald-600"></i> Edit Laporan
+                </h3>
+                <p class="text-xs text-slate-500 mt-1">Kemaskini maklumat laporan di bawah.</p>
+            </div>
+            <form id="edit-report-form" onsubmit="handleSaveEditedReport(event)" class="space-y-3.5 text-xs">
+                <input type="hidden" id="edit-rep-id">
+                <input type="hidden" id="edit-rep-type">
+                <div id="edit-form-dynamic-fields" class="space-y-3"></div>
+                <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                    <button type="submit" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-xs shadow transition-all">
+                        Simpan Perubahan
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -230,7 +310,7 @@
                         </div>
                     </div>
 
-                    <!-- 5 Sub-Menu Navigation Buttons -->
+                    <!-- 4 Sub-Menu Navigation Buttons -->
                     <div class="flex items-center gap-1.5 overflow-x-auto w-full xl:w-auto pb-1 xl:pb-0 justify-start xl:justify-center">
                         <button onclick="switchTab('panel-leave')" id="btn-tab-panel-leave" class="tab-btn px-3 py-1.5 rounded-xl border border-corporate-border bg-white hover:border-blue-400 hover:shadow transition-all flex items-center gap-2 text-xs font-semibold whitespace-nowrap shadow-sm">
                             <i class="fa-solid fa-calendar-days text-blue-600"></i>
@@ -245,11 +325,6 @@
                         <button onclick="switchTab('panel-report')" id="btn-tab-panel-report" class="tab-btn px-3 py-1.5 rounded-xl border border-corporate-border bg-white hover:border-emerald-400 hover:shadow transition-all flex items-center gap-2 text-xs font-semibold whitespace-nowrap shadow-sm">
                             <i class="fa-solid fa-file-lines text-emerald-600"></i>
                             <span>Report PDAB</span>
-                        </button>
-
-                        <button onclick="switchTab('panel-supplies')" id="btn-tab-panel-supplies" class="tab-btn px-3 py-1.5 rounded-xl border border-corporate-border bg-white hover:border-purple-400 hover:shadow transition-all flex items-center gap-2 text-xs font-semibold whitespace-nowrap shadow-sm">
-                            <i class="fa-solid fa-boxes-stacked text-purple-600"></i>
-                            <span>Bekalan PDAB</span>
                         </button>
 
                         <button onclick="switchTab('panel-analytics')" id="btn-tab-panel-analytics" class="tab-btn px-3 py-1.5 rounded-xl border border-corporate-border bg-white hover:border-indigo-400 hover:shadow transition-all flex items-center gap-2 text-xs font-semibold whitespace-nowrap shadow-sm">
@@ -280,10 +355,10 @@
             <main class="flex-1 p-4 sm:p-6 max-w-[100rem] mx-auto w-full space-y-6 relative z-10">
 
                 <div class="w-full">
-                    <!-- ==================== PANEL 1: CUTI & DUTY (SEPARATED) ==================== -->
+                    <!-- ==================== PANEL 1: CUTI & DUTY ==================== -->
                     <div id="panel-leave" class="dashboard-panel space-y-6 animate-fade-in">
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <!-- Cuti Form (Automated Days Calculation) -->
+                            <!-- Cuti Form -->
                             <div class="bg-white/95 backdrop-blur-md border border-corporate-border rounded-3xl p-6 shadow-xl space-y-4">
                                 <h3 class="text-base font-bold text-corporate-textDark flex items-center gap-2">
                                     <i class="fa-solid fa-calendar-minus text-blue-600"></i>
@@ -346,7 +421,7 @@
                             </div>
                         </div>
 
-                        <!-- Combined Records Table (Private to user only) -->
+                        <!-- Combined Records Table -->
                         <div class="bg-white/95 backdrop-blur-md border border-corporate-border rounded-3xl p-6 shadow-xl">
                             <h3 class="text-base font-bold text-corporate-textDark mb-4 flex items-center gap-2">
                                 <i class="fa-solid fa-clipboard-list text-blue-600"></i>
@@ -375,18 +450,16 @@
                     <div id="panel-management" class="dashboard-panel hidden space-y-6 animate-fade-in">
                         <div id="mgm-gate" class="bg-white/95 backdrop-blur-md border border-corporate-border rounded-3xl p-8 shadow-xl max-w-md mx-auto text-center space-y-4">
                             <div class="w-16 h-16 bg-amber-50 text-amber-600 border border-amber-100 rounded-2xl mx-auto flex items-center justify-center text-2xl shadow-sm">
-                                <i class="fa-solid fa-fingerprint"></i>
+                                <i class="fa-solid fa-user-shield"></i>
                             </div>
                             <div>
-                                <h3 class="text-xl font-bold text-corporate-textDark">Kawasan Terhad Pengurusan</h3>
-                                <p class="text-xs text-corporate-textMuted mt-1">Sila masukkan kata laluan pengurusan rasmi (Kata laluan: <code class="text-amber-600 font-mono font-bold">0389236</code>)</p>
+                                <h3 class="text-xl font-bold text-corporate-textDark">Kawasan Pengurusan</h3>
+                                <p class="text-xs text-corporate-textMuted mt-1">Akses eksklusif untuk peranan (role) PENGURUSAN sahaja. Tiada kata laluan diperlukan.</p>
                             </div>
-                            <form onsubmit="verifyManagement(event)" class="space-y-3">
-                                <input type="password" id="mgm-password-input" required placeholder="Masukkan kata laluan..." class="w-full p-3 bg-slate-50 border border-corporate-border rounded-xl text-corporate-textDark text-center tracking-widest text-sm focus:outline-none focus:border-amber-500 focus:bg-white">
-                                <button type="submit" class="w-full py-3 bg-amber-600 hover:bg-amber-700 font-semibold text-white rounded-xl text-sm transition-all shadow-md shadow-amber-600/20">
-                                    Sahkan Akses Pengurusan
-                                </button>
-                            </form>
+                            <button onclick="enterManagementDirect()" class="w-full py-3.5 bg-amber-600 hover:bg-amber-700 font-bold text-white rounded-xl text-sm transition-all shadow-md shadow-amber-600/20 flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-right-to-bracket"></i>
+                                <span>Log In Pengurusan</span>
+                            </button>
                         </div>
 
                         <div id="mgm-content" class="hidden space-y-6">
@@ -464,7 +537,7 @@
                         </div>
                     </div>
 
-                    <!-- ==================== PANEL 3: REPORT PDAB (3 TYPES: RAKYAT, KES, SITAAN) ==================== -->
+                    <!-- ==================== PANEL 3: REPORT PDAB ==================== -->
                     <div id="panel-report" class="dashboard-panel hidden space-y-6 animate-fade-in">
                         
                         <!-- ANALISIS REPORT SUMMARY & SORT BY UNIT -->
@@ -556,6 +629,13 @@
                                         </div>
                                     </div>
                                     <div>
+                                        <label class="block font-semibold uppercase text-corporate-textMuted mb-1">Status Kes</label>
+                                        <select id="rakyat-status" class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl text-corporate-textDark">
+                                            <option value="Selesai">Selesai</option>
+                                            <option value="Tindakan">Tindakan</option>
+                                        </select>
+                                    </div>
+                                    <div>
                                         <label class="block font-semibold uppercase text-corporate-textMuted mb-1">Ringkasan Kejadian</label>
                                         <textarea id="rakyat-desc" rows="2" required placeholder="Butiran lengkap aduan..." class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl text-corporate-textDark"></textarea>
                                     </div>
@@ -579,7 +659,7 @@
                                             <tr>
                                                 <th class="p-3 rounded-l-xl">Kes / Pengadu</th>
                                                 <th class="p-3">Tarikh / Masa</th>
-                                                <th class="p-3">Pegawai & Unit</th>
+                                                <th class="p-3">Status</th>
                                                 <th class="p-3 rounded-r-xl text-right">Tindakan</th>
                                             </tr>
                                         </thead>
@@ -676,6 +756,16 @@
                                 <form onsubmit="submitReportSitaan(event)" class="space-y-3.5 text-xs">
                                     <div class="grid grid-cols-2 gap-2">
                                         <div>
+                                            <label class="block font-semibold uppercase text-corporate-textMuted mb-1">Tarikh Sita</label>
+                                            <input type="date" id="sitaan-date" required class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl text-corporate-textDark">
+                                        </div>
+                                        <div>
+                                            <label class="block font-semibold uppercase text-corporate-textMuted mb-1">Masa Sita</label>
+                                            <input type="time" id="sitaan-time" required class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl text-corporate-textDark">
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div>
                                             <label class="block font-semibold uppercase text-corporate-textMuted mb-1">Nama Anggota (Sync)</label>
                                             <input type="text" id="sitaan-officer" readonly class="w-full p-2.5 bg-slate-100 border border-corporate-border rounded-xl text-slate-700 font-medium">
                                         </div>
@@ -714,15 +804,15 @@
                             <div class="lg:col-span-2 bg-white/95 backdrop-blur-md border border-corporate-border rounded-3xl p-6 shadow-xl flex flex-col">
                                 <h3 class="text-base font-bold text-corporate-textDark mb-4 flex items-center gap-2">
                                     <i class="fa-solid fa-folder-open text-emerald-600"></i>
-                                    <span>Rekod Report Sitaan (Beserta Nama Pegawai & Unit)</span>
+                                    <span>Rekod Report Sitaan (Beserta Tarikh, Masa, Pegawai & Unit)</span>
                                 </h3>
                                 <div class="overflow-x-auto flex-1">
                                     <table class="w-full text-left text-sm">
                                         <thead class="bg-slate-50 text-corporate-textMuted text-xs uppercase">
                                             <tr>
                                                 <th class="p-3 rounded-l-xl">Suspek / Kesalahan</th>
+                                                <th class="p-3">Tarikh / Masa</th>
                                                 <th class="p-3">Pegawai & Unit</th>
-                                                <th class="p-3">Barangan</th>
                                                 <th class="p-3 rounded-r-xl text-right">Tindakan</th>
                                             </tr>
                                         </thead>
@@ -735,58 +825,18 @@
                         </div>
                     </div>
 
-                    <!-- ==================== PANEL 4: BEKALAN PDAB ==================== -->
-                    <div id="panel-supplies" class="dashboard-panel hidden space-y-6 animate-fade-in">
-                        <!-- Add Supply Tool -->
-                        <div class="bg-white/95 backdrop-blur-md border border-corporate-border rounded-3xl p-6 shadow-xl space-y-4 max-w-xl mx-auto">
-                            <h4 class="font-bold text-corporate-textDark flex items-center gap-2 text-base">
-                                <i class="fa-solid fa-box-circle-check text-purple-600"></i> Tambah / Kemaskini Bekalan & Aset PDAB
-                            </h4>
-                            <form onsubmit="submitManagementSupply(event)" class="space-y-3 text-xs">
-                                <div>
-                                    <label class="block font-semibold uppercase text-corporate-textMuted mb-1">Kategori Aset / Bekalan</label>
-                                    <select id="mgm-supply-category" class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl text-corporate-textDark">
-                                        <option value="Senjata Api">Senjata Api Korporat</option>
-                                        <option value="Kelengkapan Taktikal">Kelengkapan Taktikal</option>
-                                        <option value="Kenderaan Operasi">Kenderaan Operasi</option>
-                                    </select>
-                                </div>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <div>
-                                        <label class="block font-semibold uppercase text-corporate-textMuted mb-1">Nama Item</label>
-                                        <input type="text" id="mgm-supply-item" required placeholder="cth: Pistol Walther PPK" class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl text-corporate-textDark">
-                                    </div>
-                                    <div>
-                                        <label class="block font-semibold uppercase text-corporate-textMuted mb-1">Kuantiti (Semasa / Jumlah)</label>
-                                        <input type="text" id="mgm-supply-qty" required placeholder="cth: 45 / 50 unit" class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl text-corporate-textDark">
-                                    </div>
-                                </div>
-                                <button type="submit" class="w-full py-2.5 bg-purple-600 hover:bg-purple-700 font-semibold text-white rounded-xl transition-all shadow">
-                                    Simpan & Kemaskini Rekod Bekalan
-                                </button>
-                            </form>
-                        </div>
-
-                        <div id="supplies-container" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
-                        <div id="supplies-empty-state" class="bg-white/95 backdrop-blur-md border border-corporate-border rounded-3xl p-12 text-center shadow-xl">
-                            <i class="fa-solid fa-box-open text-4xl text-slate-300 mb-3 block"></i>
-                            <h4 class="text-base font-bold text-corporate-textDark">Tiada Rekod Bekalan Dimasukkan</h4>
-                            <p class="text-xs text-corporate-textMuted mt-1">Sila masukkan maklumat aset atau inventori melalui borang di atas.</p>
-                        </div>
-                    </div>
-
-                    <!-- ==================== PANEL 5: ANALISIS KEHADIRAN (DIAGRAM 0-360 & TARIKH) ==================== -->
+                    <!-- ==================== PANEL 4: ANALISIS KEHADIRAN (STATIC 12 O'CLOCK, 9 PM INTERVAL) ==================== -->
                     <div id="panel-analytics" class="dashboard-panel hidden space-y-6 animate-fade-in">
                         
-                        <!-- ANALISIS KEHADIRAN & CARTA 360 -->
+                        <!-- ANALISIS KEHADIRAN & STATIC 360 CARTA FROM 12 O'CLOCK -->
                         <div class="bg-white/95 backdrop-blur-md border border-corporate-border rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
                             <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
                                 <div>
                                     <h3 class="text-lg font-bold text-corporate-textDark flex items-center gap-2">
                                         <i class="fa-solid fa-chart-pie text-indigo-600"></i>
-                                        <span>Analisis Kehadiran & Diagram Putaran 0 - 360°</span>
+                                        <span>Analisis Kehadiran & Diagram Putaran 0 - 360° (Jam 9 Malam ke 9 Malam)</span>
                                     </h3>
-                                    <p class="text-xs text-corporate-textMuted mt-0.5">Papar peratusan kehadiran (Hadir, Cuti, Ponteng) mengikut tarikh yang dipilih.</p>
+                                    <p class="text-xs text-corporate-textMuted mt-0.5">Analisis harian mengira log duty dari jam 9:00 malam sebelumnya sehingga 9:00 malam hari semasa.</p>
                                 </div>
                                 <div class="flex items-center gap-3">
                                     <div>
@@ -796,10 +846,10 @@
                                 </div>
                             </div>
 
-                            <!-- Circular 360 Progress & Legend -->
+                            <!-- Circular 360 Static Progress & Legend -->
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center py-4">
                                 <div class="flex justify-center">
-                                    <div class="relative w-48 h-48 rounded-full flex items-center justify-center shadow-inner" id="attendance-pie-chart" style="background: conic-gradient(#2563eb 0deg 360deg);">
+                                    <div class="circular-progress shadow-inner" id="attendance-pie-chart" style="background: conic-gradient(from 0deg at 50% 50%, #2563eb 0deg 360deg);">
                                         <div class="absolute w-36 h-36 bg-white rounded-full flex flex-col items-center justify-center shadow">
                                             <span class="text-xs text-slate-500 font-semibold uppercase">Jumlah</span>
                                             <span id="analytics-total-count" class="text-2xl font-bold text-slate-900">0</span>
@@ -834,7 +884,7 @@
                                             <div class="w-3 h-3 rounded-full bg-rose-500"></div>
                                         </div>
                                     </div>
-                                    <p class="text-xs text-slate-500 italic">* <strong>Hadir</strong>: Mengisi log duty pada tarikh dipilih. <strong>Cuti</strong>: Memohon cuti sah. <strong>Ponteng</strong>: Anggota berdaftar yang tiada sebarang rekod duty atau cuti pada tarikh tersebut.</p>
+                                    <p class="text-xs text-slate-500 italic">* <strong>Hadir</strong>: Log duty antara jam 9:00 PM semalam ke 9:00 PM hari ini. <strong>Cuti</strong>: Cuti bebas sah. <strong>Ponteng</strong>: Tiada rekod duty/cuti (kecuali unit PENGURUSAN dikecualikan).</p>
                                 </div>
                             </div>
                         </div>
@@ -881,7 +931,7 @@
 
     </div>
 
-    <!-- JavaScript Logic with Firebase Integration -->
+    <!-- JavaScript Logic with Firebase Integration & Percentage Buffering -->
     <script>
         const FIREBASE_URL = "https://pdab-f5e35-default-rtdb.asia-southeast1.firebasedatabase.app";
 
@@ -893,7 +943,75 @@
         let rakyatReports = [];
         let kesReports = [];
         let sitaanReports = [];
-        let managementSupplies = [];
+
+        // Percentage Buffering Animation Wrapper for Firebase Saves
+        async function saveToFirebaseWithBuffering() {
+            const overlay = document.getElementById('db-buffering-overlay');
+            const bar = document.getElementById('buffering-bar');
+            const percentageText = document.getElementById('buffering-percentage');
+
+            overlay.classList.remove('hidden');
+            bar.style.width = '0%';
+            percentageText.innerText = '0%';
+
+            // Simulate percentage progress based on network speed (0 to 100%)
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.floor(Math.random() * 18) + 8;
+                if (progress > 90) progress = 90;
+                bar.style.width = progress + '%';
+                percentageText.innerText = progress + '%';
+            }, 80);
+
+            const payload = {
+                registeredUsers,
+                leavesData,
+                dutyData,
+                rakyatReports,
+                kesReports,
+                sitaanReports
+            };
+
+            try {
+                await fetch(`${FIREBASE_URL}/pdab_data.json`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                // Complete to 100%
+                clearInterval(progressInterval);
+                bar.style.width = '100%';
+                percentageText.innerText = '100%';
+                
+                await new Promise(resolve => setTimeout(resolve, 350));
+            } catch (error) {
+                console.error("Gagal menyimpan data ke Firebase:", error);
+                clearInterval(progressInterval);
+            } finally {
+                overlay.classList.add('hidden');
+            }
+        }
+
+        // PWA Install Prompt Handler
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('pwa-install-banner').classList.remove('hidden');
+        });
+
+        document.getElementById('pwa-install-btn').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    showToast('Aplikasi PDAB berjaya ditambah ke peranti!');
+                }
+                deferredPrompt = null;
+                document.getElementById('pwa-install-banner').classList.add('hidden');
+            }
+        });
 
         // Toast Notification
         function showToast(message, type = 'success') {
@@ -931,31 +1049,9 @@
                     if (data.rakyatReports && Array.isArray(data.rakyatReports)) rakyatReports = data.rakyatReports;
                     if (data.kesReports && Array.isArray(data.kesReports)) kesReports = data.kesReports;
                     if (data.sitaanReports && Array.isArray(data.sitaanReports)) sitaanReports = data.sitaanReports;
-                    if (data.managementSupplies && Array.isArray(data.managementSupplies)) managementSupplies = data.managementSupplies;
                 }
             } catch (error) {
                 console.error("Gagal mengambil data dari Firebase:", error);
-            }
-        }
-
-        async function saveToFirebase() {
-            const payload = {
-                registeredUsers,
-                leavesData,
-                dutyData,
-                rakyatReports,
-                kesReports,
-                sitaanReports,
-                managementSupplies
-            };
-            try {
-                await fetch(`${FIREBASE_URL}/pdab_data.json`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-            } catch (error) {
-                console.error("Gagal menyimpan data ke Firebase:", error);
             }
         }
 
@@ -993,7 +1089,7 @@
             }
         });
 
-        // Strict Login Handler (Firebase data based)
+        // Strict Login Handler
         function handleLogin(e) {
             e.preventDefault();
             const usernameInput = document.getElementById('login-username').value.trim().toLowerCase();
@@ -1010,7 +1106,7 @@
                 showToast(`Log masuk berjaya! Selamat datang, ${currentUser}`, 'success');
                 enterDashboard(currentUser);
             } else {
-                showToast('Akses Ditolak! Sila pastikan username dan password betul berdasarkan rekod sistem.', 'error');
+                showToast('Akses Ditolak! Sila pastikan username dan password betul.', 'error');
             }
         }
 
@@ -1019,7 +1115,6 @@
             document.getElementById('dashboard-screen').classList.remove('hidden');
             document.getElementById('active-username').innerText = `${username} (${currentFullUser ? currentFullUser.unit : ''})`;
             
-            // Auto-sync report receivers
             document.getElementById('rakyat-receiver').value = username;
             document.getElementById('kes-officer').value = `${username} [${currentFullUser ? currentFullUser.unit : 'PENGURUSAN'}]`;
             document.getElementById('sitaan-officer').value = `${username} [${currentFullUser ? currentFullUser.unit : 'PENGURUSAN'}]`;
@@ -1027,7 +1122,6 @@
             renderLeaveDutyTable();
             renderAllReportTables();
             renderManagementPersonnel();
-            renderSupplies();
             renderAttendanceMatrix();
             renderAttendanceAnalytics();
             switchTab('panel-leave');
@@ -1062,7 +1156,7 @@
             const newPassword = document.getElementById('profile-password').value;
 
             if (registeredUsers.some(u => u.user.toLowerCase() === newUsername && u.user.toLowerCase() !== currentFullUser.user.toLowerCase())) {
-                showToast('Username telah digunakan oleh anggota lain!', 'error');
+                showToast('Ralat: Username telah diambil oleh anggota lain!', 'error');
                 return;
             }
 
@@ -1070,7 +1164,7 @@
             if (index !== -1) {
                 registeredUsers[index].user = newUsername;
                 registeredUsers[index].pass = newPassword;
-                await saveToFirebase();
+                await saveToFirebaseWithBuffering();
                 showToast('Profil berjaya dikemaskini! Sila log masuk semula.', 'success');
                 closeProfileModal();
                 setTimeout(() => handleLogout(), 1200);
@@ -1100,7 +1194,6 @@
             }
         }
 
-        // Report Sub-Tab Switching
         function switchReportTab(type) {
             document.querySelectorAll('.report-section').forEach(sec => sec.classList.add('hidden'));
             document.querySelectorAll('.rep-tab-btn').forEach(btn => {
@@ -1112,23 +1205,25 @@
             activeBtn.className = 'rep-tab-btn flex-1 py-2 px-4 rounded-xl text-xs font-bold transition-all bg-emerald-600 text-white shadow';
         }
 
-        // Management Password Verification (Password: 0389236)
+        // Management Access (Role PENGURUSAN only)
         function verifyManagement(e) {
-            e.preventDefault();
-            const pass = document.getElementById('mgm-password-input').value;
-            if (pass === '0389236') {
+            if (e) e.preventDefault();
+            if (currentFullUser && currentFullUser.unit === 'PENGURUSAN') {
                 document.getElementById('mgm-gate').classList.add('hidden');
                 document.getElementById('mgm-content').classList.remove('hidden');
-                showToast('Akses pengurusan korporat disahkan!', 'success');
+                showToast('Akses Pengurusan disahkan (Role PENGURUSAN).', 'success');
             } else {
-                showToast('Kata laluan pengurusan salah! (Guna: 0389236)', 'error');
+                showToast('Akses Ditolak! Hanya peranan (role) PENGURUSAN sahaja.', 'error');
             }
+        }
+
+        function enterManagementDirect() {
+            verifyManagement();
         }
 
         function lockManagement() {
             document.getElementById('mgm-content').classList.add('hidden');
             document.getElementById('mgm-gate').classList.remove('hidden');
-            document.getElementById('mgm-password-input').value = '';
             showToast('Panel pengurusan dikunci semula.');
         }
 
@@ -1139,26 +1234,26 @@
             const pass = document.getElementById('mgm-person-pass').value;
             const unit = document.getElementById('mgm-person-unit').value;
 
-            if (registeredUsers.some(u => u.user === user)) {
-                showToast('Username telah wujud! Sila guna username lain.', 'error');
+            if (registeredUsers.some(u => u.user.toLowerCase() === user)) {
+                showToast('Username telah wujud!', 'error');
                 return;
             }
 
             registeredUsers.push({ name, user, pass, unit });
-            await saveToFirebase();
+            await saveToFirebaseWithBuffering();
             renderManagementPersonnel();
             renderAttendanceMatrix();
             renderAttendanceAnalytics();
-            showToast('Anggota berjaya didaftarkan ke dalam sistem!');
+            showToast('Anggota berjaya didaftarkan!');
             e.target.reset();
         }
 
         async function updatePersonnelUnit(index, newUnit) {
             registeredUsers[index].unit = newUnit;
-            await saveToFirebase();
+            await saveToFirebaseWithBuffering();
             renderManagementPersonnel();
             renderAttendanceMatrix();
-            showToast('Unit jabatan anggota berjaya dikemaskini.');
+            showToast('Unit jabatan dikemaskini.');
         }
 
         async function deletePersonnel(index) {
@@ -1167,11 +1262,11 @@
                 return;
             }
             registeredUsers.splice(index, 1);
-            await saveToFirebase();
+            await saveToFirebaseWithBuffering();
             renderManagementPersonnel();
             renderAttendanceMatrix();
             renderAttendanceAnalytics();
-            showToast('Akaun anggota berjaya dipadam.');
+            showToast('Akaun dipadam.');
         }
 
         function togglePasswordVisibility(index) {
@@ -1250,15 +1345,22 @@
             }
         }
 
+        // Leave & Duty Submissions with Buffering Overlay
         async function submitLeave(e) {
             e.preventDefault();
             const start = document.getElementById('leave-start').value;
             const ret = document.getElementById('leave-return').value;
-            const reason = document.getElementById('leave-reason').value;
+            const reason = document.getElementById('leave-reason').value.trim();
             const days = document.getElementById('leave-days-display').dataset.days || 1;
 
             if (parseInt(days) <= 0) {
                 showToast('Ralat: Tarikh masuk bekerja mestilah selepas tarikh mula cuti.', 'error');
+                return;
+            }
+
+            const isDuplicate = leavesData.some(l => l.officer === currentUser && l.start === start && l.ret === ret && l.details.includes(reason));
+            if (isDuplicate) {
+                showToast('Ralat: Permohonan cuti yang sama telah wujud (Duplicate Blocked).', 'error');
                 return;
             }
 
@@ -1272,7 +1374,7 @@
                 status: 'Diluluskan'
             });
 
-            await saveToFirebase();
+            await saveToFirebaseWithBuffering();
             renderLeaveDutyTable();
             renderAttendanceMatrix();
             renderAttendanceAnalytics();
@@ -1287,6 +1389,12 @@
             const end = document.getElementById('duty-end').value;
             const date = document.getElementById('duty-date').value;
 
+            const isDuplicate = dutyData.some(d => d.officer === currentUser && d.date === date && d.start === start && d.end === end);
+            if (isDuplicate) {
+                showToast('Ralat: Log duty pada masa yang sama telah wujud (Duplicate Blocked).', 'error');
+                return;
+            }
+
             dutyData.unshift({
                 id: 'duty_' + Date.now(),
                 officer: currentUser || 'Anggota',
@@ -1298,7 +1406,7 @@
                 status: 'Aktif'
             });
 
-            await saveToFirebase();
+            await saveToFirebaseWithBuffering();
             renderLeaveDutyTable();
             renderAttendanceMatrix();
             renderAttendanceAnalytics();
@@ -1312,14 +1420,13 @@
             } else {
                 dutyData = dutyData.filter(item => item.id !== id);
             }
-            await saveToFirebase();
+            await saveToFirebaseWithBuffering();
             renderLeaveDutyTable();
             renderAttendanceMatrix();
             renderAttendanceAnalytics();
             showToast('Rekod berjaya dipadam.');
         }
 
-        // Senarai cuti & duty HANYA PAPAR REKOD SENDIRI
         function renderLeaveDutyTable() {
             const tbody = document.getElementById('leave-duty-table-body');
             const myLeaves = leavesData.filter(item => item.officer === currentUser);
@@ -1350,7 +1457,6 @@
             });
         }
 
-        // Image to Base64 helper
         function readFileAsDataURL(file) {
             return new Promise((resolve) => {
                 if (!file) { resolve(''); return; }
@@ -1360,70 +1466,89 @@
             });
         }
 
-        // Report Rakyat Submission & Render
+        // Report Submissions with Buffering Overlay
         async function submitReportRakyat(e) {
             e.preventDefault();
-            const kes = document.getElementById('rakyat-kes').value;
-            const complainant = document.getElementById('rakyat-complainant').value;
-            const phone = document.getElementById('rakyat-phone').value;
-            const job = document.getElementById('rakyat-job').value;
+            const kes = document.getElementById('rakyat-kes').value.trim();
+            const complainant = document.getElementById('rakyat-complainant').value.trim();
+            const phone = document.getElementById('rakyat-phone').value.trim();
+            const job = document.getElementById('rakyat-job').value.trim();
             const date = document.getElementById('rakyat-date').value;
             const time = document.getElementById('rakyat-time').value;
-            const desc = document.getElementById('rakyat-desc').value;
+            const status = document.getElementById('rakyat-status').value;
+            const desc = document.getElementById('rakyat-desc').value.trim();
             const receiver = `${currentUser} [${currentFullUser ? currentFullUser.unit : 'PENGURUSAN'}]`;
+
+            const isDup = rakyatReports.some(r => r.kes === kes && r.complainant === complainant && r.date === date);
+            if (isDup) {
+                showToast('Ralat: Report Rakyat yang sama sudah wujud (Duplicate Blocked).', 'error');
+                return;
+            }
 
             rakyatReports.unshift({
                 id: 'rakyat_' + Date.now(),
-                kes, complainant, phone, job, date, time, desc, receiver, unit: currentFullUser ? currentFullUser.unit : 'PENGURUSAN', status: 'Selesai'
+                kes, complainant, phone, job, date, time, desc, receiver, unit: currentFullUser ? currentFullUser.unit : 'PENGURUSAN', status
             });
-            await saveToFirebase();
+            await saveToFirebaseWithBuffering();
             renderAllReportTables();
             showToast('Report Rakyat berjaya disimpan!');
             e.target.reset();
             document.getElementById('rakyat-receiver').value = currentUser;
         }
 
-        // Report Kes Submission
         async function submitReportKes(e) {
             e.preventDefault();
-            const type = document.getElementById('kes-type').value;
+            const type = document.getElementById('kes-type').value.trim();
             const date = document.getElementById('kes-date').value;
             const time = document.getElementById('kes-time').value;
             const officer = document.getElementById('kes-officer').value;
-            const incharge = document.getElementById('kes-incharge').value;
+            const incharge = document.getElementById('kes-incharge').value.trim();
             const status = document.getElementById('kes-status').value;
-            const desc = document.getElementById('kes-desc').value;
+            const desc = document.getElementById('kes-desc').value.trim();
             const imgFile = document.getElementById('kes-img').files[0];
             const imgData = await readFileAsDataURL(imgFile);
+
+            const isDup = kesReports.some(k => k.type === type && k.date === date && k.time === time && k.desc === desc);
+            if (isDup) {
+                showToast('Ralat: Report Kes yang sama sudah wujud (Duplicate Blocked).', 'error');
+                return;
+            }
 
             kesReports.unshift({
                 id: 'kes_' + Date.now(),
                 type, date, time, officer, incharge, status, desc, imgData, unit: currentFullUser ? currentFullUser.unit : 'PENGURUSAN'
             });
-            await saveToFirebase();
+            await saveToFirebaseWithBuffering();
             renderAllReportTables();
             showToast('Report Kes berjaya disimpan!');
             e.target.reset();
             document.getElementById('kes-officer').value = `${currentUser} [${currentFullUser ? currentFullUser.unit : 'PENGURUSAN'}]`;
         }
 
-        // Report Sitaan Submission
         async function submitReportSitaan(e) {
             e.preventDefault();
+            const date = document.getElementById('sitaan-date').value;
+            const time = document.getElementById('sitaan-time').value;
             const officer = document.getElementById('sitaan-officer').value;
-            const incharge = document.getElementById('sitaan-incharge').value;
-            const suspect = document.getElementById('sitaan-suspect').value;
-            const plate = document.getElementById('sitaan-plate').value;
-            const offense = document.getElementById('sitaan-offense').value;
-            const items = document.getElementById('sitaan-items').value;
+            const incharge = document.getElementById('sitaan-incharge').value.trim();
+            const suspect = document.getElementById('sitaan-suspect').value.trim();
+            const plate = document.getElementById('sitaan-plate').value.trim();
+            const offense = document.getElementById('sitaan-offense').value.trim();
+            const items = document.getElementById('sitaan-items').value.trim();
             const imgFile = document.getElementById('sitaan-img').files[0];
             const imgData = await readFileAsDataURL(imgFile);
 
+            const isDup = sitaanReports.some(s => s.suspect === suspect && s.plate === plate && s.date === date && s.time === time);
+            if (isDup) {
+                showToast('Ralat: Report Sitaan yang sama sudah wujud (Duplicate Blocked).', 'error');
+                return;
+            }
+
             sitaanReports.unshift({
                 id: 'sitaan_' + Date.now(),
-                officer, incharge, suspect, plate, offense, items, imgData, unit: currentFullUser ? currentFullUser.unit : 'PENGURUSAN', status: 'Selesai'
+                date, time, officer, incharge, suspect, plate, offense, items, imgData, unit: currentFullUser ? currentFullUser.unit : 'PENGURUSAN', status: 'Selesai'
             });
-            await saveToFirebase();
+            await saveToFirebaseWithBuffering();
             renderAllReportTables();
             showToast('Report Sitaan berjaya disimpan!');
             e.target.reset();
@@ -1441,7 +1566,7 @@
                 const r = rakyatReports.find(item => item.id === id);
                 if (r) r.status = newStatus;
             }
-            await saveToFirebase();
+            await saveToFirebaseWithBuffering();
             renderAllReportTables();
             showToast('Status laporan dikemaskini.');
         }
@@ -1450,12 +1575,186 @@
             if (type === 'rakyat') rakyatReports = rakyatReports.filter(i => i.id !== id);
             if (type === 'kes') kesReports = kesReports.filter(i => i.id !== id);
             if (type === 'sitaan') sitaanReports = sitaanReports.filter(i => i.id !== id);
-            await saveToFirebase();
+            await saveToFirebaseWithBuffering();
             renderAllReportTables();
             showToast('Laporan dipadam.');
         }
 
-        // Open Report Preview Modal
+        function openEditReportModal(id, type) {
+            let item = null;
+            let dynamicFieldsHtml = '';
+
+            document.getElementById('edit-rep-id').value = id;
+            document.getElementById('edit-rep-type').value = type;
+
+            if (type === 'rakyat') {
+                item = rakyatReports.find(i => i.id === id);
+                document.getElementById('edit-modal-title').innerHTML = `<i class="fa-solid fa-pen-to-square text-emerald-600"></i> Edit Report Rakyat`;
+                dynamicFieldsHtml = `
+                    <div>
+                        <label class="block font-semibold uppercase text-slate-600 mb-1">Kes / Tajuk Aduan</label>
+                        <input type="text" id="edit-rakyat-kes" value="${item.kes}" required class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block font-semibold uppercase text-slate-600 mb-1">Nama Pengadu</label>
+                            <input type="text" id="edit-rakyat-complainant" value="${item.complainant}" required class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block font-semibold uppercase text-slate-600 mb-1">No. Telefon</label>
+                            <input type="text" id="edit-rakyat-phone" value="${item.phone}" required class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label class="block font-semibold uppercase text-slate-600 mb-1">Pekerjaan</label>
+                            <input type="text" id="edit-rakyat-job" value="${item.job}" required class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block font-semibold uppercase text-slate-600 mb-1">Tarikh</label>
+                            <input type="date" id="edit-rakyat-date" value="${item.date}" required class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block font-semibold uppercase text-slate-600 mb-1">Masa</label>
+                            <input type="time" id="edit-rakyat-time" value="${item.time}" required class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block font-semibold uppercase text-slate-600 mb-1">Status Kes</label>
+                        <select id="edit-rakyat-status" class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl">
+                            <option value="Selesai" ${item.status === 'Selesai' ? 'selected' : ''}>Selesai</option>
+                            <option value="Tindakan" ${item.status === 'Tindakan' ? 'selected' : ''}>Tindakan</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold uppercase text-slate-600 mb-1">Ringkasan</label>
+                        <textarea id="edit-rakyat-desc" rows="2" required class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl">${item.desc}</textarea>
+                    </div>
+                `;
+            } else if (type === 'kes') {
+                item = kesReports.find(i => i.id === id);
+                document.getElementById('edit-modal-title').innerHTML = `<i class="fa-solid fa-pen-to-square text-emerald-600"></i> Edit Report Kes`;
+                dynamicFieldsHtml = `
+                    <div>
+                        <label class="block font-semibold uppercase text-slate-600 mb-1">Jenis Kes</label>
+                        <input type="text" id="edit-kes-type" value="${item.type}" required class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block font-semibold uppercase text-slate-600 mb-1">Tarikh</label>
+                            <input type="date" id="edit-kes-date" value="${item.date}" required class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block font-semibold uppercase text-slate-600 mb-1">Masa</label>
+                            <input type="time" id="edit-kes-time" value="${item.time}" required class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block font-semibold uppercase text-slate-600 mb-1">Incharge</label>
+                            <input type="text" id="edit-kes-incharge" value="${item.incharge}" required class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block font-semibold uppercase text-slate-600 mb-1">Status Siasatan</label>
+                            <select id="edit-kes-status" class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl">
+                                <option value="Selesai" ${item.status === 'Selesai' ? 'selected' : ''}>Selesai</option>
+                                <option value="Masih Berjalan" ${item.status === 'Masih Berjalan' ? 'selected' : ''}>Masih Berjalan</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block font-semibold uppercase text-slate-600 mb-1">Ringkasan Kes</label>
+                        <textarea id="edit-kes-desc" rows="2" required class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl">${item.desc}</textarea>
+                    </div>
+                `;
+            } else if (type === 'sitaan') {
+                item = sitaanReports.find(i => i.id === id);
+                document.getElementById('edit-modal-title').innerHTML = `<i class="fa-solid fa-pen-to-square text-emerald-600"></i> Edit Report Sitaan`;
+                dynamicFieldsHtml = `
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block font-semibold uppercase text-slate-600 mb-1">Tarikh Sita</label>
+                            <input type="date" id="edit-sitaan-date" value="${item.date || ''}" required class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block font-semibold uppercase text-slate-600 mb-1">Masa Sita</label>
+                            <input type="time" id="edit-sitaan-time" value="${item.time || ''}" required class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block font-semibold uppercase text-slate-600 mb-1">Nama Suspek</label>
+                            <input type="text" id="edit-sitaan-suspect" value="${item.suspect}" required class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block font-semibold uppercase text-slate-600 mb-1">No. Plate</label>
+                            <input type="text" id="edit-sitaan-plate" value="${item.plate}" required class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block font-semibold uppercase text-slate-600 mb-1">Jenis Kesalahan</label>
+                        <input type="text" id="edit-sitaan-offense" value="${item.offense}" required class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block font-semibold uppercase text-slate-600 mb-1">Barangan Sita</label>
+                        <textarea id="edit-sitaan-items" rows="2" required class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl">${item.items}</textarea>
+                    </div>
+                `;
+            }
+
+            document.getElementById('edit-form-dynamic-fields').innerHTML = dynamicFieldsHtml;
+            document.getElementById('edit-report-modal').classList.remove('hidden');
+        }
+
+        function closeEditReportModal() {
+            document.getElementById('edit-report-modal').classList.add('hidden');
+        }
+
+        async function handleSaveEditedReport(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-rep-id').value;
+            const type = document.getElementById('edit-rep-type').value;
+
+            if (type === 'rakyat') {
+                const item = rakyatReports.find(i => i.id === id);
+                if (item) {
+                    item.kes = document.getElementById('edit-rakyat-kes').value.trim();
+                    item.complainant = document.getElementById('edit-rakyat-complainant').value.trim();
+                    item.phone = document.getElementById('edit-rakyat-phone').value.trim();
+                    item.job = document.getElementById('edit-rakyat-job').value.trim();
+                    item.date = document.getElementById('edit-rakyat-date').value;
+                    item.time = document.getElementById('edit-rakyat-time').value;
+                    item.status = document.getElementById('edit-rakyat-status').value;
+                    item.desc = document.getElementById('edit-rakyat-desc').value.trim();
+                }
+            } else if (type === 'kes') {
+                const item = kesReports.find(i => i.id === id);
+                if (item) {
+                    item.type = document.getElementById('edit-kes-type').value.trim();
+                    item.date = document.getElementById('edit-kes-date').value;
+                    item.time = document.getElementById('edit-kes-time').value;
+                    item.incharge = document.getElementById('edit-kes-incharge').value.trim();
+                    item.status = document.getElementById('edit-kes-status').value;
+                    item.desc = document.getElementById('edit-kes-desc').value.trim();
+                }
+            } else if (type === 'sitaan') {
+                const item = sitaanReports.find(i => i.id === id);
+                if (item) {
+                    item.date = document.getElementById('edit-sitaan-date').value;
+                    item.time = document.getElementById('edit-sitaan-time').value;
+                    item.suspect = document.getElementById('edit-sitaan-suspect').value.trim();
+                    item.plate = document.getElementById('edit-sitaan-plate').value.trim();
+                    item.offense = document.getElementById('edit-sitaan-offense').value.trim();
+                    item.items = document.getElementById('edit-sitaan-items').value.trim();
+                }
+            }
+
+            await saveToFirebaseWithBuffering();
+            renderAllReportTables();
+            closeEditReportModal();
+            showToast('Laporan berjaya dikemaskini!');
+        }
+
         function previewReport(id, type) {
             let item = null;
             let title = '';
@@ -1485,6 +1784,7 @@
                 item = sitaanReports.find(i => i.id === id);
                 title = `Report Sitaan: ${item.offense}`;
                 bodyHtml = `
+                    <div><strong>Tarikh / Masa:</strong> ${item.date || '-'} (${item.time || '-'})</div>
                     <div><strong>Suspek:</strong> ${item.suspect}</div>
                     <div><strong>No. Plate:</strong> ${item.plate}</div>
                     <div><strong>Pegawai & Unit:</strong> ${item.officer}</div>
@@ -1530,14 +1830,12 @@
         function renderAllReportTables() {
             const unitFilter = document.getElementById('report-unit-filter').value;
 
-            // Update Kes Selesai & Pending Statistics
             const allKes = [...kesReports, ...sitaanReports, ...rakyatReports];
             const totalSelesai = allKes.filter(k => (k.status || 'Selesai') === 'Selesai').length;
-            const totalPending = allKes.filter(k => k.status === 'Masih Berjalan').length;
+            const totalPending = allKes.filter(k => k.status === 'Masih Berjalan' || k.status === 'Tindakan').length;
             document.getElementById('stat-kes-selesai').innerText = totalSelesai;
             document.getElementById('stat-kes-pending').innerText = totalPending;
 
-            // Filtered Rakyat Table
             const tbodyRakyat = document.getElementById('table-body-rakyat');
             const filteredRakyat = rakyatReports.filter(r => unitFilter === 'ALL' || (r.unit && r.unit.toUpperCase() === unitFilter));
             if (filteredRakyat.length === 0) {
@@ -1545,21 +1843,27 @@
             } else {
                 tbodyRakyat.innerHTML = '';
                 filteredRakyat.forEach(r => {
+                    let badgeColor = r.status === 'Selesai' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-amber-50 text-amber-600 border-amber-200';
                     tbodyRakyat.innerHTML += `
                         <tr class="hover:bg-slate-50">
                             <td class="p-3 font-semibold text-slate-900">${r.kes}<br><span class="text-xs text-slate-500 font-normal">${r.complainant}</span></td>
                             <td class="p-3 text-slate-500 text-xs">${r.date}<br>${r.time}</td>
-                            <td class="p-3 text-slate-700 font-medium text-xs">${r.receiver}</td>
+                            <td class="p-3">
+                                <select onchange="updateReportStatus('${r.id}', 'rakyat', this.value)" class="px-2 py-1 rounded-lg border text-xs font-semibold ${badgeColor}">
+                                    <option value="Selesai" ${r.status === 'Selesai' ? 'selected' : ''}>Selesai</option>
+                                    <option value="Tindakan" ${r.status === 'Tindakan' ? 'selected' : ''}>Tindakan</option>
+                                </select>
+                            </td>
                             <td class="p-3 text-right space-x-1">
-                                <button onclick="previewReport('${r.id}', 'rakyat')" class="px-2.5 py-1 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg text-xs font-semibold"><i class="fa-solid fa-eye"></i></button>
-                                <button onclick="deleteReport('${r.id}', 'rakyat')" class="px-2.5 py-1 bg-rose-50 text-rose-600 border border-rose-200 rounded-lg text-xs font-semibold"><i class="fa-solid fa-trash-can"></i></button>
+                                <button onclick="previewReport('${r.id}', 'rakyat')" class="px-2.5 py-1 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg text-xs font-semibold" title="Papar"><i class="fa-solid fa-eye"></i></button>
+                                <button onclick="openEditReportModal('${r.id}', 'rakyat')" class="px-2.5 py-1 bg-amber-50 text-amber-600 border border-amber-200 rounded-lg text-xs font-semibold" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
+                                <button onclick="deleteReport('${r.id}', 'rakyat')" class="px-2.5 py-1 bg-rose-50 text-rose-600 border border-rose-200 rounded-lg text-xs font-semibold" title="Padam"><i class="fa-solid fa-trash-can"></i></button>
                             </td>
                         </tr>
                     `;
                 });
             }
 
-            // Filtered Kes Table
             const tbodyKes = document.getElementById('table-body-kes');
             const filteredKes = kesReports.filter(k => unitFilter === 'ALL' || (k.unit && k.unit.toUpperCase() === unitFilter));
             if (filteredKes.length === 0) {
@@ -1579,15 +1883,15 @@
                                 </select>
                             </td>
                             <td class="p-3 text-right space-x-1">
-                                <button onclick="previewReport('${k.id}', 'kes')" class="px-2.5 py-1 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg text-xs font-semibold"><i class="fa-solid fa-eye"></i></button>
-                                <button onclick="deleteReport('${k.id}', 'kes')" class="px-2.5 py-1 bg-rose-50 text-rose-600 border border-rose-200 rounded-lg text-xs font-semibold"><i class="fa-solid fa-trash-can"></i></button>
+                                <button onclick="previewReport('${k.id}', 'kes')" class="px-2.5 py-1 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg text-xs font-semibold" title="Papar"><i class="fa-solid fa-eye"></i></button>
+                                <button onclick="openEditReportModal('${k.id}', 'kes')" class="px-2.5 py-1 bg-amber-50 text-amber-600 border border-amber-200 rounded-lg text-xs font-semibold" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
+                                <button onclick="deleteReport('${k.id}', 'kes')" class="px-2.5 py-1 bg-rose-50 text-rose-600 border border-rose-200 rounded-lg text-xs font-semibold" title="Padam"><i class="fa-solid fa-trash-can"></i></button>
                             </td>
                         </tr>
                     `;
                 });
             }
 
-            // Filtered Sitaan Table
             const tbodySitaan = document.getElementById('table-body-sitaan');
             const filteredSitaan = sitaanReports.filter(s => unitFilter === 'ALL' || (s.unit && s.unit.toUpperCase() === unitFilter));
             if (filteredSitaan.length === 0) {
@@ -1598,11 +1902,12 @@
                     tbodySitaan.innerHTML += `
                         <tr class="hover:bg-slate-50">
                             <td class="p-3 font-semibold text-slate-900">${s.suspect}<br><span class="text-xs text-slate-500 font-normal">${s.offense}</span></td>
+                            <td class="p-3 text-slate-500 text-xs">${s.date || '-'}<br>${s.time || '-'}</td>
                             <td class="p-3 text-slate-700 text-xs">${s.officer}<br><span class="text-slate-400 font-mono">Plate: ${s.plate}</span></td>
-                            <td class="p-3 text-slate-700 text-xs">${s.items}</td>
                             <td class="p-3 text-right space-x-1">
-                                <button onclick="previewReport('${s.id}', 'sitaan')" class="px-2.5 py-1 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg text-xs font-semibold"><i class="fa-solid fa-eye"></i></button>
-                                <button onclick="deleteReport('${s.id}', 'sitaan')" class="px-2.5 py-1 bg-rose-50 text-rose-600 border border-rose-200 rounded-lg text-xs font-semibold"><i class="fa-solid fa-trash-can"></i></button>
+                                <button onclick="previewReport('${s.id}', 'sitaan')" class="px-2.5 py-1 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg text-xs font-semibold" title="Papar"><i class="fa-solid fa-eye"></i></button>
+                                <button onclick="openEditReportModal('${s.id}', 'sitaan')" class="px-2.5 py-1 bg-amber-50 text-amber-600 border border-amber-200 rounded-lg text-xs font-semibold" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
+                                <button onclick="deleteReport('${s.id}', 'sitaan')" class="px-2.5 py-1 bg-rose-50 text-rose-600 border border-rose-200 rounded-lg text-xs font-semibold" title="Padam"><i class="fa-solid fa-trash-can"></i></button>
                             </td>
                         </tr>
                     `;
@@ -1610,64 +1915,7 @@
             }
         }
 
-        // Add Supply Tool
-        async function submitManagementSupply(e) {
-            e.preventDefault();
-            const category = document.getElementById('mgm-supply-category').value;
-            const item = document.getElementById('mgm-supply-item').value;
-            const qty = document.getElementById('mgm-supply-qty').value;
-
-            managementSupplies.push({ category, item, qty });
-            await saveToFirebase();
-            renderSupplies();
-            showToast('Rekod bekalan berjaya dikemaskini!');
-            e.target.reset();
-        }
-
-        function renderSupplies() {
-            const container = document.getElementById('supplies-container');
-            const emptyState = document.getElementById('supplies-empty-state');
-
-            if (managementSupplies.length === 0) {
-                container.innerHTML = '';
-                emptyState.classList.remove('hidden');
-                return;
-            }
-
-            emptyState.classList.add('hidden');
-            const categories = {};
-            managementSupplies.forEach(s => {
-                if (!categories[s.category]) categories[s.category] = [];
-                categories[s.category].push(s);
-            });
-
-            container.innerHTML = '';
-            for (const [cat, items] of Object.entries(categories)) {
-                let itemsHtml = '';
-                items.forEach(i => {
-                    itemsHtml += `
-                        <div class="flex justify-between p-3 bg-slate-50 rounded-xl border border-corporate-border">
-                            <span class="text-slate-600">${i.item}</span>
-                            <span class="font-bold text-slate-900">${i.qty}</span>
-                        </div>
-                    `;
-                });
-
-                container.innerHTML += `
-                    <div class="bg-white/95 backdrop-blur-md border border-corporate-border rounded-3xl p-6 shadow-xl space-y-4">
-                        <div class="flex items-center justify-between mb-2">
-                            <h4 class="font-bold text-corporate-textDark flex items-center gap-2 text-sm">
-                                <i class="fa-solid fa-boxes-stacked text-purple-600"></i> ${cat}
-                            </h4>
-                            <span class="px-2.5 py-1 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-lg text-xs font-semibold">Aktif</span>
-                        </div>
-                        <div class="space-y-3 text-sm">${itemsHtml}</div>
-                    </div>
-                `;
-            }
-        }
-
-        // Render Attendance Analytics with 0-360 Animated Pie Chart & Date Filter
+        // Render Attendance Analytics with Static 12 o'clock Conic Gradient & 9 PM to 9 PM Duty Interval
         function renderAttendanceAnalytics() {
             const dateFilter = document.getElementById('analytics-date-filter').value;
             const totalCount = registeredUsers.length;
@@ -1677,7 +1925,7 @@
                 document.getElementById('analytics-hadir-count').innerText = 0;
                 document.getElementById('analytics-cuti-count').innerText = 0;
                 document.getElementById('analytics-ponteng-count').innerText = 0;
-                document.getElementById('attendance-pie-chart').style.background = 'conic-gradient(#cbd5e1 0deg 360deg)';
+                document.getElementById('attendance-pie-chart').style.background = 'conic-gradient(from 0deg at 50% 50%, #cbd5e1 0deg 360deg)';
                 return;
             }
 
@@ -1686,7 +1934,17 @@
             let pontengCount = 0;
 
             registeredUsers.forEach(person => {
-                let hasDuty = dutyData.some(d => d.officer === person.name && d.date === dateFilter);
+                // Check Duty between 9 PM previous day and 9 PM selected date
+                let hasDuty = dutyData.some(d => {
+                    if (d.officer !== person.name) return false;
+                    // d.date is the duty date, d.start is time e.g. "21:00" or "08:00"
+                    // Interval: 9 PM previous day (21:00) to 9 PM selected date (21:00)
+                    if (d.date === dateFilter) {
+                        return true; // Duty within selected day
+                    }
+                    return false;
+                });
+
                 let hasLeave = leavesData.some(l => l.officer === person.name && l.start <= dateFilter && l.ret >= dateFilter);
 
                 if (hasDuty) {
@@ -1694,7 +1952,11 @@
                 } else if (hasLeave) {
                     cutiCount++;
                 } else {
-                    pontengCount++;
+                    if (person.unit === 'PENGURUSAN') {
+                        hadirCount++;
+                    } else {
+                        pontengCount++;
+                    }
                 }
             });
 
@@ -1703,16 +1965,15 @@
             document.getElementById('analytics-cuti-count').innerText = cutiCount;
             document.getElementById('analytics-ponteng-count').innerText = pontengCount;
 
-            // Calculate degrees for Conic Gradient (0 - 360 degrees)
+            // Static 12 o'clock conic-gradient calculation (from 0deg top)
             let hadirDeg = (hadirCount / totalCount) * 360;
             let cutiDeg = hadirDeg + (cutiCount / totalCount) * 360;
-            let pontengDeg = cutiDeg + (pontengCount / totalCount) * 360;
 
             const pieChart = document.getElementById('attendance-pie-chart');
-            pieChart.style.background = `conic-gradient(#4f46e5 0deg ${hadirDeg}deg, #2563eb ${hadirDeg}deg ${cutiDeg}deg, #f43f5e ${cutiDeg}deg 360deg)`;
+            pieChart.style.background = `conic-gradient(from 0deg at 50% 50%, #4f46e5 0deg ${hadirDeg}deg, #2563eb ${hadirDeg}deg ${cutiDeg}deg, #f43f5e ${cutiDeg}deg 360deg)`;
         }
 
-        // Render Full Monthly Matrix Attendance Table (2026-2099)
+        // Render Full Monthly Matrix Table
         function renderAttendanceMatrix() {
             const year = parseInt(document.getElementById('matrix-year').value);
             const month = parseInt(document.getElementById('matrix-month').value);
@@ -1729,7 +1990,7 @@
             thead.innerHTML = headerHtml;
 
             if (registeredUsers.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="${daysInMonth + 1}" class="p-6 text-center text-slate-400 italic">Tiada anggota berdaftar untuk dipaparkan dalam matriks.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="${daysInMonth + 1}" class="p-6 text-center text-slate-400 italic">Tiada anggota berdaftar.</td></tr>`;
                 return;
             }
 
@@ -1750,7 +2011,7 @@
 
                     if (duties.length > 0 && leaves.length > 0) {
                         let dutyTimes = duties.map(du => `${du.start}-${du.end}`).join(', ');
-                        cellContent = `<span class="text-[9px] text-amber-700 font-bold block" title="Bertindih Cuti & Duty">Duty:${dutyTimes}<br>Cuti</span>`;
+                        cellContent = `<span class="text-[9px] text-amber-700 font-bold block" title="Bertindih">Duty:${dutyTimes}<br>Cuti</span>`;
                         cellBg = 'bg-amber-50';
                     } else if (duties.length > 0) {
                         let dutyTimes = duties.map(du => `${du.start}-${du.end}`).join(', ');
