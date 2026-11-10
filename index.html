@@ -947,8 +947,8 @@
         let kesReports = [];
         let sitaanReports = [];
 
-        // Image Compression helper to prevent excessive Firebase data consumption (>10GB issue)
-        function compressImage(file, maxWidth = 600, quality = 0.7) {
+        // Image Compression helper to prevent excessive Firebase data consumption
+        function compressImage(file, maxWidth = 600, quality = 0.6) {
             return new Promise((resolve) => {
                 if (!file) { resolve(''); return; }
                 const reader = new FileReader();
@@ -982,16 +982,16 @@
             const bar = document.getElementById('buffering-bar');
             const percentageText = document.getElementById('buffering-percentage');
 
-            overlay.classList.remove('hidden');
-            bar.style.width = '0%';
-            percentageText.innerText = '0%';
+            if (overlay) overlay.classList.remove('hidden');
+            if (bar) bar.style.width = '0%';
+            if (percentageText) percentageText.innerText = '0%';
 
             let progress = 0;
             const progressInterval = setInterval(() => {
                 progress += Math.floor(Math.random() * 18) + 8;
                 if (progress > 90) progress = 90;
-                bar.style.width = progress + '%';
-                percentageText.innerText = progress + '%';
+                if (bar) bar.style.width = progress + '%';
+                if (percentageText) percentageText.innerText = progress + '%';
             }, 80);
 
             const payload = {
@@ -1011,15 +1011,15 @@
                 });
                 
                 clearInterval(progressInterval);
-                bar.style.width = '100%';
-                percentageText.innerText = '100%';
+                if (bar) bar.style.width = '100%';
+                if (percentageText) percentageText.innerText = '100%';
                 
                 await new Promise(resolve => setTimeout(resolve, 300));
             } catch (error) {
                 console.error("Gagal menyimpan data ke Firebase:", error);
                 clearInterval(progressInterval);
             } finally {
-                overlay.classList.add('hidden');
+                if (overlay) overlay.classList.add('hidden');
             }
         }
 
@@ -1028,24 +1028,30 @@
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            document.getElementById('pwa-install-banner').classList.remove('hidden');
+            const banner = document.getElementById('pwa-install-banner');
+            if (banner) banner.classList.remove('hidden');
         });
 
-        document.getElementById('pwa-install-btn').addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    showToast('Aplikasi PDAB berjaya ditambah ke peranti!');
+        const installBtn = document.getElementById('pwa-install-btn');
+        if (installBtn) {
+            installBtn.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        showToast('Aplikasi PDAB berjaya ditambah ke peranti!');
+                    }
+                    deferredPrompt = null;
+                    const banner = document.getElementById('pwa-install-banner');
+                    if (banner) banner.classList.add('hidden');
                 }
-                deferredPrompt = null;
-                document.getElementById('pwa-install-banner').classList.add('hidden');
-            }
-        });
+            });
+        }
 
         // Toast Notification
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
+            if (!container) return;
             const toast = document.createElement('div');
             
             let bgClass = 'bg-white border-emerald-200 text-emerald-800 shadow-xl';
@@ -1101,16 +1107,17 @@
                     yearSelect.appendChild(opt);
                 }
                 const currentMonth = new Date().getMonth();
-                document.getElementById('matrix-month').value = currentMonth;
+                const monthSelect = document.getElementById('matrix-month');
+                if (monthSelect) monthSelect.value = currentMonth;
             }
 
             const todayStr = new Date().toISOString().split('T')[0];
             const analyticsDateInput = document.getElementById('analytics-date-filter');
-            if (analyticsDateInput) analyticsDateInput.value = todayStr;
+            if (analyticsDataInput) analyticsDateInput.value = todayStr;
 
             const savedUser = localStorage.getItem('pdab_corp_user');
             if (savedUser) {
-                const found = registeredUsers.find(u => u.name === savedUser);
+                const found = registeredUsers.find(u => u.name.trim().toLowerCase() === savedUser.trim().toLowerCase());
                 if (found) {
                     currentFullUser = found;
                     currentUser = found.name;
