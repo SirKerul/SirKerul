@@ -143,19 +143,20 @@
 
     <!-- REPORT PREVIEW & PNG EXPORT MODAL -->
     <div id="report-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fade-in">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-6 sm:p-8 space-y-6 relative max-h-[90vh] overflow-y-auto">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-3xl w-full p-6 sm:p-8 space-y-6 relative max-h-[90vh] overflow-y-auto">
             <button onclick="closeReportModal()" class="absolute top-5 right-5 p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-all">
                 <i class="fa-solid fa-xmark text-lg"></i>
             </button>
-            <div id="printable-report-card" class="bg-white p-6 rounded-2xl border border-corporate-border space-y-4">
+            <!-- Report Card with Landscape-optimized layout -->
+            <div id="printable-report-card" class="bg-white p-8 rounded-2xl border border-corporate-border space-y-6 w-[800px] max-w-full mx-auto">
                 <div class="flex items-center justify-between border-b pb-4">
                     <div>
                         <h3 id="modal-report-title" class="font-bold text-slate-900 text-base"></h3>
-                        <p class="text-xs text-slate-500">Laporan Rasmi Bahagian PDAB</p>
+                        <p class="text-xs text-slate-500">Laporan Rasmi Bahagian PDAB (Format Landskap)</p>
                     </div>
                     <span id="modal-report-status" class="px-3 py-1 rounded-lg text-xs font-bold"></span>
                 </div>
-                <div id="modal-report-body" class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-slate-700"></div>
+                <div id="modal-report-body" class="grid grid-cols-2 gap-4 text-xs text-slate-800 leading-relaxed"></div>
                 <div id="modal-report-image-container" class="mt-4 hidden space-y-2">
                     <div class="flex items-center justify-between">
                         <p id="image-status-label" class="text-xs font-semibold text-slate-600">Lampiran Gambar Kes:</p>
@@ -168,7 +169,7 @@
             </div>
             <div class="flex items-center justify-end gap-3 pt-2 border-t border-slate-100">
                 <button onclick="downloadReportPNG()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow transition-all">
-                    <i class="fa-solid fa-download"></i> Download as PNG
+                    <i class="fa-solid fa-download"></i> Download Report (Landskap PNG)
                 </button>
                 <button onclick="closeReportModal()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs transition-all">
                     Tutup
@@ -179,22 +180,22 @@
 
     <!-- LEAVE LETTER MODAL (OVERLAY FOR >= 3 DAYS) -->
     <div id="leave-letter-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-xl w-full p-6 sm:p-8 space-y-6 relative max-h-[95vh] overflow-y-auto">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-3xl w-full p-6 sm:p-8 space-y-6 relative max-h-[95vh] overflow-y-auto">
             <button onclick="closeLeaveLetterModal()" class="absolute top-5 right-5 p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-all">
                 <i class="fa-solid fa-xmark text-lg"></i>
             </button>
             <div>
                 <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
-                    <i class="fa-solid fa-file-contract text-blue-600"></i> Surat Rasmi Permohonan Cuti (&ge; 3 Hari)
+                    <i class="fa-solid fa-file-contract text-blue-600"></i> Surat Rasmi Permohonan Cuti (&ge; 3 Hari) - Format Landskap
                 </h3>
                 <p class="text-xs text-slate-500 mt-1">Sila semak butiran surat di bawah sebelum memuat turun atau menghantar cuti.</p>
             </div>
 
-            <!-- Printable Official Letter Card (Background Putih Sahaja, No Logo) -->
-            <div id="printable-leave-letter" class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6 relative text-xs text-slate-900">
+            <!-- Printable Official Letter Card (Landscape optimized width: 800px max, pure white background, no logo) -->
+            <div id="printable-leave-letter" class="bg-white p-10 rounded-2xl border border-slate-200 shadow-sm space-y-6 relative text-xs text-slate-900 w-[800px] max-w-full mx-auto">
                 <div class="flex items-center justify-between border-b border-slate-300 pb-4">
                     <div>
-                        <h4 class="font-bold text-slate-900">PENGURUSAN PDAB MOBILE</h4>
+                        <h4 class="font-bold text-slate-900 tracking-wider">PENGURUSAN PDAB MOBILE</h4>
                         <p class="text-[10px] text-slate-600">NO 1, JALAN JPN LAMA ABRPM, BALAI PDAB LOS SANTOS</p>
                     </div>
                     <div class="text-right text-[10px] text-slate-500 font-mono">
@@ -226,7 +227,7 @@
                     <p class="pt-2">Sekian.</p>
                 </div>
 
-                <div class="space-y-6 pt-4">
+                <div class="space-y-6 pt-6">
                     <div>
                         <p class="font-bold uppercase">YANG BENAR,</p>
                         <div class="my-2 font-['Brush_Script_MT',cursive,serif] text-2xl text-blue-900 italic font-bold" id="letter-signature-name">Nama Anggota</div>
@@ -238,7 +239,7 @@
 
             <div class="flex items-center justify-end gap-3 pt-2 border-t border-slate-100">
                 <button onclick="downloadLeaveLetterPNG()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow transition-all">
-                    <i class="fa-solid fa-download"></i> Download Surat as PNG
+                    <i class="fa-solid fa-download"></i> Download Surat (Landskap PNG)
                 </button>
                 <button onclick="finalizeAndSubmitLeaveFromModal()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow transition-all">
                     <i class="fa-solid fa-paper-plane"></i> Hantar Cuti (&gt;3 Hari) ke Database
@@ -1661,22 +1662,22 @@
             document.getElementById('letter-sign-name').innerText = currentUser || 'ANGGOTA';
 
             document.getElementById('leave-letter-modal').classList.remove('hidden');
-            showToast(`Tempoh cuti ${days} hari dikesan. Surat rasmi dijana tanpa logo & background putih!`);
+            showToast(`Tempoh cuti ${days} hari dikesan. Surat rasmi dijana dalam format landskap bersih!`);
         }
 
         function closeLeaveLetterModal() {
             document.getElementById('leave-letter-modal').classList.add('hidden');
         }
 
-        // Fixed Download Surat PNG (Fully functioning html2canvas export)
+        // Fixed Download Surat PNG in Landscape dimensions
         function downloadLeaveLetterPNG() {
             const letterCard = document.getElementById('printable-leave-letter');
-            html2canvas(letterCard, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
+            html2canvas(letterCard, { scale: 2, backgroundColor: '#ffffff', width: 800 }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = `Surat_Cuti_${currentUser}_${Date.now()}.png`;
+                link.download = `Surat_Cuti_Landskap_${currentUser}_${Date.now()}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
-                showToast('Surat Rasmi berjaya dimuat turun sebagai PNG!');
+                showToast('Surat Rasmi Format Landskap berjaya dimuat turun!');
             });
         }
 
@@ -1708,7 +1709,7 @@
             renderAttendanceAnalytics();
             renderPersonalProgress();
             closeLeaveLetterModal();
-            showToast('Surat rasmi berjaya dihantar ke database dengan status BELUM DISEMAK untuk kelulusan pengurusan!');
+            showToast('Surat rasmi berjaya dihantar ke database dengan status BELUM DISEMAK!');
         }
 
         async function submitDuty(e) {
@@ -1792,12 +1793,10 @@
             });
         }
 
-        // Panel Pengurusan: Semakan status cuti anggota > 3 hari (Papar hanya yang BELUM DISEMAK)
         function renderManagementLeaveApproval() {
             const tbody = document.getElementById('management-leave-approval-tbody');
             if (!tbody) return;
 
-            // Hanya paparkan yang BELUM DISEMAK dalam HTML pengurusan (yang dah LULUS / TOLAK disorokkan tapi tetap dalam database)
             const pendingLeaves = leavesData.filter(l => l.category === 'CUTI > 3 HARI' && (l.status === 'BELUM DISEMAK' || l.status === 'PENDING'));
             if (pendingLeaves.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-400 italic">Tiada permohonan cuti &gt; 3 hari yang belum disemak.</td></tr>`;
@@ -1893,6 +1892,33 @@
             if (ring) {
                 ring.style.background = `conic-gradient(from 0deg at 50% 50%, #4f46e5 0deg ${deg}deg, #e2e8f0 ${deg}deg 360deg)`;
             }
+        }
+
+        // Robust image compressor to guarantee reports submit smoothly without payload overload
+        async function compressImage(file, maxWidth = 600, quality = 0.7) {
+            if (!file) return null;
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = new Image();
+                    img.onload = function () {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        if (width > maxWidth) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        resolve(canvas.toDataURL('image/jpeg', quality));
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
         }
 
         async function submitReportRakyat(e) {
@@ -2284,14 +2310,15 @@
             activePreviewReportItem = null;
         }
 
+        // Fixed Download Report PNG in Landscape dimensions
         function downloadReportPNG() {
             const card = document.getElementById('printable-report-card');
-            html2canvas(card, { scale: 2 }).then(canvas => {
+            html2canvas(card, { scale: 2, backgroundColor: '#ffffff', width: 800 }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = 'Laporan_PDAB_' + Date.now() + '.png';
+                link.download = 'Laporan_Rasmi_Landskap_' + Date.now() + '.png';
                 link.href = canvas.toDataURL('image/png');
                 link.click();
-                showToast('Fail PNG berjaya dimuat turun!');
+                showToast('Fail Report Landskap berjaya dimuat turun!');
             });
         }
 
@@ -2405,7 +2432,6 @@
 
             registeredUsers.forEach(person => {
                 let hasDuty = dutyData.some(d => d.officer === person.name && d.date === dateFilter);
-                // Hanya cuti yang DILULUSKAN dikira sebagai cuti aktif
                 let hasLeave = leavesData.some(l => l.officer === person.name && l.status === 'DILULUSKAN' && l.start <= dateFilter && l.ret >= dateFilter);
 
                 if (hasDuty) {
@@ -2505,7 +2531,6 @@
                     let dateStr = `${year}-${formattedMonth}-${formattedDay}`;
 
                     let duties = dutyData.filter(du => du.officer === person.name && du.date === dateStr);
-                    // HANYA CUTI YANG STATUSNYA 'DILULUSKAN' MASUK DALAM MATRIKS
                     let leaves = leavesData.filter(l => l.officer === person.name && l.status === 'DILULUSKAN' && l.start <= dateStr && l.ret >= dateStr);
 
                     let cellContent = '-';
