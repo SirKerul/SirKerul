@@ -177,6 +177,76 @@
         </div>
     </div>
 
+    <!-- LEAVE LETTER MODAL (OVERLAY FOR >= 3 DAYS) -->
+    <div id="leave-letter-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-xl w-full p-6 sm:p-8 space-y-6 relative max-h-[95vh] overflow-y-auto">
+            <button onclick="closeLeaveLetterModal()" class="absolute top-5 right-5 p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-all">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div>
+                <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
+                    <i class="fa-solid fa-file-contract text-blue-600"></i> Surat Rasmi Permohonan Cuti (&ge; 3 Hari)
+                </h3>
+                <p class="text-xs text-slate-500 mt-1">Sila semak butiran surat di bawah sebelum memuat turun atau menghantar cuti.</p>
+            </div>
+
+            <!-- Printable Official Letter Card (Background Putih Sahaja, No Logo) -->
+            <div id="printable-leave-letter" class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6 relative text-xs text-slate-900">
+                <div class="flex items-center justify-between border-b border-slate-300 pb-4">
+                    <div>
+                        <h4 class="font-bold text-slate-900">PENGURUSAN PDAB MOBILE</h4>
+                        <p class="text-[10px] text-slate-600">NO 1, JALAN JPN LAMA ABRPM, BALAI PDAB LOS SANTOS</p>
+                    </div>
+                    <div class="text-right text-[10px] text-slate-500 font-mono">
+                        Rujukan: PDAB/CUTI/<span id="letter-ref-date">2026</span>
+                    </div>
+                </div>
+
+                <div class="space-y-1 font-semibold uppercase">
+                    <div id="letter-officer-name">NAMA ANGGOTA</div>
+                    <div id="letter-officer-badge">NO. BADAN: -</div>
+                    <div>KUATERS KEDIAMAN PENJAWAT AWAM ABRPM MOBILE</div>
+                </div>
+
+                <div class="space-y-3 pt-2">
+                    <p class="font-bold">Tuan/Puan,</p>
+                    <p id="letter-title-display" class="font-bold uppercase tracking-wide">CUTI TANPA GAJI</p>
+                </div>
+
+                <div class="space-y-4 text-justify leading-relaxed">
+                    <p>
+                        1. Merujuk kepada perkara di atas, saya <strong id="letter-body-name"></strong> (No. Badan: <strong id="letter-body-badge"></strong>) dengan ini memohon kelulusan cuti bermula dari <strong id="letter-body-start"></strong> hingga <strong id="letter-body-end"></strong> kerana <strong id="letter-body-reason"></strong>.
+                    </p>
+                    <p>
+                        2. Saya menyusun jari memohon maaf sekiranya permohonan cuti ini menyebabkan sebarang kekurangan keanggotaan di lapangan.
+                    </p>
+                    <p>
+                        Segala pertimbangan dan kelulusan daripada pihak pengurusan amatlah dihargai dan didahului dengan ucapan ribuan terima kasih.
+                    </p>
+                    <p class="pt-2">Sekian.</p>
+                </div>
+
+                <div class="space-y-6 pt-4">
+                    <div>
+                        <p class="font-bold uppercase">YANG BENAR,</p>
+                        <div class="my-2 font-['Brush_Script_MT',cursive,serif] text-2xl text-blue-900 italic font-bold" id="letter-signature-name">Nama Anggota</div>
+                        <p class="font-bold uppercase">(<span id="letter-sign-name">Nama Anggota</span>)</p>
+                        <p class="text-[10px] text-slate-600">Polis Diraja Adik-Beradik Mobile</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-2 border-t border-slate-100">
+                <button onclick="downloadLeaveLetterPNG()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow transition-all">
+                    <i class="fa-solid fa-download"></i> Download Surat as PNG
+                </button>
+                <button onclick="finalizeAndSubmitLeaveFromModal()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow transition-all">
+                    <i class="fa-solid fa-paper-plane"></i> Hantar Cuti (&gt;3 Hari) ke Database
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- EDIT REPORT MODAL -->
     <div id="edit-report-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fade-in">
         <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 sm:p-8 space-y-6 relative max-h-[90vh] overflow-y-auto">
@@ -234,7 +304,7 @@
     <!-- MAIN APP CONTAINER -->
     <div id="app" class="min-h-full flex flex-col w-full h-full">
 
-        <!-- ==================== LOGIN SCREEN (ONLY EXISTING USERS WITH NAME & ROLE) ==================== -->
+        <!-- ==================== LOGIN SCREEN ==================== -->
         <div id="login-screen" class="flex-1 flex items-center justify-center p-4 relative overflow-hidden bg-corporate-pattern">
             <div class="absolute inset-0 bg-slate-950/40 backdrop-blur-[2px] pointer-events-none"></div>
 
@@ -247,7 +317,6 @@
                     <p class="text-sm text-corporate-textMuted mt-1">Portal Operasi Anggota Sedia Ada</p>
                 </div>
 
-                <!-- FORM: LOGIN BY EXISTING USERNAME IN FIREBASE -->
                 <form id="login-form" onsubmit="handleExistingLogin(event)" class="space-y-4">
                     <div>
                         <label class="block text-xs font-semibold uppercase tracking-wider text-corporate-textMuted mb-1.5">Pilih Anggota (Nama & Role)</label>
@@ -296,7 +365,6 @@
         <div id="dashboard-screen" class="hidden flex-1 flex flex-col bg-corporate-pattern bg-fixed w-full min-h-full">
             <div class="absolute inset-0 bg-slate-950/15 backdrop-blur-[1px] pointer-events-none z-0"></div>
 
-            <!-- Top Header & Navigation Banner -->
             <header class="bg-white/95 backdrop-blur-md border-b border-corporate-border sticky top-0 z-40 px-4 sm:px-6 py-3 shadow-md relative z-10 w-full">
                 <div class="max-w-[100rem] mx-auto flex flex-col xl:flex-row items-center justify-between gap-3">
                     
@@ -320,7 +388,6 @@
                         </div>
                     </div>
 
-                    <!-- 4 Sub-Menu Navigation Buttons -->
                     <div class="flex items-center gap-1.5 overflow-x-auto w-full xl:w-auto pb-1 xl:pb-0 justify-start xl:justify-center">
                         <button onclick="switchTab('panel-leave')" id="btn-tab-panel-leave" class="tab-btn px-3 py-1.5 rounded-xl border border-corporate-border bg-white hover:border-blue-400 hover:shadow transition-all flex items-center gap-2 text-xs font-semibold whitespace-nowrap shadow-sm">
                             <i class="fa-solid fa-calendar-days text-blue-600"></i>
@@ -361,7 +428,6 @@
                 </div>
             </header>
 
-            <!-- Main Content Area -->
             <main class="flex-1 p-4 sm:p-6 max-w-[100rem] mx-auto w-full space-y-6 relative z-10">
 
                 <div class="w-full">
@@ -397,67 +463,121 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <!-- Cuti Form -->
-                            <div class="bg-white/95 backdrop-blur-md border border-corporate-border rounded-3xl p-6 shadow-xl space-y-4">
-                                <h3 class="text-base font-bold text-corporate-textDark flex items-center gap-2">
-                                    <i class="fa-solid fa-calendar-minus text-blue-600"></i>
-                                    <span>Permohonan Cuti Anggota</span>
-                                </h3>
-                                <form onsubmit="submitLeave(event)" class="space-y-3.5 text-xs">
-                                    <div class="grid grid-cols-2 gap-3">
-                                        <div>
-                                            <label class="block font-semibold uppercase text-corporate-textMuted mb-1">Tarikh Mula Cuti</label>
-                                            <input type="date" id="leave-start" onchange="calculateLeaveDays()" required class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl text-corporate-textDark">
-                                        </div>
-                                        <div>
-                                            <label class="block font-semibold uppercase text-corporate-textMuted mb-1">Tarikh Masuk Bekerja</label>
-                                            <input type="date" id="leave-return" onchange="calculateLeaveDays()" required class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl text-corporate-textDark">
-                                        </div>
-                                    </div>
-                                    <div class="grid grid-cols-1 gap-3">
-                                        <div>
-                                            <label class="block font-semibold uppercase text-corporate-textMuted mb-1">Anggaran Jumlah Cuti (Auto Kira)</label>
-                                            <div id="leave-days-display" class="w-full p-2.5 bg-blue-50 border border-blue-200 rounded-xl font-bold text-blue-800 text-sm">
-                                                0 Hari
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label class="block font-semibold uppercase text-corporate-textMuted mb-1">Sebab Cuti</label>
-                                            <input type="text" id="leave-reason" required placeholder="Sebab permohonan" class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl text-corporate-textDark uppercase">
-                                        </div>
-                                    </div>
-                                    <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-700 font-semibold text-white rounded-xl transition-all shadow">
-                                        Hantar Permohonan Cuti
-                                    </button>
-                                </form>
+                        <!-- 2 BUTTON MENU UTAMA UNTUK KURANGKAN SERABUT (Cuti & Duty) -->
+                        <div class="bg-white/95 backdrop-blur-md border border-corporate-border rounded-3xl p-6 shadow-xl space-y-6">
+                            <div class="flex items-center gap-2 border-b border-slate-100 pb-4">
+                                <button onclick="switchLeaveDutyMenu('cuti')" id="btn-menu-cuti" class="flex-1 py-3 px-6 rounded-2xl text-xs sm:text-sm font-bold transition-all bg-blue-600 text-white shadow-md flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-calendar-minus"></i> <span>Menu Cuti (Harian & Lebih 3 Hari)</span>
+                                </button>
+                                <button onclick="switchLeaveDutyMenu('duty')" id="btn-menu-duty" class="flex-1 py-3 px-6 rounded-2xl text-xs sm:text-sm font-bold transition-all bg-slate-100 text-slate-700 hover:bg-slate-200 flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-clock-rotate-left"></i> <span>Menu Duty Rasmi</span>
+                                </button>
                             </div>
 
-                            <!-- Duty Form -->
-                            <div class="bg-white/95 backdrop-blur-md border border-corporate-border rounded-3xl p-6 shadow-xl space-y-4">
-                                <h3 class="text-base font-bold text-corporate-textDark flex items-center gap-2">
-                                    <i class="fa-solid fa-clock-rotate-left text-blue-600"></i>
-                                    <span>Log Masa Duty Rasmi</span>
-                                </h3>
-                                <form onsubmit="submitDuty(event)" class="space-y-3.5 text-xs">
-                                    <div class="grid grid-cols-3 gap-3">
-                                        <div>
-                                            <label class="block font-semibold uppercase text-corporate-textMuted mb-1">Masa Duty</label>
-                                            <input type="time" id="duty-start" required class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl text-corporate-textDark">
+                            <!-- SUB-CONTAINER 1: CUTI (Harian & Lebih 3 Hari) -->
+                            <div id="subcontainer-cuti" class="space-y-6 animate-fade-in">
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <!-- Cuti Harian (< 3 Hari) -->
+                                    <div class="bg-slate-50/70 border border-slate-200 rounded-2xl p-5 space-y-4">
+                                        <div class="flex items-center justify-between">
+                                            <h4 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                                                <i class="fa-solid fa-calendar-day text-blue-600"></i> Permohonan Cuti Harian (&lt; 3 Hari)
+                                            </h4>
+                                            <span class="px-2.5 py-1 bg-blue-100 text-blue-800 rounded-lg text-[10px] font-bold">Terus Masuk Jadual</span>
                                         </div>
-                                        <div>
-                                            <label class="block font-semibold uppercase text-corporate-textMuted mb-1">Masa Tamat</label>
-                                            <input type="time" id="duty-end" required class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl text-corporate-textDark">
-                                        </div>
-                                        <div>
-                                            <label class="block font-semibold uppercase text-corporate-textMuted mb-1">Tarikh Duty</label>
-                                            <input type="date" id="duty-date" required class="w-full p-2.5 bg-slate-50 border border-corporate-border rounded-xl text-corporate-textDark">
-                                        </div>
+                                        <form onsubmit="submitCutiHarian(event)" class="space-y-3 text-xs">
+                                            <div class="grid grid-cols-2 gap-2">
+                                                <div>
+                                                    <label class="block font-semibold uppercase text-slate-600 mb-1">Tarikh Mula</label>
+                                                    <input type="date" id="harian-start" onchange="calcHarianDays()" required class="w-full p-2.5 bg-white border border-corporate-border rounded-xl">
+                                                </div>
+                                                <div>
+                                                    <label class="block font-semibold uppercase text-slate-600 mb-1">Tarikh Masuk Kerja</label>
+                                                    <input type="date" id="harian-return" onchange="calcHarianDays()" required class="w-full p-2.5 bg-white border border-corporate-border rounded-xl">
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label class="block font-semibold uppercase text-slate-600 mb-1">Jumlah (Auto Kira): <span id="harian-days-display" class="font-bold text-blue-700">0 Hari</span></label>
+                                            </div>
+                                            <div>
+                                                <label class="block font-semibold uppercase text-slate-600 mb-1">Sebab Cuti</label>
+                                                <input type="text" id="harian-reason" required placeholder="SEBAB CUTI HARIAN" oninput="this.value = this.value.toUpperCase()" class="w-full p-2.5 bg-white border border-corporate-border rounded-xl uppercase">
+                                            </div>
+                                            <button type="submit" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 font-semibold text-white rounded-xl shadow transition-all">
+                                                Hantar Cuti Harian
+                                            </button>
+                                        </form>
                                     </div>
-                                    <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 font-semibold text-white rounded-xl transition-all shadow mt-6">
-                                        Simpan Rekod Duty & Kemaskini Matrix
-                                    </button>
-                                </form>
+
+                                    <!-- Cuti Lebih 3 Hari (Jana Surat Rasmi & Pending) -->
+                                    <div class="bg-slate-50/70 border border-slate-200 rounded-2xl p-5 space-y-4 border-l-4 border-l-amber-500">
+                                        <div class="flex items-center justify-between">
+                                            <h4 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                                                <i class="fa-solid fa-file-contract text-amber-600"></i> Cuti Lebih 3 Hari (Jana Surat & Pending)
+                                            </h4>
+                                            <span class="px-2.5 py-1 bg-amber-100 text-amber-800 rounded-lg text-[10px] font-bold">Perlu Semakan Pengurusan</span>
+                                        </div>
+                                        <form onsubmit="handleSuratFeatureForm(event)" class="space-y-3 text-xs">
+                                            <div>
+                                                <label class="block font-semibold uppercase text-slate-600 mb-1">Tajuk / Sebab Cuti</label>
+                                                <input type="text" id="surat-title" required placeholder="cth: CUTI TANPA GAJI / KELUARGA" oninput="this.value = this.value.toUpperCase()" class="w-full p-2.5 bg-white border border-corporate-border rounded-xl uppercase">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-2">
+                                                <div>
+                                                    <label class="block font-semibold uppercase text-slate-600 mb-1">Tarikh Mula</label>
+                                                    <input type="date" id="surat-start" onchange="calculateSuratDays()" required class="w-full p-2.5 bg-white border border-corporate-border rounded-xl">
+                                                </div>
+                                                <div>
+                                                    <label class="block font-semibold uppercase text-slate-600 mb-1">Tarikh Akhir</label>
+                                                    <input type="date" id="surat-end" onchange="calculateSuratDays()" required class="w-full p-2.5 bg-white border border-corporate-border rounded-xl">
+                                                </div>
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-2">
+                                                <div>
+                                                    <label class="block font-semibold uppercase text-slate-600 mb-1">Nombor Badan</label>
+                                                    <input type="text" id="surat-badge" required placeholder="cth: G0020" oninput="this.value = this.value.toUpperCase()" class="w-full p-2.5 bg-white border border-corporate-border rounded-xl uppercase font-mono">
+                                                </div>
+                                                <div>
+                                                    <label class="block font-semibold uppercase text-slate-600 mb-1">Jumlah Hari (Auto)</label>
+                                                    <div id="surat-days-display" class="w-full p-2 bg-blue-50 border border-blue-200 rounded-xl font-bold text-blue-800 text-xs flex items-center">
+                                                        0 Hari
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <button type="submit" class="w-full py-2.5 bg-amber-600 hover:bg-amber-700 font-semibold text-white rounded-xl shadow transition-all">
+                                                Jana & Semak Surat Rasmi Cuti
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SUB-CONTAINER 2: DUTY -->
+                            <div id="subcontainer-duty" class="space-y-4 hidden animate-fade-in max-w-xl mx-auto">
+                                <div class="bg-slate-50/70 border border-slate-200 rounded-2xl p-6 space-y-4">
+                                    <h4 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                                        <i class="fa-solid fa-clock-rotate-left text-indigo-600"></i> Log Masa Duty Rasmi
+                                    </h4>
+                                    <form onsubmit="submitDuty(event)" class="space-y-3.5 text-xs">
+                                        <div class="grid grid-cols-3 gap-2">
+                                            <div>
+                                                <label class="block font-semibold uppercase text-slate-600 mb-1">Masa Mula</label>
+                                                <input type="time" id="duty-start" required class="w-full p-2.5 bg-white border border-corporate-border rounded-xl">
+                                            </div>
+                                            <div>
+                                                <label class="block font-semibold uppercase text-slate-600 mb-1">Masa Tamat</label>
+                                                <input type="time" id="duty-end" required class="w-full p-2.5 bg-white border border-corporate-border rounded-xl">
+                                            </div>
+                                            <div>
+                                                <label class="block font-semibold uppercase text-slate-600 mb-1">Tarikh Duty</label>
+                                                <input type="date" id="duty-date" required class="w-full p-2.5 bg-white border border-corporate-border rounded-xl">
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 font-semibold text-white rounded-xl shadow transition-all">
+                                            Simpan Rekod Duty & Kemaskini Matrix
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
 
@@ -488,7 +608,6 @@
 
                     <!-- ==================== PANEL 2: PIHAK PENGURUSAN ==================== -->
                     <div id="panel-management" class="dashboard-panel hidden space-y-6 animate-fade-in">
-                        <!-- Gate shown if NOT management role -->
                         <div id="mgm-gate" class="bg-white/95 backdrop-blur-md border border-corporate-border rounded-3xl p-8 shadow-xl max-w-md mx-auto text-center space-y-4">
                             <div class="w-16 h-16 bg-rose-50 text-rose-600 border border-rose-100 rounded-2xl mx-auto flex items-center justify-center text-2xl shadow-sm">
                                 <i class="fa-solid fa-lock"></i>
@@ -502,15 +621,36 @@
                             </div>
                         </div>
 
-                        <!-- Content shown if role IS PENGURUSAN -->
                         <div id="mgm-content" class="hidden space-y-6">
                             <div class="flex items-center justify-between bg-amber-50 border border-amber-200/60 p-4 rounded-2xl shadow-sm">
                                 <div class="flex items-center gap-3">
                                     <i class="fa-solid fa-shield-check text-amber-600 text-xl"></i>
                                     <div>
                                         <h4 class="text-amber-900 font-bold text-sm">Mod Pengurusan Korporat Aktif</h4>
-                                        <p class="text-xs text-amber-700">Daftar anggota baru dengan pilihan unit dan pengurusan akaun.</p>
+                                        <p class="text-xs text-amber-700">Semak status permohonan cuti anggota &gt; 3 hari dan daftar anggota baru.</p>
                                     </div>
+                                </div>
+                            </div>
+
+                            <!-- PENGURUSAN SEMAKAN CUTI > 3 HARI (PENDING APPROVAL) -->
+                            <div class="bg-white/95 backdrop-blur-md border border-corporate-border rounded-3xl p-6 shadow-xl space-y-4">
+                                <h4 class="font-bold text-corporate-textDark flex items-center gap-2 text-sm">
+                                    <i class="fa-solid fa-clipboard-check text-amber-600"></i> Semakan Status Cuti Anggota (&gt; 3 Hari) - Kelulusan Matriks
+                                </h4>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left text-sm">
+                                        <thead class="bg-slate-50 text-corporate-textMuted text-xs uppercase">
+                                            <tr>
+                                                <th class="p-3 rounded-l-xl">Anggota</th>
+                                                <th class="p-3">Butiran Cuti &gt; 3 Hari</th>
+                                                <th class="p-3">Status Semasa</th>
+                                                <th class="p-3 rounded-r-xl text-right">Tindakan Pengurusan</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="management-leave-approval-tbody" class="divide-y divide-slate-100 text-slate-700 uppercase">
+                                            <tr><td colspan="4" class="p-6 text-center text-slate-400 italic">Tiada permohonan cuti &gt; 3 hari yang memerlukan semakan.</td></tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
 
@@ -578,7 +718,6 @@
                     <!-- ==================== PANEL 3: REPORT PDAB ==================== -->
                     <div id="panel-report" class="dashboard-panel hidden space-y-6 animate-fade-in">
                         
-                        <!-- ANALISIS REPORT SUMMARY & SORT BY UNIT -->
                         <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
                             <div class="bg-white/95 backdrop-blur-md border border-corporate-border rounded-2xl p-4 shadow-sm flex items-center justify-between">
                                 <div>
@@ -617,7 +756,6 @@
                             </div>
                         </div>
 
-                        <!-- Sub-nav for the 3 report types -->
                         <div class="flex items-center gap-2 bg-white/95 backdrop-blur-md border border-corporate-border p-2 rounded-2xl shadow-sm">
                             <button onclick="switchReportTab('rakyat')" id="btn-rep-rakyat" class="rep-tab-btn flex-1 py-2 px-4 rounded-xl text-xs font-bold transition-all bg-emerald-600 text-white shadow">
                                 <i class="fa-solid fa-users-rectangle mr-1.5"></i> Report Rakyat
@@ -867,7 +1005,6 @@
                     <!-- ==================== PANEL 4: ANALISIS KEHADIRAN ==================== -->
                     <div id="panel-analytics" class="dashboard-panel hidden space-y-6 animate-fade-in">
                         
-                        <!-- ANALISIS KEHADIRAN & STATIC 360 CARTA FROM 12 O'CLOCK -->
                         <div class="bg-white/95 backdrop-blur-md border border-corporate-border rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
                             <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
                                 <div>
@@ -888,9 +1025,7 @@
                                 </div>
                             </div>
 
-                            <!-- Circular 360 Static Progress & Legend -->
                             <div id="analytics-charts-body" class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center py-4 transition-all">
-                                <!-- Chart 1: Daily Status (Hadir / Cuti / Ponteng) -->
                                 <div class="flex flex-col items-center p-4 bg-slate-50/80 rounded-2xl border border-slate-200">
                                     <span class="text-xs font-bold uppercase text-slate-700 mb-3">Carta Status Harian (9PM - 9PM)</span>
                                     <div class="circular-progress shadow-inner transition-all duration-700 mb-4" id="attendance-pie-chart" style="background: conic-gradient(from 0deg at 50% 50%, #2563eb 0deg 360deg);">
@@ -916,7 +1051,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Chart 2: Weekly 14-Hour Duty Target (>14 Jam Hijau vs <14 Jam Merah) -->
                                 <div class="flex flex-col items-center p-4 bg-slate-50/80 rounded-2xl border border-slate-200">
                                     <div class="flex items-center justify-between w-full mb-3">
                                         <span class="text-xs font-bold uppercase text-slate-700">Analisis Mingguan (Sasaran 14 Jam)</span>
@@ -943,7 +1077,6 @@
                             </div>
                         </div>
 
-                        <!-- Full Monthly Matrix Table (2026-2099) with Export Options & Collapse Toggle -->
                         <div class="bg-white/95 backdrop-blur-md border border-corporate-border rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
                             <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
                                 <div>
@@ -951,7 +1084,7 @@
                                         <i class="fa-solid fa-table-cells text-indigo-600"></i>
                                         <span>Jadual Matriks Kehadiran & Duty (2026 - 2099)</span>
                                     </h3>
-                                    <p class="text-xs text-corporate-textMuted mt-0.5">Paparan matrix bulanan penuh merekodkan Duty (masa) dan Cuti secara bertindih bagi setiap anggota.</p>
+                                    <p class="text-xs text-corporate-textMuted mt-0.5">Paparan matrix bulanan penuh merekodkan Duty (masa) dan Cuti yang telah diluluskan bagi setiap anggota.</p>
                                 </div>
                                 <div class="flex flex-wrap items-center gap-3">
                                     <div>
@@ -965,7 +1098,6 @@
                                             <option value="4">Mei</option><option value="5">Jun</option><option value="6">Julai</option><option value="7">Ogos</option><option value="8">September</option><option value="9">Oktober</option><option value="10">November</option><option value="11">Disember</option>
                                         </select>
                                     </div>
-                                    <!-- Export Options Dropdown / Buttons -->
                                     <div class="flex items-center gap-1.5 self-end">
                                         <button onclick="exportMatrixExcel()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow flex items-center gap-1">
                                             <i class="fa-solid fa-file-excel"></i> Excel
@@ -983,7 +1115,6 @@
                                 </div>
                             </div>
 
-                            <!-- Full Matrix Table Wrapper for Export -->
                             <div id="matrix-export-container" class="overflow-x-auto border border-corporate-border rounded-2xl bg-white p-2 transition-all">
                                 <table id="matrix-table" class="w-full text-center text-xs border-collapse">
                                     <thead class="bg-slate-100 text-corporate-textMuted uppercase"></thead>
@@ -1013,6 +1144,7 @@
         let sitaanReports = [];
         let activePreviewReportItem = null;
         let pendingLoginUserObj = null;
+        let tempSuratPayload = null;
 
         function showBuffering(text = "Sedang Menyimpan...") {
             document.getElementById('buffering-text').innerText = text;
@@ -1121,7 +1253,6 @@
                 selectElem.appendChild(opt);
             });
             
-            // Populate datalist for Incharge
             const datalist = document.getElementById('incharge-list');
             if (datalist) {
                 datalist.innerHTML = '';
@@ -1137,7 +1268,6 @@
             await fetchFirebaseData();
             populateLoginUsernames();
 
-            // Check remembered session
             const rememberedUser = localStorage.getItem('pdab_remembered_username');
             if (rememberedUser) {
                 const found = registeredUsers.find(u => u.user === rememberedUser);
@@ -1174,6 +1304,26 @@
                 weekInput.value = `${now.getFullYear()}-W${String(weekNum).padStart(2, '0')}`;
             }
         });
+
+        // Toggle 2 Button Menu for Cuti & Duty
+        function switchLeaveDutyMenu(menuType) {
+            const btnCuti = document.getElementById('btn-menu-cuti');
+            const btnDuty = document.getElementById('btn-menu-duty');
+            const subCuti = document.getElementById('subcontainer-cuti');
+            const subDuty = document.getElementById('subcontainer-duty');
+
+            if (menuType === 'cuti') {
+                btnCuti.className = 'flex-1 py-3 px-6 rounded-2xl text-xs sm:text-sm font-bold transition-all bg-blue-600 text-white shadow-md flex items-center justify-center gap-2';
+                btnDuty.className = 'flex-1 py-3 px-6 rounded-2xl text-xs sm:text-sm font-bold transition-all bg-slate-100 text-slate-700 hover:bg-slate-200 flex items-center justify-center gap-2';
+                subCuti.classList.remove('hidden');
+                subDuty.classList.add('hidden');
+            } else {
+                btnDuty.className = 'flex-1 py-3 px-6 rounded-2xl text-xs sm:text-sm font-bold transition-all bg-indigo-600 text-white shadow-md flex items-center justify-center gap-2';
+                btnCuti.className = 'flex-1 py-3 px-6 rounded-2xl text-xs sm:text-sm font-bold transition-all bg-slate-100 text-slate-700 hover:bg-slate-200 flex items-center justify-center gap-2';
+                subDuty.classList.remove('hidden');
+                subCuti.classList.add('hidden');
+            }
+        }
 
         async function handleExistingLogin(e) {
             e.preventDefault();
@@ -1235,6 +1385,7 @@
             document.getElementById('sitaan-officer').value = `${username} [${currentFullUser ? currentFullUser.unit : 'PENGURUSAN'}]`;
 
             renderLeaveDutyTable();
+            renderManagementLeaveApproval();
             renderAllReportTables();
             renderManagementPersonnel();
             renderAttendanceMatrix();
@@ -1302,6 +1453,9 @@
             }
             if (panelId === 'panel-leave') {
                 renderPersonalProgress();
+            }
+            if (panelId === 'panel-management') {
+                renderManagementLeaveApproval();
             }
         }
 
@@ -1392,10 +1546,10 @@
             });
         }
 
-        function calculateLeaveDays() {
-            const startVal = document.getElementById('leave-start').value;
-            const returnVal = document.getElementById('leave-return').value;
-            const display = document.getElementById('leave-days-display');
+        function calcHarianDays() {
+            const startVal = document.getElementById('harian-start').value;
+            const returnVal = document.getElementById('harian-return').value;
+            const display = document.getElementById('harian-days-display');
 
             if (startVal && returnVal) {
                 const startDate = new Date(startVal);
@@ -1407,7 +1561,7 @@
                     display.innerText = `${diffDays} Hari`;
                     display.dataset.days = diffDays;
                 } else {
-                    display.innerText = `0 Hari (Tarikh masuk bekerja mestilah selepas tarikh mula)`;
+                    display.innerText = `0 Hari`;
                     display.dataset.days = 0;
                 }
             } else {
@@ -1416,32 +1570,30 @@
             }
         }
 
-        async function submitLeave(e) {
+        async function submitCutiHarian(e) {
             e.preventDefault();
-            const start = document.getElementById('leave-start').value;
-            const ret = document.getElementById('leave-return').value;
-            const reason = document.getElementById('leave-reason').value.trim().toUpperCase();
-            const days = document.getElementById('leave-days-display').dataset.days || 1;
+            const start = document.getElementById('harian-start').value;
+            const ret = document.getElementById('harian-return').value;
+            const reason = document.getElementById('harian-reason').value.trim().toUpperCase();
+            const days = parseInt(document.getElementById('harian-days-display').dataset.days || 0);
 
-            if (parseInt(days) <= 0) {
-                showToast('Ralat: Tarikh masuk bekerja mestilah selepas tarikh mula cuti.', 'error');
+            if (days <= 0) {
+                showToast('Ralat: Tarikh masuk kerja mestilah selepas tarikh mula cuti.', 'error');
                 return;
             }
-
-            const isDuplicate = leavesData.some(l => l.officer === currentUser && l.start === start && l.ret === ret && l.details.includes(reason));
-            if (isDuplicate) {
-                showToast('Ralat: Rekod permohonan cuti yang sama telah wujud (Auto Block Double Data).', 'error');
+            if (days >= 3) {
+                showToast('Ralat: Cuti 3 hari atau lebih mesti melalui menu Cuti Lebih 3 Hari dan Jana Surat Rasmi.', 'error');
                 return;
             }
 
             leavesData.unshift({
                 id: 'leave_' + Date.now(),
                 officer: currentUser || 'ANGGOTA',
-                category: 'CUTI',
+                category: 'CUTI HARIAN',
                 details: `Mula: ${start} | Masuk Kerja: ${ret} | Jumlah: ${days} hari (${reason})`,
                 start: start,
                 ret: ret,
-                status: 'DILULUSKAN'
+                status: 'DILULUSKAN' // Cuti harian (<3 hari) terus diluluskan
             });
 
             await saveToFirebase(true);
@@ -1449,9 +1601,114 @@
             renderAttendanceMatrix();
             renderAttendanceAnalytics();
             renderPersonalProgress();
-            showToast('Permohonan cuti berjaya disimpan ke Firebase!');
+            showToast('Permohonan cuti harian berjaya direkodkan & masuk matriks!');
             e.target.reset();
-            document.getElementById('leave-days-display').innerText = '0 Hari';
+            document.getElementById('harian-days-display').innerText = '0 Hari';
+        }
+
+        function calculateSuratDays() {
+            const startVal = document.getElementById('surat-start').value;
+            const endVal = document.getElementById('surat-end').value;
+            const display = document.getElementById('surat-days-display');
+
+            if (startVal && endVal) {
+                const startDate = new Date(startVal);
+                const endDate = new Date(endVal);
+                const diffTime = endDate - startDate;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // inclusive
+                
+                if (diffDays > 0) {
+                    display.innerText = `${diffDays} Hari`;
+                    display.dataset.days = diffDays;
+                } else {
+                    display.innerText = `0 Hari`;
+                    display.dataset.days = 0;
+                }
+            } else {
+                display.innerText = `0 Hari`;
+                display.dataset.days = 0;
+            }
+        }
+
+        async function handleSuratFeatureForm(e) {
+            e.preventDefault();
+            const title = document.getElementById('surat-title').value.trim().toUpperCase();
+            const start = document.getElementById('surat-start').value;
+            const end = document.getElementById('surat-end').value;
+            const badge = document.getElementById('surat-badge').value.trim().toUpperCase();
+            const days = parseInt(document.getElementById('surat-days-display').dataset.days || 0);
+
+            if (days < 3) {
+                showToast('Ralat: Untuk cuti kurang dari 3 hari, sila guna borang Cuti Harian.', 'error');
+                return;
+            }
+
+            tempSuratPayload = {
+                title, start, end, badge, days
+            };
+
+            // Populate Letter Modal fields (Auto Sync Name from currentUser)
+            document.getElementById('letter-ref-date').innerText = new Date().getFullYear();
+            document.getElementById('letter-officer-name').innerText = currentUser || 'ANGGOTA';
+            document.getElementById('letter-officer-badge').innerText = `NO. BADAN: ${badge}`;
+            document.getElementById('letter-title-display').innerText = title;
+            document.getElementById('letter-body-name').innerText = currentUser || 'ANGGOTA';
+            document.getElementById('letter-body-badge').innerText = badge;
+            document.getElementById('letter-body-start').innerText = start;
+            document.getElementById('letter-body-end').innerText = end;
+            document.getElementById('letter-body-reason').innerText = title.toLowerCase();
+            document.getElementById('letter-signature-name').innerText = currentUser || 'ANGGOTA';
+            document.getElementById('letter-sign-name').innerText = currentUser || 'ANGGOTA';
+
+            document.getElementById('leave-letter-modal').classList.remove('hidden');
+            showToast(`Tempoh cuti ${days} hari dikesan. Surat rasmi dijana tanpa logo & background putih!`);
+        }
+
+        function closeLeaveLetterModal() {
+            document.getElementById('leave-letter-modal').classList.add('hidden');
+        }
+
+        // Fixed Download Surat PNG (Fully functioning html2canvas export)
+        function downloadLeaveLetterPNG() {
+            const letterCard = document.getElementById('printable-leave-letter');
+            html2canvas(letterCard, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `Surat_Cuti_${currentUser}_${Date.now()}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                showToast('Surat Rasmi berjaya dimuat turun sebagai PNG!');
+            });
+        }
+
+        async function finalizeAndSubmitLeaveFromModal() {
+            if (!tempSuratPayload) return;
+
+            const isDuplicate = leavesData.some(l => l.officer === currentUser && l.start === tempSuratPayload.start && l.ret === tempSuratPayload.end && l.details.includes(tempSuratPayload.title));
+            if (isDuplicate) {
+                showToast('Ralat: Permohonan cuti yang sama telah wujud dalam database.', 'error');
+                closeLeaveLetterModal();
+                return;
+            }
+
+            // Status BELUM DISEMAK untuk cuti > 3 hari
+            leavesData.unshift({
+                id: 'leave_' + Date.now(),
+                officer: currentUser || 'ANGGOTA',
+                category: 'CUTI > 3 HARI',
+                details: `Mula: ${tempSuratPayload.start} hingga ${tempSuratPayload.end} | Jumlah: ${tempSuratPayload.days} hari (${tempSuratPayload.title}) [No. Badan: ${tempSuratPayload.badge}]`,
+                start: tempSuratPayload.start,
+                ret: tempSuratPayload.end,
+                status: 'BELUM DISEMAK'
+            });
+
+            await saveToFirebase(true);
+            renderLeaveDutyTable();
+            renderManagementLeaveApproval();
+            renderAttendanceMatrix();
+            renderAttendanceAnalytics();
+            renderPersonalProgress();
+            closeLeaveLetterModal();
+            showToast('Surat rasmi berjaya dihantar ke database dengan status BELUM DISEMAK untuk kelulusan pengurusan!');
         }
 
         async function submitDuty(e) {
@@ -1487,13 +1744,14 @@
         }
 
         async function deleteLeaveDuty(id, type) {
-            if (type === 'CUTI' || type === 'Cuti') {
+            if (type.includes('CUTI') || type.includes('Cuti')) {
                 leavesData = leavesData.filter(item => item.id !== id);
             } else {
                 dutyData = dutyData.filter(item => item.id !== id);
             }
             await saveToFirebase(false);
             renderLeaveDutyTable();
+            renderManagementLeaveApproval();
             renderAttendanceMatrix();
             renderAttendanceAnalytics();
             renderPersonalProgress();
@@ -1513,13 +1771,17 @@
 
             tbody.innerHTML = '';
             combined.forEach(item => {
-                let badge = (item.category === 'CUTI' || item.category === 'Cuti') ? 'bg-blue-50 text-blue-600 border-blue-200' : 'bg-indigo-50 text-indigo-600 border-indigo-200';
+                let badge = item.category.includes('CUTI') ? 'bg-blue-50 text-blue-600 border-blue-200' : 'bg-indigo-50 text-indigo-600 border-indigo-200';
+                let statusBadge = 'bg-emerald-50 text-emerald-600 border-emerald-200';
+                if (item.status === 'BELUM DISEMAK' || item.status === 'PENDING') statusBadge = 'bg-amber-50 text-amber-600 border-amber-200';
+                if (item.status === 'DITOLAK') statusBadge = 'bg-rose-50 text-rose-600 border-rose-200';
+
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50 transition-colors uppercase">
                         <td class="p-3 font-semibold text-slate-900">${item.officer}</td>
                         <td class="p-3"><span class="px-2 py-0.5 rounded border text-xs font-semibold ${badge}">${item.category}</span></td>
                         <td class="p-3 text-slate-700 text-xs">${item.details}</td>
-                        <td class="p-3"><span class="px-2.5 py-1 rounded-lg border text-xs font-semibold bg-emerald-50 text-emerald-600 border-emerald-200">${item.status}</span></td>
+                        <td class="p-3"><span class="px-2.5 py-1 rounded-lg border text-xs font-semibold ${statusBadge}">${item.status}</span></td>
                         <td class="p-3 text-right">
                             <button onclick="deleteLeaveDuty('${item.id}', '${item.category}')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-lg text-xs font-semibold transition-all">
                                 <i class="fa-solid fa-trash-can"></i> Padam
@@ -1528,6 +1790,55 @@
                     </tr>
                 `;
             });
+        }
+
+        // Panel Pengurusan: Semakan status cuti anggota > 3 hari (Papar hanya yang BELUM DISEMAK)
+        function renderManagementLeaveApproval() {
+            const tbody = document.getElementById('management-leave-approval-tbody');
+            if (!tbody) return;
+
+            // Hanya paparkan yang BELUM DISEMAK dalam HTML pengurusan (yang dah LULUS / TOLAK disorokkan tapi tetap dalam database)
+            const pendingLeaves = leavesData.filter(l => l.category === 'CUTI > 3 HARI' && (l.status === 'BELUM DISEMAK' || l.status === 'PENDING'));
+            if (pendingLeaves.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-400 italic">Tiada permohonan cuti &gt; 3 hari yang belum disemak.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = '';
+            pendingLeaves.forEach(l => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="p-3 font-semibold text-slate-900">${l.officer}</td>
+                        <td class="p-3 text-xs text-slate-700">${l.details}</td>
+                        <td class="p-3">
+                            <span class="px-2.5 py-1 rounded-lg border text-xs font-semibold bg-amber-50 text-amber-700 border-amber-200">
+                                ${l.status}
+                            </span>
+                        </td>
+                        <td class="p-3 text-right space-x-1.5">
+                            <button onclick="updateLeaveApprovalStatus('${l.id}', 'DILULUSKAN')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow transition-all">
+                                <i class="fa-solid fa-check"></i> Luluskan
+                            </button>
+                            <button onclick="updateLeaveApprovalStatus('${l.id}', 'DITOLAK')" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow transition-all">
+                                <i class="fa-solid fa-xmark"></i> Tolak
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function updateLeaveApprovalStatus(leaveId, newStatus) {
+            const leaveItem = leavesData.find(l => l.id === leaveId);
+            if (leaveItem) {
+                leaveItem.status = newStatus;
+                await saveToFirebase(true);
+                renderManagementLeaveApproval();
+                renderLeaveDutyTable();
+                renderAttendanceMatrix();
+                renderAttendanceAnalytics();
+                showToast(`Status cuti dikemaskini kepada ${newStatus}. Direkodkan dalam database.`);
+            }
         }
 
         function calculateHoursBetween(startStr, endStr) {
@@ -2094,7 +2405,8 @@
 
             registeredUsers.forEach(person => {
                 let hasDuty = dutyData.some(d => d.officer === person.name && d.date === dateFilter);
-                let hasLeave = leavesData.some(l => l.officer === person.name && l.start <= dateFilter && l.ret >= dateFilter);
+                // Hanya cuti yang DILULUSKAN dikira sebagai cuti aktif
+                let hasLeave = leavesData.some(l => l.officer === person.name && l.status === 'DILULUSKAN' && l.start <= dateFilter && l.ret >= dateFilter);
 
                 if (hasDuty) {
                     hadirCount++;
@@ -2193,7 +2505,8 @@
                     let dateStr = `${year}-${formattedMonth}-${formattedDay}`;
 
                     let duties = dutyData.filter(du => du.officer === person.name && du.date === dateStr);
-                    let leaves = leavesData.filter(l => l.officer === person.name && l.start <= dateStr && l.ret >= dateStr);
+                    // HANYA CUTI YANG STATUSNYA 'DILULUSKAN' MASUK DALAM MATRIKS
+                    let leaves = leavesData.filter(l => l.officer === person.name && l.status === 'DILULUSKAN' && l.start <= dateStr && l.ret >= dateStr);
 
                     let cellContent = '-';
                     let cellBg = '';
@@ -2219,7 +2532,6 @@
             tbody.innerHTML = bodyHtml;
         }
 
-        // Export Functions for Monthly Matrix
         function exportMatrixExcel() {
             const table = document.getElementById('matrix-table');
             let csv = [];
