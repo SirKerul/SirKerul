@@ -147,12 +147,12 @@
             <button onclick="closeReportModal()" class="absolute top-5 right-5 p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-all">
                 <i class="fa-solid fa-xmark text-lg"></i>
             </button>
-            <!-- Report Card with Landscape-optimized layout -->
-            <div id="printable-report-card" class="bg-white p-8 rounded-2xl border border-corporate-border space-y-6 w-[800px] max-w-full mx-auto">
+            <!-- Report Card with standard format -->
+            <div id="printable-report-card" class="bg-white p-8 rounded-2xl border border-corporate-border space-y-6 max-w-full mx-auto">
                 <div class="flex items-center justify-between border-b pb-4">
                     <div>
                         <h3 id="modal-report-title" class="font-bold text-slate-900 text-base"></h3>
-                        <p class="text-xs text-slate-500">Laporan Rasmi Bahagian PDAB (Format Landskap)</p>
+                        <p class="text-xs text-slate-500">Laporan Rasmi Bahagian PDAB</p>
                     </div>
                     <span id="modal-report-status" class="px-3 py-1 rounded-lg text-xs font-bold"></span>
                 </div>
@@ -169,7 +169,7 @@
             </div>
             <div class="flex items-center justify-end gap-3 pt-2 border-t border-slate-100">
                 <button onclick="downloadReportPNG()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow transition-all">
-                    <i class="fa-solid fa-download"></i> Download Report (Landskap PNG)
+                    <i class="fa-solid fa-download"></i> Download Report (PNG)
                 </button>
                 <button onclick="closeReportModal()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs transition-all">
                     Tutup
@@ -186,13 +186,13 @@
             </button>
             <div>
                 <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
-                    <i class="fa-solid fa-file-contract text-blue-600"></i> Surat Rasmi Permohonan Cuti (&ge; 3 Hari) - Format Landskap
+                    <i class="fa-solid fa-file-contract text-blue-600"></i> Surat Rasmi Permohonan Cuti (&ge; 3 Hari)
                 </h3>
                 <p class="text-xs text-slate-500 mt-1">Sila semak butiran surat di bawah sebelum memuat turun atau menghantar cuti.</p>
             </div>
 
-            <!-- Printable Official Letter Card (Landscape optimized width: 800px max, pure white background, no logo) -->
-            <div id="printable-leave-letter" class="bg-white p-10 rounded-2xl border border-slate-200 shadow-sm space-y-6 relative text-xs text-slate-900 w-[800px] max-w-full mx-auto">
+            <!-- Printable Official Letter Card (Standard format) -->
+            <div id="printable-leave-letter" class="bg-white p-10 rounded-2xl border border-slate-200 shadow-sm space-y-6 relative text-xs text-slate-900 max-w-full mx-auto">
                 <div class="flex items-center justify-between border-b border-slate-300 pb-4">
                     <div>
                         <h4 class="font-bold text-slate-900 tracking-wider">PENGURUSAN PDAB MOBILE</h4>
@@ -239,7 +239,7 @@
 
             <div class="flex items-center justify-end gap-3 pt-2 border-t border-slate-100">
                 <button onclick="downloadLeaveLetterPNG()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow transition-all">
-                    <i class="fa-solid fa-download"></i> Download Surat (Landskap PNG)
+                    <i class="fa-solid fa-download"></i> Download Surat (PNG)
                 </button>
                 <button onclick="finalizeAndSubmitLeaveFromModal()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow transition-all">
                     <i class="fa-solid fa-paper-plane"></i> Hantar Cuti (&gt;3 Hari) ke Database
@@ -1662,22 +1662,22 @@
             document.getElementById('letter-sign-name').innerText = currentUser || 'ANGGOTA';
 
             document.getElementById('leave-letter-modal').classList.remove('hidden');
-            showToast(`Tempoh cuti ${days} hari dikesan. Surat rasmi dijana dalam format landskap bersih!`);
+            showToast(`Tempoh cuti ${days} hari dikesan. Surat rasmi dijana dalam format A4 Portrait bersih!`);
         }
 
         function closeLeaveLetterModal() {
             document.getElementById('leave-letter-modal').classList.add('hidden');
         }
 
-        // Fixed Download Surat PNG in Landscape dimensions
+        // Standard Download Surat PNG without forced A4/Landscape width constraint
         function downloadLeaveLetterPNG() {
             const letterCard = document.getElementById('printable-leave-letter');
-            html2canvas(letterCard, { scale: 2, backgroundColor: '#ffffff', width: 800 }).then(canvas => {
+            html2canvas(letterCard, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = `Surat_Cuti_Landskap_${currentUser}_${Date.now()}.png`;
+                link.download = `Surat_Cuti_${currentUser}_${Date.now()}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
-                showToast('Surat Rasmi Format Landskap berjaya dimuat turun!');
+                showToast('Surat Rasmi berjaya dimuat turun!');
             });
         }
 
@@ -2310,15 +2310,15 @@
             activePreviewReportItem = null;
         }
 
-        // Fixed Download Report PNG in Landscape dimensions
+        // Standard Download Report PNG without forced A4/Landscape width constraint
         function downloadReportPNG() {
             const card = document.getElementById('printable-report-card');
-            html2canvas(card, { scale: 2, backgroundColor: '#ffffff', width: 800 }).then(canvas => {
+            html2canvas(card, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = 'Laporan_Rasmi_Landskap_' + Date.now() + '.png';
+                link.download = 'Laporan_Rasmi_' + Date.now() + '.png';
                 link.href = canvas.toDataURL('image/png');
                 link.click();
-                showToast('Fail Report Landskap berjaya dimuat turun!');
+                showToast('Fail Report berjaya dimuat turun!');
             });
         }
 
